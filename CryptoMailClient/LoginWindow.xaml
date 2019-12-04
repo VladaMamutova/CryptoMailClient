@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        FontFamily="Montserrat"
-        FontSize="14"
+        FontFamily="Segoe UI"
+        FontSize="16"
         Foreground="{StaticResource PrimaryHueLightForegroundBrush}"
         Title="Crypto Mail Client"
         Width="400" Height="300"
@@ -16,7 +16,7 @@
     <Grid MouseLeftButtonDown="Window_OnMouseLeftButtonDown">
         <Grid.Background>
             <LinearGradientBrush StartPoint="0 0" EndPoint="1 1">
-                <GradientStop Color="{StaticResource Primary600}" Offset="0" />
+                <GradientStop Color="{StaticResource Primary500}" Offset="0" />
                 <GradientStop Color="{StaticResource Primary900}" Offset="1" />
             </LinearGradientBrush>
         </Grid.Background>
@@ -40,7 +40,7 @@
                     <RowDefinition Height="20"></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Text="Вход" FontSize="24" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Row="0" Text="Вход" FontWeight="Bold" FontSize="24" HorizontalAlignment="Center"/>
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -48,7 +48,7 @@
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
                     <materialDesign:PackIcon Grid.Column="0" Kind="Account" VerticalAlignment="Center" Height="20" Width="20"/>
-                    <TextBox Grid.Column="2" x:Name="Login" Style="{StaticResource MaterialDesignTextBox}" materialDesign:HintAssist.Hint="Имя пользователя"/>
+                    <TextBox Grid.Column="2" x:Name="Login" materialDesign:HintAssist.Hint="Имя пользователя"/>
                 </Grid>
                 <Grid Grid.Row="4">
                     <Grid.ColumnDefinitions>
@@ -59,7 +59,7 @@
                     <materialDesign:PackIcon Grid.Column="0" Kind="Key" VerticalAlignment="Center" Height="20" Width="20"/>
                     <PasswordBox Grid.Column="2" x:Name="Password" materialDesign:HintAssist.Hint="Пароль"/>
                 </Grid>
-                <Button Grid.Row="6" x:Name="SignIn" IsDefault="True" HorizontalAlignment="Center" Content="Войти" materialDesign:ShadowAssist.ShadowDepth="Depth2" Width="150"/>
+                <Button Grid.Row="6" x:Name="SignIn" IsDefault="True" HorizontalAlignment="Center" Content="Войти" materialDesign:ShadowAssist.ShadowDepth="Depth2" Width="150" FontWeight="Bold" FontSize="16" Click="SignIn_OnClick"/>
             </Grid>
         </Grid>
     </Grid>

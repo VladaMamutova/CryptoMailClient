@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
+using CryptoMailClient.Classes;
 
 namespace CryptoMailClient
 {
@@ -11,10 +13,12 @@ namespace CryptoMailClient
         {
             base.OnStartup(e);
             MainWindow = new MainWindow();
-            
+
             LoginWindow loginWindow = new LoginWindow();
             if (loginWindow.ShowDialog() == true)
             {
+                ((MainWindow) MainWindow).SetEmailAccount(loginWindow
+                    .EmailAccount);
                 MainWindow.Show();
             }
             else
