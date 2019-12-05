@@ -1,4 +1,4 @@
-﻿namespace CryptoMailClient.Classes
+﻿namespace CryptoMailClient.Models
 {
     public struct ProtocolConfig
     {

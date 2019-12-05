@@ -5,7 +5,7 @@ using MailKit;
 using MailKit.Net.Imap;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
-namespace CryptoMailClient.Classes
+namespace CryptoMailClient.Models
 {
     public class EmailAccount
     {

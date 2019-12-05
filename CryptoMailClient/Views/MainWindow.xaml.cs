@@ -1,7 +1,7 @@
 ﻿using System.Windows;
-using CryptoMailClient.Classes;
+using CryptoMailClient.Models;
 
-namespace CryptoMailClient
+namespace CryptoMailClient.Views
 {
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
@@ -22,7 +22,7 @@ namespace CryptoMailClient
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            TotalCount.Text = _emailAccount.TotalCount.ToString();
+            //TotalCount.Text = _emailAccount.TotalCount.ToString();
         }
     }
 }
