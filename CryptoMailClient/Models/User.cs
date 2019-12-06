@@ -14,6 +14,16 @@ namespace CryptoMailClient.Models
 
         public User(string login, string password)
         {
+            if (string.IsNullOrWhiteSpace(login))
+            {
+                throw new ArgumentException(nameof(login));
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new ArgumentException(nameof(password));
+            }
+
             Login = login;
             PasswordHash = ComputeHash(password);
             _emailAccounts = new Dictionary<string, EmailAccount>();
