@@ -81,6 +81,11 @@
   <ItemGroup>
     <Compile Include="Models\EmailAccount.cs" />
     <Compile Include="Models\ProtocolConfig.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Utilities\RelayCommand.cs" />
+    <Compile Include="Utilities\StringExtensions.cs" />
+    <Compile Include="ViewModels\LoginWindowViewModel.cs" />
+    <Compile Include="Utilities\ViewModelBase.cs" />
     <Compile Include="Views\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>

@@ -8,7 +8,8 @@
         FontSize="16"
         Foreground="{StaticResource PrimaryHueLightForegroundBrush}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="400" Width="600" Loaded="MainWindow_OnLoaded">
+        Title="Crypto Mail Client" Height="400" Width="600"
+        WindowStartupLocation="CenterScreen">
     <Grid Margin="15">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.5*"/>

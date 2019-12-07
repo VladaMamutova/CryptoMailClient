@@ -1,18 +1,25 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
-using CryptoMailClient.Models;
+using CryptoMailClient.ViewModels;
 
 namespace CryptoMailClient.Views
 {
     /// <summary>
-    /// Логика взаимодействия для MainWindow.xaml
+    /// Логика взаимодействия для LoginWindow.xaml
     /// </summary>
     public partial class LoginWindow : Window
     {
         public LoginWindow()
         {
             InitializeComponent();
+            LoginWindowViewModel loginViewModel = new LoginWindowViewModel();
+            loginViewModel.MessageBoxDisplayRequested += (sender, e) =>
+            {
+                MessageBox.Show(e.MessageBoxText, e.Caption);
+            };
+            loginViewModel.CloseRequested += () => DialogResult = true;
+            DataContext = loginViewModel;
         }
 
         private void Window_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -25,77 +32,22 @@ namespace CryptoMailClient.Views
             DialogResult = false;
         }
 
-        private void SignIn_OnClick(object sender, RoutedEventArgs e)
+        private void Password_OnPasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (!IsUserDataValid())
+            if (DataContext != null && sender is PasswordBox passwordBox)
             {
-                return;
-            }
-
-            if (UserManager.SignIn(Login.Text, Password.Password))
-            {
-                DialogResult = true;
-            }
-            else
-            {
-                MessageBox.Show("Пользователь с данным логином" +
-                                " и паролем не зарегистрирован.",
-                    Title, MessageBoxButton.OK);
+                ((LoginWindowViewModel)DataContext).SecurePassword =
+                    passwordBox.SecurePassword;
             }
         }
 
-        private void SignUp_OnClick(object sender, RoutedEventArgs e)
+        private void PasswordConfirmation_OnPasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (!IsUserDataValid())
+            if (DataContext != null && sender is PasswordBox passwordBox)
             {
-                return;
+                ((LoginWindowViewModel)DataContext).SecurePasswordConfirmation =
+                    passwordBox.SecurePassword;
             }
-
-            if (UserManager.SignUp(Login.Text, Password.Password))
-            {
-                MessageBox.Show("Вы успешно зарегистрированы!",
-                    Title, MessageBoxButton.OK);
-            }
-            else
-            {
-                MessageBox.Show("Пользователь с данным логином уже" +
-                                " зарегистрирован!", Title, MessageBoxButton.OK);
-            }
-        }
-
-        private bool IsUserDataValid()
-        {
-            if (string.IsNullOrWhiteSpace(Login.Text))
-            {
-                MessageBox.Show("Логин не задан. Заполните поле логина.",
-                    Title);
-                return false;
-            }
-
-            if (Login.Text.Length < 3)
-            {
-                MessageBox.Show(
-                    "Логин слишком короткий. Логин должен состоять " +
-                    "минимум из 3 символов.", Title);
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(Password.Password))
-            {
-                MessageBox.Show("Пароль не задан. Заполните поле пароля.",
-                    Title);
-                return false;
-            }
-
-            if (Password.Password.Length < 4)
-            {
-                MessageBox.Show(
-                    "Пароль слишком короткий. Пароль должен состоять " +
-                    "минимум из 4 символов.", Title);
-                return false;
-            }
-
-            return true;
         }
     }
 }
