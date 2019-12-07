@@ -19,6 +19,11 @@ namespace CryptoMailClient.Views
                 MessageBox.Show(e.MessageBoxText, e.Caption);
             };
             loginViewModel.CloseRequested += () => DialogResult = true;
+            loginViewModel.ClearPasswordFieldsRequested += () =>
+            {
+                Password.Clear();
+                PasswordConfirmation.Clear();
+            };
             DataContext = loginViewModel;
         }
 
@@ -36,8 +41,8 @@ namespace CryptoMailClient.Views
         {
             if (DataContext != null && sender is PasswordBox passwordBox)
             {
-                ((LoginWindowViewModel)DataContext).SecurePassword =
-                    passwordBox.SecurePassword;
+                ((LoginWindowViewModel)DataContext).SetPassword(passwordBox
+                    .SecurePassword);
             }
         }
 
@@ -45,8 +50,8 @@ namespace CryptoMailClient.Views
         {
             if (DataContext != null && sender is PasswordBox passwordBox)
             {
-                ((LoginWindowViewModel)DataContext).SecurePasswordConfirmation =
-                    passwordBox.SecurePassword;
+                ((LoginWindowViewModel)DataContext).SetPasswordConfirmation(
+                    passwordBox.SecurePassword);
             }
         }
     }

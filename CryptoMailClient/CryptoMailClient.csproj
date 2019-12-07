@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,6 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BouncyCastle.Crypto, Version=1.8.5.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
@@ -83,7 +85,7 @@
     <Compile Include="Models\ProtocolConfig.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Utilities\RelayCommand.cs" />
-    <Compile Include="Utilities\StringExtensions.cs" />
+    <Compile Include="Utilities\SecureStringHelper.cs" />
     <Compile Include="ViewModels\LoginWindowViewModel.cs" />
     <Compile Include="Utilities\ViewModelBase.cs" />
     <Compile Include="Views\LoginWindow.xaml.cs">
