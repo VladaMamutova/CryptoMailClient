@@ -4,42 +4,84 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
         FontFamily="Segoe UI"
         FontSize="16"
         Foreground="{StaticResource PrimaryHueLightForegroundBrush}"
-        mc:Ignorable="d"
-        Title="Crypto Mail Client" Height="400" Width="600"
-        WindowStartupLocation="CenterScreen">
-    <Grid Margin="15">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.5*"/>
-            <ColumnDefinition Width="10"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <StackPanel>
-            <Button Content="Написать" Margin="0 0 0 10"/>
-            <ListBox Name="FolderList">
-                <ListBoxItem HorizontalContentAlignment="Stretch">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Входящие"></TextBlock>
-                        <TextBlock Grid.Column="1" Name="TotalCount"></TextBlock>
-                    </Grid>
-                </ListBoxItem>
-            </ListBox>
-        </StackPanel>
-        <Grid Grid.Column="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="10"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <ListView Grid.Row="2">
+        Title="Crypto Mail Client"
+        MinHeight="400" MinWidth="600"
+        Height="600" Width="900"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" BorderThickness="1" BorderBrush="{StaticResource PrimaryHueDarkBrush}"
+        ResizeMode="CanResizeWithGrip" AllowsTransparency="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <materialDesign:ColorZone Padding="15" materialDesign:ShadowAssist.ShadowDepth="Depth2" Mode="PrimaryMid" DockPanel.Dock="Top">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Crypto Mail Client" FontWeight="Medium" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="22"/>
+                <materialDesign:PopupBox Grid.Column="1" HorizontalAlignment="Right" PlacementMode="BottomAndAlignRightEdges" StaysOpen="False">
+                    <materialDesign:PopupBox.ToggleContent>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="User" Foreground="{StaticResource MaterialDesignDarkForeground}" Width="20" Height="20" Cursor="Hand"/>
+                            <TextBlock Text="name@yandex.ru" VerticalAlignment="Center" Padding="10 0 0 0" FontSize="14" Foreground="{StaticResource MaterialDesignDarkForeground}" Cursor="Hand"></TextBlock>
+                        </StackPanel>
+                    </materialDesign:PopupBox.ToggleContent>
+                    <StackPanel>
+                        <Button Content="Настройки"/>
+                        <Button Content="Сменить почтовый ящик"/>
+                        <Separator/>
+                        <Button Content="Добавить почтовый ящик"/>
+                    </StackPanel>
+                </materialDesign:PopupBox>
+                <StackPanel Margin="20 0 0 0" Grid.Column="2" x:Name="WindowHeader" Orientation="Horizontal" Height="40" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <Button Width="24" Height="24" Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}" Background="{x:Null}" BorderBrush="{x:Null}" ToolTip="Развернуть" Click="ButtonExpand_OnClick">
+                        <materialDesign:PackIcon Kind="ArrowExpand" Width="23" Height="23"/>
+                    </Button>
+                    <Button Margin="10 0 0 0" Width="24" Height="24" Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}" Background="{x:Null}" BorderBrush="{x:Null}" ToolTip="Выйти" Click="ButtonClose_OnClick">
+                        <materialDesign:PackIcon Kind="Power" Width="24" Height="24"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:ColorZone>
+        <Grid Margin="15" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.5*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <Button Content="Написать" Margin="0 0 0 10"/>
+                <ListBox Name="FolderList">
+                    <ListBoxItem HorizontalContentAlignment="Stretch">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Входящие"></TextBlock>
+                            <TextBlock Grid.Column="1" Name="TotalCount"></TextBlock>
+                        </Grid>
+                    </ListBoxItem>
+                </ListBox>
+            </StackPanel>
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <ListView Grid.Row="2">
 
-            </ListView>
+                </ListView>
+            </Grid>
         </Grid>
     </Grid>
 </Window>
