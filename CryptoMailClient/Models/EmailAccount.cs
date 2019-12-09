@@ -1,21 +1,37 @@
 ﻿using System;
 using System.Net.Mail;
 using System.Net.Sockets;
+using CryptoMailClient.Utilities;
 using MailKit;
 using MailKit.Net.Imap;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace CryptoMailClient.Models
 {
-    public class EmailAccount
+    public class EmailAccount : IDeepCloneable<EmailAccount>
     {
-        public string Address { get; }
-        private readonly string _password;
+        public string Address { get; private set; }
+        private string _password;
 
         public ProtocolConfig SmtpConfig;
         public ProtocolConfig ImapConfig;
 
         public int TotalCount { get; set; }
+
+        static EmailAccount() { Empty = new EmailAccount(); }
+
+        public static readonly EmailAccount Empty;
+
+        private EmailAccount()
+        {
+            Address = string.Empty;
+            _password = string.Empty;
+            
+            SmtpConfig = new ProtocolConfig("", -1);
+            ImapConfig = new ProtocolConfig("", -1);
+
+            TotalCount = 0;
+        }
 
         public EmailAccount(string address, string password)
         {
@@ -29,7 +45,8 @@ namespace CryptoMailClient.Models
                 throw new Exception("Адрес электронной почты имеет неверный формат.");
             }
 
-            if (mailAddress.Host != "gmail.com" && !mailAddress.Host.StartsWith("yandex."))
+            if (mailAddress.Host != "gmail.com" && !mailAddress.Host.StartsWith("yandex.") &&
+                mailAddress.Host != "mail.ru")
             {
                 throw new ArgumentException("Адрес электронной почты указан неверно. " +
                                             "Выберите почтовый ящик на сервисе Gmail, " +
@@ -45,9 +62,32 @@ namespace CryptoMailClient.Models
             // 993 порт пользуется протоколом SSL для шифрования, 143 - без шифрования.
         }
 
+        public void SetAddress(string address)
+        {
+            Address = address;
+        }
+
+        public void SetSmtpProtocolConfig(ProtocolConfig smtpProtocolConfig)
+        {
+            SmtpConfig.Set(smtpProtocolConfig);
+        }
+
+        public void SetImapProtocolConfig(ProtocolConfig imapProtocolConfig)
+        {
+            ImapConfig.Set(imapProtocolConfig);
+        }
+
+        public void Set(EmailAccount emailAccount)
+        {
+            Address = emailAccount.Address;
+            _password = emailAccount._password;
+            SmtpConfig.Set(emailAccount.SmtpConfig);
+            ImapConfig.Set(emailAccount.ImapConfig);
+            TotalCount = emailAccount.TotalCount;
+        }
+
         public void Connect()
         {
-
             try
             {
                 using (var client = new SmtpClient())
@@ -87,6 +127,61 @@ namespace CryptoMailClient.Models
             {
                 throw new Exception("Логин или пароль неверны.");
             }
+        }
+
+        public EmailAccount DeepClone()
+        {
+            EmailAccount clone = new EmailAccount
+            {
+                Address = Address,
+                _password = _password,
+                SmtpConfig = SmtpConfig,
+                ImapConfig = ImapConfig,
+                TotalCount = TotalCount
+            };
+            return clone;
+        }
+
+        object IDeepCloneable.DeepClone()
+        {
+            return DeepClone();
+        }
+
+        public virtual bool Equals(EmailAccount emailAccount)
+        {
+            if (emailAccount == null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, emailAccount))
+            {
+                return true;
+            }
+
+            if (string.Compare(Address, emailAccount.Address,
+                    StringComparison.CurrentCulture) != 0 ||
+                string.Compare(_password, emailAccount._password,
+                    StringComparison.CurrentCulture) != 0)
+            {
+                return false;
+            }
+
+            return SmtpConfig.Equals(emailAccount.SmtpConfig) &&
+                   ImapConfig.Equals(emailAccount.ImapConfig)
+                && TotalCount == emailAccount.TotalCount;
+        }
+
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"Address: {Address}, " +
+                   $"SmtpConfig: {{{SmtpConfig}}}, " +
+                   $"ImapConfig:{{{ImapConfig}}}";
         }
     }
 }

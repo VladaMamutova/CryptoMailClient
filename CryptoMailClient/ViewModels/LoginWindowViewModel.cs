@@ -40,10 +40,10 @@ namespace CryptoMailClient.ViewModels
         public string Title => _isRegistration ? "Регистрация" : "Вход";
 
         public string CommandName =>
-            _isRegistration ? "Зарегистрироваться" : "Войти";
+            _isRegistration ? "Зарегистрироваться".ToUpper() : "Войти".ToUpper();
 
         public string AlternateCommandName =>
-            _isRegistration ? "Отмена" : "Создать аккаунт";
+            _isRegistration ? "Отмена".ToUpper() : "Создать аккаунт".ToUpper();
 
         private SecureString _securePassword;
         public void SetPassword(SecureString securePassword)
@@ -76,6 +76,7 @@ namespace CryptoMailClient.ViewModels
         }
 
         private bool _confirmPasswordValidation;
+
         public bool ConfirmPasswordValidation
         {
             get => _confirmPasswordValidation;
@@ -86,8 +87,39 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
-        public RelayCommand Command { get; }
-        public RelayCommand AlternateCommand { get; }
+        #endregion
+
+        #region Commands
+
+        public RelayCommand Command => new RelayCommand(o =>
+        {
+            if (IsRegistration)
+            {
+                SignUp();
+            }
+            else
+            {
+                SignIn();
+            }
+        });
+
+        public RelayCommand AlternateCommand => new RelayCommand(o =>
+        {
+            IsRegistration = !IsRegistration;
+
+            // При смене типа действия очищаем все поля и устанавливаем
+            // флаги, что пустые поля не проверяеются на ошибки
+            // (до первого обновления значения в поле).
+            Login = string.Empty;
+            _loginValidation = false;
+            OnPropertyChanged(nameof(Login));
+
+            ClearPasswordFieldsRequested?.Invoke();
+            PasswordValidation = false;
+            ConfirmPasswordValidation = false;
+            OnPropertyChanged(nameof(PasswordValidation));
+            OnPropertyChanged(nameof(ConfirmPasswordValidation));
+        });
 
         #endregion
 
@@ -105,39 +137,39 @@ namespace CryptoMailClient.ViewModels
                     switch (propertyName)
                     {
                         case nameof(Login):
-                        {
-                            if (_loginValidation)
                             {
-                                Error = GetLoginValidError(Login);
-                            }
+                                if (_loginValidation)
+                                {
+                                    Error = GetLoginValidError(Login);
+                                }
 
-                            break;
-                        }
+                                break;
+                            }
                         case nameof(PasswordValidation):
-                        {
-                            if (PasswordValidation)
                             {
-                                Error = GetPasswordValidError(_securePassword);
-                            }
+                                if (PasswordValidation)
+                                {
+                                    Error = GetPasswordValidError(_securePassword);
+                                }
 
-                            break;
-                        }
+                                break;
+                            }
                         case nameof(ConfirmPasswordValidation):
-                        {
-                            if (ConfirmPasswordValidation)
                             {
-                                Error = GetPasswordComparisonError(
-                                    _securePassword,
-                                    _securePasswordConfirmation);
-                            }
+                                if (ConfirmPasswordValidation)
+                                {
+                                    Error = GetPasswordComparisonError(
+                                        _securePassword,
+                                        _securePasswordConfirmation);
+                                }
 
-                            break;
-                        }
+                                break;
+                            }
                         default:
-                        {
-                            Error = string.Empty;
-                            break;
-                        }
+                            {
+                                Error = string.Empty;
+                                break;
+                            }
                     }
                 }
 
@@ -161,36 +193,6 @@ namespace CryptoMailClient.ViewModels
             _confirmPasswordValidation = false;
 
             IsRegistration = false;
-
-            Command = new RelayCommand(o =>
-            {
-                if (IsRegistration)
-                {
-                    SignUp();
-                }
-                else
-                {
-                    SignIn();
-                }
-            });
-
-            AlternateCommand = new RelayCommand(o =>
-            {
-                IsRegistration = !IsRegistration;
-
-                // При смене типа действия очищаем все поля и устанавливаем
-                // флаги, что пустые поля не проверяеются на ошибки
-                // (до первого обновления значения в поле).
-                Login = string.Empty;
-                _loginValidation = false;
-                OnPropertyChanged(nameof(Login));
-
-                ClearPasswordFieldsRequested?.Invoke();
-                PasswordValidation = false;
-                ConfirmPasswordValidation = false;
-                OnPropertyChanged(nameof(PasswordValidation));
-                OnPropertyChanged(nameof(ConfirmPasswordValidation));
-            });
         }
 
         private void SignIn()

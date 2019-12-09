@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using CryptoMailClient.Models;
+using CryptoMailClient.ViewModels;
 
 namespace CryptoMailClient.Views
 {
@@ -13,6 +13,12 @@ namespace CryptoMailClient.Views
         public MainWindow()
         {
             InitializeComponent();
+            var viewModel = new MainWindowViewModel();
+            viewModel.MessageBoxDisplayRequested += (sender, o) =>
+            {
+                MessageBox.Show(o.MessageBoxText, o.Caption);
+            };
+            DataContext = viewModel;
         }
 
         private void Window_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

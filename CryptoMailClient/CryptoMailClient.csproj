@@ -84,10 +84,16 @@
     <Compile Include="Models\EmailAccount.cs" />
     <Compile Include="Models\ProtocolConfig.cs" />
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Utilities\IDeepCloneable.cs" />
     <Compile Include="Utilities\RelayCommand.cs" />
     <Compile Include="Utilities\SecureStringHelper.cs" />
+    <Compile Include="ViewModels\EmailSettingsDialogViewModel.cs" />
     <Compile Include="ViewModels\LoginWindowViewModel.cs" />
     <Compile Include="Utilities\ViewModelBase.cs" />
+    <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="Views\EmailSettingsDialog.xaml.cs">
+      <DependentUpon>EmailSettingsDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -121,6 +127,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\EmailSettingsDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\LoginWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

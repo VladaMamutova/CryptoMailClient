@@ -41,15 +41,15 @@
                     <RowDefinition Height="30"></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Text="{Binding Title}" FontWeight="Bold" FontSize="24" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Row="0" Text="{Binding Title}" FontWeight="Medium" FontSize="24" HorizontalAlignment="Center"/>
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                         <ColumnDefinition Width="5"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <materialDesign:PackIcon Grid.Column="0" Kind="Account" VerticalAlignment="Center" Height="20" Width="20"/>
-                    <TextBox Grid.Column="2" materialDesign:HintAssist.Hint="Логин" Text="{Binding Login, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
+                    <materialDesign:PackIcon Grid.Column="0" Kind="Account" VerticalAlignment="Center" Height="20" Width="20" Foreground="{Binding ElementName=Login, Path=BorderBrush}"/>
+                    <TextBox Grid.Column="2" Name="Login" materialDesign:HintAssist.Hint="Логин" Text="{Binding Login, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"/>
                 </Grid>
                 <Grid Grid.Row="4">
                     <Grid.ColumnDefinitions>
@@ -57,18 +57,18 @@
                         <ColumnDefinition Width="5"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <materialDesign:PackIcon Grid.Column="0" Kind="Key" VerticalAlignment="Center" Height="20" Width="20"/>
+                    <materialDesign:PackIcon Grid.Column="0" Kind="Key" VerticalAlignment="Center" Height="20" Width="20" Foreground="{Binding ElementName=Password, Path=BorderBrush}"/>
                     <PasswordBox Grid.Column="2" x:Name="Password" materialDesign:HintAssist.Hint="Пароль" PasswordChanged="Password_OnPasswordChanged"
                         Tag="{Binding PasswordValidation, ValidatesOnDataErrors=True}">
                     </PasswordBox>
                 </Grid>
-                <Grid Grid.Row="5" Margin="0 15 0 0" Name="PasswordConfirmationRow" Visibility="{Binding IsRegistration, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid Grid.Row="5" Margin="0 15 0 0" Visibility="{Binding IsRegistration, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
                         <ColumnDefinition Width="5"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <materialDesign:PackIcon Grid.Column="0" Kind="KeyChange" VerticalAlignment="Center" Height="20" Width="20"/>
+                    <materialDesign:PackIcon Grid.Column="0" Kind="KeyChange" VerticalAlignment="Center" Height="20" Width="20" Foreground="{Binding ElementName=PasswordConfirmation, Path=BorderBrush}"/>
                     <PasswordBox Grid.Column="2" x:Name="PasswordConfirmation" materialDesign:HintAssist.Hint="Подтверждение пароля" PasswordChanged="PasswordConfirmation_OnPasswordChanged"
                         Tag="{Binding ConfirmPasswordValidation, ValidatesOnDataErrors=True}">
                     </PasswordBox>
@@ -81,11 +81,9 @@
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Content="{Binding AlternateCommandName}" 
                             Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left"
-                            materialDesign:ShadowAssist.ShadowDepth="Depth0"
-                            FontSize="16" Command="{Binding AlternateCommand}"/>
+                            Command="{Binding AlternateCommand}"/>
                     <Button Grid.Column="2" IsDefault="True" Content="{Binding CommandName}"
-                            materialDesign:ShadowAssist.ShadowDepth="Depth1"
-                            Padding="20 0" FontWeight="Bold" FontSize="16" Command="{Binding Command}"/>
+                            Command="{Binding Command}"/>
                 </Grid>
             </Grid>
         </Grid>
