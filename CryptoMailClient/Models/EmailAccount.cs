@@ -174,14 +174,13 @@ namespace CryptoMailClient.Models
 
         public override int GetHashCode()
         {
-            return ToString().GetHashCode();
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
+            return Address.GetHashCode();
         }
 
         public override string ToString()
         {
-            return $"Address: {Address}, " +
-                   $"SmtpConfig: {{{SmtpConfig}}}, " +
-                   $"ImapConfig:{{{ImapConfig}}}";
+            return Address;
         }
     }
 }

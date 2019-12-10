@@ -9,7 +9,6 @@ namespace CryptoMailClient.ViewModels
     class EmailSettingsDialogViewModel : ViewModelBase
     {
         private readonly EmailAccount _emailAccount;
-        private readonly EmailAccount _sourceEmailAccount;
 
         public string Login
         {
@@ -78,47 +77,36 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
-        private bool _isNewEmailAccount;
-        public bool IsNewEmailAccount
-        {
-            get => _isNewEmailAccount;
-            set
-            {
-                _isNewEmailAccount = value;
-                OnPropertyChanged(nameof(IsNewEmailAccount));
-                OnPropertyChanged(nameof(Title));
-                OnPropertyChanged(nameof(IsReadOnly));
-            }
-        }
+        public bool IsNewEmailAccount { get; }
 
-        public string Title => _isNewEmailAccount ? "Добавление ящика" : "Настройки";
-        public bool IsReadOnly => !_isNewEmailAccount;
+        public string Title => IsNewEmailAccount ? "Добавление ящика" : "Настройки";
+        public bool IsReadOnly => !IsNewEmailAccount;
 
         public RelayCommand DeleteCommand => new RelayCommand(o =>
         {
-            _sourceEmailAccount.Set(EmailAccount.Empty);
+            UserManager.CurrentUser.RemoveEmailAccount(_emailAccount);
+            DialogHost.CloseDialogCommand.Execute(true, null);
+        });
 
+        public RelayCommand AddCommand => new RelayCommand(o =>
+        {
+            UserManager.CurrentUser.AddEmailAccount(_emailAccount);
             DialogHost.CloseDialogCommand.Execute(true, null);
         });
 
         public RelayCommand UpdateCommand => new RelayCommand(o =>
         {
-            _sourceEmailAccount.SetSmtpProtocolConfig(_emailAccount.SmtpConfig);
-            _sourceEmailAccount.SetImapProtocolConfig(_emailAccount.ImapConfig);
-
+            UserManager.CurrentUser.CurrentEmailAccount.SetSmtpProtocolConfig(_emailAccount.SmtpConfig);
+            UserManager.CurrentUser.CurrentEmailAccount.SetImapProtocolConfig(_emailAccount.ImapConfig);
             DialogHost.CloseDialogCommand.Execute(true, null);
         });
-        
-        public EmailSettingsDialogViewModel(EmailAccount emailAccount)
-        {
-            if (emailAccount == null)
-            {
-                throw new ArgumentException(nameof(emailAccount));
-            }
 
-            IsNewEmailAccount = !emailAccount.Equals(EmailAccount.Empty);
-            _emailAccount = emailAccount.DeepClone();
-            _sourceEmailAccount = emailAccount;
+        public EmailSettingsDialogViewModel(bool isNewEmailAccount)
+        {
+            IsNewEmailAccount = isNewEmailAccount;
+            _emailAccount = IsNewEmailAccount
+                ? EmailAccount.Empty.DeepClone()
+                : UserManager.CurrentUser.CurrentEmailAccount;
         }
     }
 }

@@ -90,12 +90,7 @@
                     <system:Boolean>False</system:Boolean>
                 </Button.CommandParameter>
             </Button>
-            <Button Grid.Column="2" IsDefault="True" Content="ДОБАВИТЬ" HorizontalAlignment="Right"
-                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
-                <Button.CommandParameter>
-                    <system:Boolean>True</system:Boolean>
-                </Button.CommandParameter>
-            </Button>
+            <Button Grid.Column="2" IsDefault="True" Content="ДОБАВИТЬ" HorizontalAlignment="Right" Command="{Binding AddCommand}"/>
         </Grid>
         <Grid Grid.Row="7" Visibility="{Binding IsNewEmailAccount, Converter={StaticResource InverseBoolToVisConverter}}">
             <Grid.ColumnDefinitions>

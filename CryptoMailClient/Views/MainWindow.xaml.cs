@@ -13,8 +13,16 @@ namespace CryptoMailClient.Views
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            // Подключаем модель представления в событии первой загрузки окна,
+            // а не в конструкторе, для того, чтобы подключились привязки
+            // для вошедшего через LoginWindow пользователя (так как MainWindow
+            // создается раньше, чем LoginWindow).
             var viewModel = new MainWindowViewModel();
-            viewModel.MessageBoxDisplayRequested += (sender, o) =>
+            viewModel.MessageBoxDisplayRequested += (s, o) =>
             {
                 MessageBox.Show(o.MessageBoxText, o.Caption);
             };
