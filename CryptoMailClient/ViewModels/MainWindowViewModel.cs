@@ -55,10 +55,10 @@ namespace CryptoMailClient.ViewModels
         private async void RunNewEmailDialog(object o)
         {
             IsPopupClose = false;
-            var view = new EmailSettingsDialog
-            {
-                DataContext = new EmailSettingsDialogViewModel(true)
-            };
+            var view = new EmailSettingsDialog(true);
+            //{
+            //    DataContext = new EmailSettingsDialogViewModel(true)
+            //};
 
             var result =
                 await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
@@ -80,10 +80,16 @@ namespace CryptoMailClient.ViewModels
         private async void RunEmailSettingsDialog(object o)
         {
             IsPopupClose = false;
-            var view = new EmailSettingsDialog
-            {
-                DataContext = new EmailSettingsDialogViewModel(false)
-            };
+            //todo: выбрать, как будут отображаться уведомления.
+            //todo: если в диалоге, оставляем этот вариант
+            var view = new EmailSettingsDialog(true);
+            //todo: если в главном окне, то этот. Тогда из диалога возвращаем объект,
+            //todo: показываем диалог с прогресс баром или другой диалог при ошибках
+            //todo: и отменяе закрытие окна
+            //var view = new EmailSettingsDialog
+            //{
+            //    DataContext = new EmailSettingsDialogViewModel(false)
+            //};
 
             var result =
                 await DialogHost.Show(view, "RootDialog", ClosingEventHandler);

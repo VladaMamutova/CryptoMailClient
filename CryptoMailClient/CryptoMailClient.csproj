@@ -77,14 +77,14 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Models\MailProtocols.cs" />
     <Compile Include="Models\UserManager.cs" />
     <Compile Include="Models\User.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\EmailAccount.cs" />
-    <Compile Include="Models\ProtocolConfig.cs" />
+    <Compile Include="Models\MailProtocol.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="Utilities\IDeepCloneable.cs" />
     <Compile Include="Utilities\RelayCommand.cs" />
     <Compile Include="Utilities\SecureStringHelper.cs" />
     <Compile Include="ViewModels\EmailSettingsDialogViewModel.cs" />

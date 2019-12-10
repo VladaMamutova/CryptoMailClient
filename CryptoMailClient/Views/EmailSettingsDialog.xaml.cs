@@ -14,6 +14,17 @@ namespace CryptoMailClient.Views
             InitializeComponent();
         }
 
+        public EmailSettingsDialog(bool isNewEmailAccount)
+        {
+            InitializeComponent();
+            var viewModel = new EmailSettingsDialogViewModel(isNewEmailAccount);
+            viewModel.MessageBoxDisplayRequested += (s, o) =>
+            {
+                MessageBox.Show(o.MessageBoxText, o.Caption);
+            };
+            DataContext = viewModel;
+        }
+
         private void Password_OnPasswordChanged(object sender, RoutedEventArgs e)
         {
             if (DataContext != null && sender is PasswordBox passwordBox)

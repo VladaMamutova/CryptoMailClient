@@ -27,8 +27,8 @@
                 <ColumnDefinition Width="5"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <materialDesign:PackIcon Grid.Column="0" Kind="Account" VerticalAlignment="Center" Width="20" Height="20" Foreground="{Binding ElementName=Login, Path=BorderBrush}"/>
-            <TextBox Name="Login" Grid.Column="2" materialDesign:HintAssist.Hint="Логин" Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsReadOnly}"/>
+            <materialDesign:PackIcon Grid.Column="0" Kind="Account" VerticalAlignment="Center" Width="20" Height="20" Foreground="{Binding ElementName=Address, Path=BorderBrush}"/>
+            <TextBox Name="Address" Grid.Column="2" materialDesign:HintAssist.Hint="Логин" Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsReadOnly}"/>
         </Grid>
         <Grid Grid.Row="3" Margin="0 15 0 0" Visibility="{Binding IsNewEmailAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
