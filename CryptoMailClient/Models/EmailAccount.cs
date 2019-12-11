@@ -29,27 +29,19 @@ namespace CryptoMailClient.Models
             catch
             {
                 throw new Exception(
-                    "Адрес электронной почты имеет неверный формат.");
+                    "Адрес электронной почты имеет неверный формат.\n" +
+                    "Пример адреса: ivanov@yandex.ru.");
             }
 
             Address = address;
             _password = password ??
                         throw new ArgumentNullException(nameof(password));
 
-            try
-            {
-                Smtp = new MailProtocol(MailProtocols.SMTP, mailAddress.Host,
-                    smtpPort);
+            Smtp = new MailProtocol(MailProtocols.SMTP, mailAddress.Host,
+                smtpPort);
 
-                Imap = new MailProtocol(MailProtocols.IMAP, mailAddress.Host,
-                    imapPort);
-            }
-            catch (ArgumentException)
-            {
-                throw new Exception("Адрес электронной почты указан неверно. " +
-                                    "Выберите почтовый ящик на сервисе Gmail, " +
-                                    "Яндекс.Почта или Mail.ru.");
-            }
+            Imap = new MailProtocol(MailProtocols.IMAP, mailAddress.Host,
+                imapPort);
         }
 
         public void SetSmtpPort(int port)
@@ -77,8 +69,6 @@ namespace CryptoMailClient.Models
 
                 using (var client = new ImapClient())
                 {
-                    client.ServerCertificateValidationCallback =
-                        (s, c, h, e) => true;
                     client.Connect(Imap.Server,
                         Imap.Port, Imap.UseSslTsl);
                     client.Authenticate(Address,
@@ -92,11 +82,11 @@ namespace CryptoMailClient.Models
             }
             catch (SocketException ex)
             {
-                string message = "Невозможно установить соединение с сервером.";
+                string message = "Невозможно установить соединение " +
+                                 "с почтовым сервером.";
                 if (ex.ErrorCode == 11001)
                 {
-                    throw new Exception(message + " Проверьте " +
-                                        "подключение к интернету.");
+                    message += "\nПроверьте подключение к интернету.";
                 }
 
                 throw new Exception(message);

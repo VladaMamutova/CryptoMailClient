@@ -1,21 +1,29 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CryptoMailClient.Models
 {
-    public struct MailProtocol
+    public class MailProtocol
     {
         public const int DEFAULT_SMTP_PORT = 465;
-        // 465 порт использует для шифрования SSL, 587 и 25 без шифрования.
-
         public const int DEFAULT_IMAP_PORT = 993;
-        // 993 порт пользуется протоколом SSL для шифрования, 143 - без шифрования.
 
+        private static readonly Dictionary<int, bool> SmtpConfig =
+            new Dictionary<int, bool>
+                {{DEFAULT_SMTP_PORT, true}, {25, false}, {587, false}};
+        // 465 порт использует соединение шифрования SSL, 25 и 587 - без шифрования.
+
+        private static readonly Dictionary<int, bool> ImapConfig =
+            new Dictionary<int, bool> {{DEFAULT_IMAP_PORT, true}, {143, false}};
+        // 993 порт использует соединение шифрования SSL, 143 - без шифрования.
+
+        private readonly MailProtocols _mailProtocol;
         public string Server { get; }
         public int Port { get; private set; }
-        public bool UseSslTsl { get; }
+        public bool UseSslTsl { get; private set; }
 
-        public MailProtocol(MailProtocols mailProtocol, string domain, int port,
-            bool useSslTsl = true)
+        public MailProtocol(MailProtocols mailProtocol, string domain, int port)
         {
             if (domain == null)
             {
@@ -26,32 +34,77 @@ namespace CryptoMailClient.Models
                 domain != "mail.ru" &&
                 !domain.StartsWith("yandex."))
             {
-                throw new ArgumentException("Invalid server domain.");
+                throw new ArgumentException("Недействительное доменное имя " +
+                                            "почтового сервера. Выберите почтовый " +
+                                            "ящик на сервисе Gmail, Яндекс.Почта " +
+                                            "или Mail.ru.");
             }
 
-            Server = mailProtocol.ToString().ToLower() + '.' + domain;
-            Port = port;
-            UseSslTsl = useSslTsl;
+            _mailProtocol = mailProtocol;
+            Server = _mailProtocol.ToString().ToLower() + '.' + domain;
+            Port = 0;
+            UseSslTsl = false;
+            SetPort(port);
         }
 
         public void SetPort(int port)
         {
-            Port = port;
+            bool result = false;
+            switch (_mailProtocol)
+            {
+                case MailProtocols.SMTP:
+                {
+                    if (SmtpConfig.ContainsKey(port))
+                    {
+                        Port = port;
+                        UseSslTsl = SmtpConfig[port];
+                        result = true;
+                    }
+
+                    break;
+                }
+                case MailProtocols.IMAP:
+                {
+                    if (ImapConfig.ContainsKey(port))
+                    {
+                        Port = port;
+                        UseSslTsl = ImapConfig[port];
+                        result = true;
+                    }
+
+                    break;
+                }
+            }
+
+            if (!result)
+            {
+                throw new ArgumentException(
+                    $"Недействительный порт {_mailProtocol}.\n" +
+                    GetMessageAboutValidPorts(_mailProtocol));
+            }
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is MailProtocol))
+            if (obj == null)
             {
                 return false;
             }
 
-            MailProtocol protocolConfig = (MailProtocol) obj;
+            if (!(obj is MailProtocol mailProtocol))
+            {
+                return false;
+            }
 
-            return string.Compare(Server, protocolConfig.Server,
+            if (ReferenceEquals(this, mailProtocol))
+            {
+                return true;
+            }
+
+            return string.Compare(Server, mailProtocol.Server,
                        StringComparison.CurrentCulture) == 0 &&
-                   Port == protocolConfig.Port &&
-                   UseSslTsl == protocolConfig.UseSslTsl;
+                   Port == mailProtocol.Port &&
+                   UseSslTsl == mailProtocol.UseSslTsl;
         }
 
         public override int GetHashCode()
@@ -61,7 +114,7 @@ namespace CryptoMailClient.Models
 
         public override string ToString()
         {
-            return $"{Server}:{Port}, {UseSslTsl}";
+            return $"{_mailProtocol} - {Server}:{Port}, {UseSslTsl}";
         }
 
         public static string GetServerFromMailAddress(
@@ -73,8 +126,56 @@ namespace CryptoMailClient.Models
                 throw new ArgumentNullException(nameof(address));
             }
 
-            return mailProtocol.ToString().ToLower() + '.' +
-                   address.Substring(address.IndexOf('@') + 1);
+            string result = mailProtocol.ToString().ToLower() + '.';
+            int index = address.IndexOf('@');
+            if (index > 0)
+            {
+                result += address.Substring(index + 1);
+            }
+
+            return result;
+        }
+
+        public static string GetMessageAboutValidPorts(
+            MailProtocols mailProtocol)
+        {
+            string purpose = string.Empty;
+            int[] ports = new int[0];
+            int[] portWithSsl = new int[0];
+
+            switch (mailProtocol)
+            {
+                case MailProtocols.SMTP:
+                {
+                    purpose = "для безопасной передачи";
+                    portWithSsl = SmtpConfig.Where(c => c.Value)
+                        .Select(c => c.Key).ToArray();
+                    ports = SmtpConfig.Where(c => !c.Value).Select(c => c.Key)
+                        .ToArray();
+                    break;
+                }
+                case MailProtocols.IMAP:
+                {
+                    purpose = "для безопасного приёма";
+                    portWithSsl = ImapConfig.Where(c => c.Value)
+                        .Select(c => c.Key).ToArray();
+                    ports = ImapConfig.Where(c => !c.Value).Select(c => c.Key)
+                        .ToArray();
+                    break;
+                }
+            }
+
+            string result = string.Empty;
+            if (ports.Length > 0 && portWithSsl.Length > 0)
+            {
+                result = $"{mailProtocol} использует ";
+                result += ports.Length == 1 ? "порт " : "порты ";
+                result += string.Join(" и ", ports) + ", а также ";
+                result += portWithSsl[0] + " " + purpose +
+                          " почты (рекомендуется).";
+            }
+
+            return result;
         }
     }
 }

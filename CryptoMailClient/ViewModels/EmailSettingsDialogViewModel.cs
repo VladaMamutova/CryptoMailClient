@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security;
+using System.Threading.Tasks;
 using CryptoMailClient.Models;
 using CryptoMailClient.Utilities;
 using MaterialDesignThemes.Wpf;
@@ -84,15 +85,19 @@ namespace CryptoMailClient.ViewModels
 
         public bool IsReadOnly => !IsNewEmailAccount;
 
+        public string SmtpPortHelpMessage =>
+            MailProtocol.GetMessageAboutValidPorts(MailProtocols.SMTP);
+
+        public string ImapPortHelpMessage =>
+            MailProtocol.GetMessageAboutValidPorts(MailProtocols.IMAP);
+
         public RelayCommand DeleteCommand => new RelayCommand(o =>
         {
-            //todo:добавить connect
-            //todo:попробовать отправлять объект наружу для отображения диалога с прогресс баром
             UserManager.CurrentUser.RemoveEmailAccount(Address);
             DialogHost.CloseDialogCommand.Execute(true, null);
         });
 
-        public RelayCommand AddCommand => new RelayCommand(o =>
+        public RelayCommand AddCommand => new RelayCommand(async o =>
         {
             try
             {
@@ -100,9 +105,14 @@ namespace CryptoMailClient.ViewModels
                     SecureStringHelper.SecureStringToString(SecurePassword),
                     _smtpPort, _imapPort);
 
-                //todo:добавить connect
-                //todo:попробовать отправлять объект наружу для отображения диалога с прогресс баром
-                UserManager.CurrentUser.AddEmailAccount(emailAccount);
+                // Асинхронно вызываем метод подключения к почтовым серверам,
+                // чтобы не блокировать интерфейс.
+                await Task.Run(() => emailAccount.Connect());
+
+                if (!UserManager.CurrentUser.AddEmailAccount(emailAccount))
+                {
+                    throw new Exception("Данный почтовый ящик уже добавлен.");
+                }
                 DialogHost.CloseDialogCommand.Execute(true, null);
             }
             catch (Exception ex)
@@ -111,17 +121,27 @@ namespace CryptoMailClient.ViewModels
             }
         });
 
-        public RelayCommand UpdateCommand => new RelayCommand(o =>
+        public RelayCommand UpdateCommand => new RelayCommand(async o =>
         {
             // Могут меняться только порты серверов, так как поле
             // email address - IsReadOnly, соответственно,
-            // и постовые сервера не меняются.
-            //todo:добавить connect
-            //todo:попробовать отправлять объект наружу для отображения диалога с прогресс баром
-            UserManager.CurrentUser.CurrentEmailAccount.SetSmtpPort(_smtpPort);
-            UserManager.CurrentUser.CurrentEmailAccount.SetImapPort(_imapPort);
+            // и почтовые сервера не меняются.
+            try
+            {
+                UserManager.CurrentUser.CurrentEmailAccount.SetSmtpPort(_smtpPort);
+                UserManager.CurrentUser.CurrentEmailAccount.SetImapPort(_imapPort);
 
-            DialogHost.CloseDialogCommand.Execute(true, null);
+                // Асинхронно вызываем метод подключения к почтовым серверам,
+                // чтобы не блокировать интерфейс.
+                await Task.Run(() =>
+                    UserManager.CurrentUser.CurrentEmailAccount.Connect());
+
+                DialogHost.CloseDialogCommand.Execute(true, null);
+            }
+            catch (Exception ex)
+            {
+                OnMessageBoxDisplayRequest(Title, ex.Message);
+            }
         });
 
         public EmailSettingsDialogViewModel(bool isNewEmailAccount)
