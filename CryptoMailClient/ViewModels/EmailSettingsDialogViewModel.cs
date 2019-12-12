@@ -91,12 +91,6 @@ namespace CryptoMailClient.ViewModels
         public string ImapPortHelpMessage =>
             MailProtocol.GetMessageAboutValidPorts(MailProtocols.IMAP);
 
-        public RelayCommand DeleteCommand => new RelayCommand(o =>
-        {
-            UserManager.CurrentUser.RemoveEmailAccount(Address);
-            DialogHost.CloseDialogCommand.Execute(true, null);
-        });
-
         public RelayCommand AddCommand => new RelayCommand(async o =>
         {
             try
@@ -142,6 +136,12 @@ namespace CryptoMailClient.ViewModels
             {
                 OnMessageBoxDisplayRequest(Title, ex.Message);
             }
+        });
+
+        public RelayCommand DeleteCommand => new RelayCommand(o =>
+        {
+            UserManager.CurrentUser.RemoveEmailAccount(Address);
+            DialogHost.CloseDialogCommand.Execute(true, null);
         });
 
         public EmailSettingsDialogViewModel(bool isNewEmailAccount)

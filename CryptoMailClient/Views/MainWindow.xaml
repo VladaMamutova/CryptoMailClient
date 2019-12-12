@@ -90,7 +90,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="Входящие"></TextBlock>
-                                <TextBlock Grid.Column="1" Name="TotalCount"></TextBlock>
+                                <TextBlock Grid.Column="1"></TextBlock>
                             </Grid>
                         </ListBoxItem>
                     </ListBox>

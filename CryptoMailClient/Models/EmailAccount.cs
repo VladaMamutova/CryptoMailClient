@@ -9,13 +9,11 @@ namespace CryptoMailClient.Models
 {
     public class EmailAccount
     {
-        public string Address { get; }
         private readonly string _password;
 
+        public string Address { get; }
         public MailProtocol Smtp { get; }
         public MailProtocol Imap { get; }
-
-        public int TotalCount { get; private set; }
 
         public EmailAccount(string address, string password,
             int smtpPort = MailProtocol.DEFAULT_SMTP_PORT,
@@ -60,23 +58,15 @@ namespace CryptoMailClient.Models
             {
                 using (var client = new SmtpClient())
                 {
-                    client.Connect(Smtp.Server, Smtp.Port,
-                        Smtp.UseSslTsl);
+                    client.Connect(Smtp.Server, Smtp.Port, Smtp.UseSslTsl);
                     client.Authenticate(Address, _password);
-
                     client.Disconnect(true);
                 }
 
                 using (var client = new ImapClient())
                 {
-                    client.Connect(Imap.Server,
-                        Imap.Port, Imap.UseSslTsl);
-                    client.Authenticate(Address,
-                        _password);
-
-                    var inbox = client.Inbox;
-                    inbox.Open(FolderAccess.ReadOnly);
-                    TotalCount = inbox.Count;
+                    client.Connect(Imap.Server, Imap.Port, Imap.UseSslTsl);
+                    client.Authenticate(Address, _password);
                     client.Disconnect(true);
                 }
             }
@@ -114,17 +104,10 @@ namespace CryptoMailClient.Models
                 return true;
             }
 
-            if (string.Compare(Address, emailAccount.Address,
-                    StringComparison.CurrentCulture) != 0 ||
-                string.Compare(_password, emailAccount._password,
-                    StringComparison.CurrentCulture) != 0)
-            {
-                return false;
-            }
-
-            return Smtp.Equals(emailAccount.Smtp) &&
-                   Imap.Equals(emailAccount.Imap)
-                   && TotalCount == emailAccount.TotalCount;
+            return Address == emailAccount.Address &&
+                   _password == emailAccount._password &&
+                   Smtp.Equals(emailAccount.Smtp) &&
+                   Imap.Equals(emailAccount.Imap);
         }
 
         public bool Equals(EmailAccount emailAccount)
@@ -139,17 +122,10 @@ namespace CryptoMailClient.Models
                 return true;
             }
 
-            if (string.Compare(Address, emailAccount.Address,
-                    StringComparison.CurrentCulture) != 0 ||
-                string.Compare(_password, emailAccount._password,
-                    StringComparison.CurrentCulture) != 0)
-            {
-                return false;
-            }
-
-            return Smtp.Equals(emailAccount.Smtp) &&
-                   Imap.Equals(emailAccount.Imap)
-                   && TotalCount == emailAccount.TotalCount;
+            return Address == emailAccount.Address &&
+                   _password == emailAccount._password &&
+                   Smtp.Equals(emailAccount.Smtp) &&
+                   Imap.Equals(emailAccount.Imap);
         }
 
         public override int GetHashCode()

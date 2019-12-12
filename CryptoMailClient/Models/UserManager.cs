@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace CryptoMailClient.Models
@@ -10,77 +12,69 @@ namespace CryptoMailClient.Models
 
         public static User CurrentUser { get; private set; }
 
-        public static bool SignIn(string login, string password)
-        {
-            bool result = !IsUniqueLogin(login);
-
-            if (result)
-            {
-                User user = new User(login, password);
-                string passwordHash = File.ReadAllText(GetUserInfoFile(user), Encoding.Unicode);
-                if (user.PasswordHash != passwordHash)
-                {
-                    result = false;
-                }
-                else
-                {
-                    CurrentUser = user;
-                }
-            }
-
-            return result;
-        }
-
-        public static bool SignUp(string login, string password)
-        {
-            bool result = IsUniqueLogin(login);
-
-            if (result)
-            {
-                User user = new User(login, password);
-                Directory.CreateDirectory(GetUserDirectory(user));
-                File.WriteAllText(GetUserInfoFile(user), user.PasswordHash,
-                    Encoding.Unicode);
-            }
-
-            return result;
-        }
-
-        private static string GetUserDirectory(User user)
-        {
-            return Path.Combine(USERS_DIRECTORY, user.Login);
-        }
+       
 
         private static string GetUserDirectory(string login)
         {
             return Path.Combine(USERS_DIRECTORY, login);
         }
 
-        private static string GetUserInfoFile(User user)
+      
+
+        private static string GetUserInfoFile(string login)
         {
-            return Path.Combine(USERS_DIRECTORY, user.Login, USER_INFO_FILE);
+            return Path.Combine(USERS_DIRECTORY, login, USER_INFO_FILE);
         }
 
         private static bool IsUniqueLogin(string login)
         {
-            bool result = true;
-
             if (!Directory.Exists(USERS_DIRECTORY))
             {
                 Directory.CreateDirectory(USERS_DIRECTORY);
+                return false;
             }
 
             string[] directories = Directory.GetDirectories(USERS_DIRECTORY);
-            string userDirectory = GetUserDirectory(login);
-            for (int i = 0; i < directories.Length && result; i++)
+            return !directories.Contains(GetUserDirectory(login));
+        }
+
+        public static bool SignIn(string login, string password)
+        {
+            if (IsUniqueLogin(login))
             {
-                if (directories[i] == userDirectory)
-                {
-                    result = false;
-                }
+                return false;
             }
 
-            return result;
+            string userFile = GetUserInfoFile(login);
+            if (!File.Exists(userFile))
+            {
+                return false;
+            }
+
+            User user = new User(login, password);
+            string passwordHash = File.ReadAllText(userFile, Encoding.Unicode);
+            if (user.PasswordHash == passwordHash)
+            {
+                CurrentUser = user;
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool SignUp(string login, string password)
+        {
+            if (!IsUniqueLogin(login))
+            {
+                return false;
+            }
+
+            User user = new User(login, password);
+            Directory.CreateDirectory(GetUserDirectory(login));
+            File.WriteAllText(GetUserInfoFile(login), user.PasswordHash,
+                Encoding.Unicode);
+
+            return true;
         }
     }
 }

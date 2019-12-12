@@ -101,8 +101,24 @@ namespace CryptoMailClient.Models
                 return true;
             }
 
-            return string.Compare(Server, mailProtocol.Server,
-                       StringComparison.CurrentCulture) == 0 &&
+            return Server == mailProtocol.Server &&
+                   Port == mailProtocol.Port &&
+                   UseSslTsl == mailProtocol.UseSslTsl;
+        }
+
+        public bool Equals(MailProtocol mailProtocol)
+        {
+            if (mailProtocol == null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, mailProtocol))
+            {
+                return true;
+            }
+
+            return Server == mailProtocol.Server &&
                    Port == mailProtocol.Port &&
                    UseSslTsl == mailProtocol.UseSslTsl;
         }
