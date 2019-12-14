@@ -67,7 +67,7 @@
                     <Button Width="24" Height="24" Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}" Background="{x:Null}" BorderBrush="{x:Null}" ToolTip="Развернуть" Click="ButtonExpand_OnClick">
                         <materialDesign:PackIcon Kind="ArrowExpand" Width="23" Height="23"/>
                     </Button>
-                    <Button Margin="10 0 0 0" Width="24" Height="24" Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}" Background="{x:Null}" BorderBrush="{x:Null}" ToolTip="Выйти" Click="ButtonClose_OnClick">
+                    <Button Margin="10 0 0 0" Width="24" Height="24" Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}" Background="{x:Null}" BorderBrush="{x:Null}" ToolTip="Выйти" Command="{Binding CloseCommand}">
                         <materialDesign:PackIcon Kind="Power" Width="24" Height="24"/>
                     </Button>
                 </StackPanel>
@@ -82,17 +82,29 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel>
                     <Button Content="Написать" Margin="0 0 0 10"/>
-                    <ListBox Name="FolderList">
-                        <ListBoxItem HorizontalContentAlignment="Stretch">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="Входящие"></TextBlock>
-                                <TextBlock Grid.Column="1"></TextBlock>
-                            </Grid>
-                        </ListBoxItem>
+                    <ListBox ItemsSource="{Binding Folders}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate >
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Name}"></TextBlock>
+                                    <TextBlock Grid.Column="1" Text="{Binding Count}"></TextBlock>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
                     </ListBox>
                 </StackPanel>
                 <Grid Grid.Column="2">

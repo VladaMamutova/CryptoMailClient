@@ -101,7 +101,7 @@ namespace CryptoMailClient.ViewModels
 
                 // Асинхронно вызываем метод подключения к почтовым серверам,
                 // чтобы не блокировать интерфейс.
-                await Task.Run(() => emailAccount.Connect());
+                await emailAccount.Connect();
 
                 if (!UserManager.CurrentUser.AddEmailAccount(emailAccount))
                 {

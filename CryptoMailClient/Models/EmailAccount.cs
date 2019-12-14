@@ -4,6 +4,7 @@ using System.Net.Mail;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using MailKit;
 using MailKit.Net.Imap;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
@@ -104,22 +105,22 @@ namespace CryptoMailClient.Models
             RsaPrivateKey = xmlKeyInfo;
         }
 
-        public void Connect()
+        public async Task Connect()
         {
             try
             {
                 using (var client = new SmtpClient())
                 {
-                    client.Connect(Smtp.Server, Smtp.Port, Smtp.UseSsl);
-                    client.Authenticate(Address, _password);
-                    client.Disconnect(true);
+                    await client.ConnectAsync(Smtp.Server, Smtp.Port, Smtp.UseSsl);
+                    await client.AuthenticateAsync(Address, _password);
+                    await client.DisconnectAsync(true);
                 }
 
                 using (var client = new ImapClient())
                 {
-                    client.Connect(Imap.Server, Imap.Port, Imap.UseSsl);
-                    client.Authenticate(Address, _password);
-                    client.Disconnect(true);
+                    await client.ConnectAsync(Imap.Server, Imap.Port, Imap.UseSsl);
+                    await client.AuthenticateAsync(Address, _password);
+                    await client.DisconnectAsync(true);
                 }
             }
             catch (SocketException ex)
@@ -136,6 +137,21 @@ namespace CryptoMailClient.Models
             catch
             {
                 throw new Exception("Логин или пароль неверны.");
+            }
+        }
+
+        public async Task<ImapClient> GetImapClient()
+        {
+            try
+            {
+                ImapClient client = new ImapClient();
+                await client.ConnectAsync(Imap.Server, Imap.Port, Imap.UseSsl);
+                await client.AuthenticateAsync(Address, _password);
+                return client;
+            }
+            catch
+            {
+                return null;
             }
         }
 

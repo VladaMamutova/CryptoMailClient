@@ -26,6 +26,7 @@ namespace CryptoMailClient.Views
             {
                 MessageBox.Show(o.MessageBoxText, o.Caption);
             };
+            viewModel.CloseRequested += Close;
             DataContext = viewModel;
         }
 
@@ -46,11 +47,6 @@ namespace CryptoMailClient.Views
                 WindowState = WindowState.Maximized;
                 ((Button)sender).ToolTip = "Свернуть";
             }
-        }
-
-        private void ButtonClose_OnClick(object sender, RoutedEventArgs e)
-        {
-            Close();
         }
     }
 }

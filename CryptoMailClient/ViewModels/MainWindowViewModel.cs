@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using CryptoMailClient.Models;
 using CryptoMailClient.Utilities;
 using CryptoMailClient.Views;
@@ -38,6 +40,18 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
+        private ObservableCollection<FolderItem> _folders;
+
+        public ObservableCollection<FolderItem> Folders
+        {
+            get => _folders;
+            set
+            {
+                _folders = value;
+                OnPropertyChanged(nameof(Folders));
+            }
+        }
+
         public RelayCommand RunNewEmailDialogCommand =>
             new RelayCommand(RunNewEmailDialog);
 
@@ -45,7 +59,7 @@ namespace CryptoMailClient.ViewModels
             new RelayCommand(RunEmailSettingsDialog);
 
         public RelayCommand SetEmailAccountCommand =>
-            new RelayCommand(address =>
+            new RelayCommand(async address =>
             {
                 try
                 {
@@ -56,6 +70,9 @@ namespace CryptoMailClient.ViewModels
                         OnPropertyChanged(nameof(EmailAccounts));
 
                         UserManager.SaveCurrectUserInfo();
+
+                        await Mailbox.ResetImapConnection();
+                        await UpdateFolders();
                     }
                 }
                 catch (Exception ex)
@@ -63,6 +80,12 @@ namespace CryptoMailClient.ViewModels
                     OnMessageBoxDisplayRequest(Title, ex.Message);
                 }
             });
+
+        public RelayCommand CloseCommand => new RelayCommand(async o =>
+        {
+            await Mailbox.ResetImapConnection();
+            OnCloseRequested();
+        });
 
         private async void RunNewEmailDialog(object o)
         {
@@ -106,6 +129,69 @@ namespace CryptoMailClient.ViewModels
             }
 
             IsPopupClose = true;
+        }
+
+        public async Task UpdateFolders()
+        {
+            try
+            {
+                await Mailbox.LoadFolders();
+                if (Mailbox.MailFolders != null)
+                {
+                    int inboxIndex = -1;
+                    int sentIndex = -1;
+                    var folders = new ObservableCollection<FolderItem>();
+                    for (var i = 0; i < Mailbox.MailFolders.Count; i++)
+                    {
+                        var folder = Mailbox.MailFolders[i];
+                        if (folder.Name.ToLower() == "отправленные")
+                        {
+                            sentIndex = i;
+                        }
+
+                        if (folder.Name.ToLower() == "inbox")
+                        {
+                            folders.Add(
+                                new FolderItem("Входящие", folder.Count));
+                            inboxIndex = i;
+                        }
+                        else
+                        {
+                            folders.Add(new FolderItem(folder.Name,
+                                folder.Count));
+                        }
+                    }
+
+                    // Папки с входящими и отправленными письмами
+                    // в списке будут первыми.
+                    if (inboxIndex != -1)
+                    {
+                        folders.Move(inboxIndex, 0);
+                        // Если sentIndex был меньше, чем inboxIndex, значит
+                        // перемещение элемента по inboxIndex на первую
+                        // позицию, сдвинуло на одну позицию элемент с sentIndex.
+                        if (sentIndex < inboxIndex)
+                        {
+                            sentIndex++;
+                        }
+                    }
+
+                    if (sentIndex != -1)
+                    {
+                        folders.Move(sentIndex, 1);
+                    }
+
+                    Folders = folders;
+                }
+                else
+                {
+                    Folders = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                OnMessageBoxDisplayRequest(Title, ex.Message);
+            }
         }
 
         private void ClosingEventHandler(object sender,
