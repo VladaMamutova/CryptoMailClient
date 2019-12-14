@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CryptoMailClient.Models;
 using CryptoMailClient.Utilities;
@@ -9,6 +10,8 @@ namespace CryptoMailClient.ViewModels
 {
     class MainWindowViewModel : ViewModelBase
     {
+        public string Title => "Crypto Mail Client";
+
         public string CurrentUserLogin => UserManager.CurrentUser?.Login;
 
         public string CurrentEmailAddress =>
@@ -24,6 +27,7 @@ namespace CryptoMailClient.ViewModels
         public bool HasEmailAccounts => EmailAccounts.Count != 0;
 
         private bool _isPopupClose;
+
         public bool IsPopupClose
         {
             get => _isPopupClose;
@@ -43,12 +47,20 @@ namespace CryptoMailClient.ViewModels
         public RelayCommand SetEmailAccountCommand =>
             new RelayCommand(address =>
             {
-                bool result = UserManager.CurrentUser
-                    .SetCurrentEmailAccount((address ?? "").ToString());
-                if (result)
+                try
                 {
-                    OnPropertyChanged(nameof(CurrentEmailAddress));
-                    OnPropertyChanged(nameof(EmailAccounts));
+                    if (UserManager.CurrentUser
+                        .SetCurrentEmailAccount((address ?? "").ToString()))
+                    {
+                        OnPropertyChanged(nameof(CurrentEmailAddress));
+                        OnPropertyChanged(nameof(EmailAccounts));
+
+                        UserManager.SaveCurrectUserInfo();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    OnMessageBoxDisplayRequest(Title, ex.Message);
                 }
             });
 

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Net.Mail;
 using System.Net.Sockets;
+using System.Security.Cryptography;
+using System.Text;
 using MailKit;
 using MailKit.Net.Imap;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
@@ -12,8 +15,45 @@ namespace CryptoMailClient.Models
         private readonly string _password;
 
         public string Address { get; }
+        public string RsaPrivateKey { get; private set; }
+        public string RsaPublicKey { get; private set; }
         public MailProtocol Smtp { get; }
         public MailProtocol Imap { get; }
+
+        public static EmailAccount FromBytes(byte[] bytes)
+        {
+            EmailAccount emailAccount;
+            try
+            {
+                using (BinaryReader reader =
+                    new BinaryReader(new MemoryStream(bytes)))
+                {
+                    int addressLength = reader.ReadInt32();
+                    string address = Encoding.Unicode.GetString(
+                        reader.ReadBytes(addressLength));
+
+                    int passwordLength = reader.ReadInt32();
+                    string password = Encoding.Unicode.GetString(
+                        reader.ReadBytes(passwordLength));
+
+                    int rsaKeyInfoLength = reader.ReadInt32();
+                    string rsaKeyInfo = Encoding.Unicode.GetString(
+                        reader.ReadBytes(rsaKeyInfoLength));
+
+                    int smtpPort = reader.ReadInt32();
+                    int imapPort = reader.ReadInt32();
+
+                    emailAccount = new EmailAccount(address, password, smtpPort, imapPort);
+                    emailAccount.SetRsaFullKeyPair(rsaKeyInfo);
+                }
+            }
+            catch
+            {
+                emailAccount = null;
+            }
+
+            return emailAccount;
+        }
 
         public EmailAccount(string address, string password,
             int smtpPort = MailProtocol.DEFAULT_SMTP_PORT,
@@ -40,6 +80,10 @@ namespace CryptoMailClient.Models
 
             Imap = new MailProtocol(MailProtocols.IMAP, mailAddress.Host,
                 imapPort);
+
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+            RsaPrivateKey = rsa.ToXmlString(true);
+            RsaPublicKey = rsa.ToXmlString(false);
         }
 
         public void SetSmtpPort(int port)
@@ -52,20 +96,28 @@ namespace CryptoMailClient.Models
             Imap.SetPort(port);
         }
 
+        public void SetRsaFullKeyPair(string xmlKeyInfo)
+        {
+            var rsaKeyPair = new RSACryptoServiceProvider();
+            rsaKeyPair.FromXmlString(xmlKeyInfo);
+            RsaPublicKey = rsaKeyPair.ToXmlString(false);
+            RsaPrivateKey = xmlKeyInfo;
+        }
+
         public void Connect()
         {
             try
             {
                 using (var client = new SmtpClient())
                 {
-                    client.Connect(Smtp.Server, Smtp.Port, Smtp.UseSslTsl);
+                    client.Connect(Smtp.Server, Smtp.Port, Smtp.UseSsl);
                     client.Authenticate(Address, _password);
                     client.Disconnect(true);
                 }
 
                 using (var client = new ImapClient())
                 {
-                    client.Connect(Imap.Server, Imap.Port, Imap.UseSslTsl);
+                    client.Connect(Imap.Server, Imap.Port, Imap.UseSsl);
                     client.Authenticate(Address, _password);
                     client.Disconnect(true);
                 }
@@ -85,6 +137,30 @@ namespace CryptoMailClient.Models
             {
                 throw new Exception("Логин или пароль неверны.");
             }
+        }
+
+        public byte[] GetBytes()
+        {
+            MemoryStream stream = new MemoryStream();
+            using (BinaryWriter writer = new BinaryWriter(stream))
+            {
+                byte[] address = Encoding.Unicode.GetBytes(Address);
+                writer.Write(address.Length);
+                writer.Write(address);
+
+                byte[] password = Encoding.Unicode.GetBytes(_password);
+                writer.Write(password.Length);
+                writer.Write(password);
+
+                byte[] rsaPrivateKey = Encoding.Unicode.GetBytes(RsaPrivateKey);
+                writer.Write(rsaPrivateKey.Length);
+                writer.Write(rsaPrivateKey);
+
+                writer.Write(Smtp.Port);
+                writer.Write(Imap.Port);
+            }
+
+            return stream.ToArray();
         }
 
         public override bool Equals(object obj)

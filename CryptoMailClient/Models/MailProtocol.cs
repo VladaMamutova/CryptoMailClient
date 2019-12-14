@@ -21,8 +21,8 @@ namespace CryptoMailClient.Models
         private readonly MailProtocols _mailProtocol;
         public string Server { get; }
         public int Port { get; private set; }
-        public bool UseSslTsl { get; private set; }
-
+        public bool UseSsl { get; private set; }
+       
         public MailProtocol(MailProtocols mailProtocol, string domain, int port)
         {
             if (domain == null)
@@ -43,7 +43,7 @@ namespace CryptoMailClient.Models
             _mailProtocol = mailProtocol;
             Server = _mailProtocol.ToString().ToLower() + '.' + domain;
             Port = 0;
-            UseSslTsl = false;
+            UseSsl = false;
             SetPort(port);
         }
 
@@ -57,7 +57,7 @@ namespace CryptoMailClient.Models
                     if (SmtpConfig.ContainsKey(port))
                     {
                         Port = port;
-                        UseSslTsl = SmtpConfig[port];
+                        UseSsl = SmtpConfig[port];
                         result = true;
                     }
 
@@ -68,7 +68,7 @@ namespace CryptoMailClient.Models
                     if (ImapConfig.ContainsKey(port))
                     {
                         Port = port;
-                        UseSslTsl = ImapConfig[port];
+                        UseSsl = ImapConfig[port];
                         result = true;
                     }
 
@@ -83,7 +83,7 @@ namespace CryptoMailClient.Models
                     GetMessageAboutValidPorts(_mailProtocol));
             }
         }
-
+        
         public override bool Equals(object obj)
         {
             if (obj == null)
@@ -103,7 +103,7 @@ namespace CryptoMailClient.Models
 
             return Server == mailProtocol.Server &&
                    Port == mailProtocol.Port &&
-                   UseSslTsl == mailProtocol.UseSslTsl;
+                   UseSsl == mailProtocol.UseSsl;
         }
 
         public bool Equals(MailProtocol mailProtocol)
@@ -120,7 +120,7 @@ namespace CryptoMailClient.Models
 
             return Server == mailProtocol.Server &&
                    Port == mailProtocol.Port &&
-                   UseSslTsl == mailProtocol.UseSslTsl;
+                   UseSsl == mailProtocol.UseSsl;
         }
 
         public override int GetHashCode()
@@ -130,7 +130,7 @@ namespace CryptoMailClient.Models
 
         public override string ToString()
         {
-            return $"{_mailProtocol} - {Server}:{Port}, {UseSslTsl}";
+            return $"{_mailProtocol} - {Server}:{Port}, {UseSsl}";
         }
 
         public static string GetServerFromMailAddress(

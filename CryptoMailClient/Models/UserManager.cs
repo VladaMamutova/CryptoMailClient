@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace CryptoMailClient.Models
@@ -12,21 +12,17 @@ namespace CryptoMailClient.Models
 
         public static User CurrentUser { get; private set; }
 
-       
-
         private static string GetUserDirectory(string login)
         {
             return Path.Combine(USERS_DIRECTORY, login);
         }
-
-      
 
         private static string GetUserInfoFile(string login)
         {
             return Path.Combine(USERS_DIRECTORY, login, USER_INFO_FILE);
         }
 
-        private static bool IsUniqueLogin(string login)
+        private static bool HasUserInfoFile(string login)
         {
             if (!Directory.Exists(USERS_DIRECTORY))
             {
@@ -34,28 +30,22 @@ namespace CryptoMailClient.Models
                 return false;
             }
 
-            string[] directories = Directory.GetDirectories(USERS_DIRECTORY);
-            return !directories.Contains(GetUserDirectory(login));
+            return File.Exists(GetUserInfoFile(login));
         }
 
         public static bool SignIn(string login, string password)
         {
-            if (IsUniqueLogin(login))
+            if (!HasUserInfoFile(login))
             {
                 return false;
             }
 
             string userFile = GetUserInfoFile(login);
-            if (!File.Exists(userFile))
-            {
-                return false;
-            }
 
-            User user = new User(login, password);
-            string passwordHash = File.ReadAllText(userFile, Encoding.Unicode);
-            if (user.PasswordHash == passwordHash)
+
+            if (ComputeHash(password) == User.GetPasswordHashFromFile(userFile))
             {
-                CurrentUser = user;
+                CurrentUser = User.FromBytes(File.ReadAllBytes(userFile));
                 return true;
             }
 
@@ -64,17 +54,37 @@ namespace CryptoMailClient.Models
 
         public static bool SignUp(string login, string password)
         {
-            if (!IsUniqueLogin(login))
+            if (HasUserInfoFile(login))
             {
                 return false;
             }
 
-            User user = new User(login, password);
+            User user = new User(login, ComputeHash(password));
             Directory.CreateDirectory(GetUserDirectory(login));
-            File.WriteAllText(GetUserInfoFile(login), user.PasswordHash,
-                Encoding.Unicode);
+
+            //todo: encrypt info
+            File.WriteAllBytes(GetUserInfoFile(user.Login),
+                user.GetBytes());
 
             return true;
+        }
+
+        public static void SaveCurrectUserInfo()
+        {
+            //todo: encrypt info
+            File.WriteAllBytes(GetUserInfoFile(CurrentUser.Login),
+                CurrentUser.GetBytes());
+        }
+
+        private static string ComputeHash(string data)
+        {
+            byte[] hash;
+            using (MD5 md5 = MD5.Create())
+            {
+                hash = md5.ComputeHash(Encoding.Unicode.GetBytes(data));
+            }
+
+            return BitConverter.ToString(hash);
         }
     }
 }

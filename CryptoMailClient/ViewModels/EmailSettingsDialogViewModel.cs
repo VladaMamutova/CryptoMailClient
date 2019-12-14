@@ -107,6 +107,8 @@ namespace CryptoMailClient.ViewModels
                 {
                     throw new Exception("Данный почтовый ящик уже добавлен.");
                 }
+
+                UserManager.SaveCurrectUserInfo();
                 DialogHost.CloseDialogCommand.Execute(true, null);
             }
             catch (Exception ex)
@@ -130,6 +132,7 @@ namespace CryptoMailClient.ViewModels
                 await Task.Run(() =>
                     UserManager.CurrentUser.CurrentEmailAccount.Connect());
 
+                UserManager.SaveCurrectUserInfo();
                 DialogHost.CloseDialogCommand.Execute(true, null);
             }
             catch (Exception ex)
@@ -141,6 +144,7 @@ namespace CryptoMailClient.ViewModels
         public RelayCommand DeleteCommand => new RelayCommand(o =>
         {
             UserManager.CurrentUser.RemoveEmailAccount(Address);
+            UserManager.SaveCurrectUserInfo();
             DialogHost.CloseDialogCommand.Execute(true, null);
         });
 

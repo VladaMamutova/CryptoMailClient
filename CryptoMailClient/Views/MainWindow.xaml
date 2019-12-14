@@ -29,7 +29,7 @@
                     <ColumnDefinition Width="20"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Crypto Mail Client" FontWeight="Medium" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="22"/>
+                <TextBlock Grid.Column="0" Text="{Binding Title}" FontWeight="Medium" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="22"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Cursor="Hand" Background="Transparent" Visibility="{Binding CurrentUserLogin, Converter={StaticResource NullableToVisibilityConverter}}">
                     <materialDesign:PackIcon Kind="User" Foreground="{StaticResource MaterialDesignDarkForeground}" Width="20" Height="20"/>
                     <TextBlock Text="{Binding CurrentUserLogin}" VerticalAlignment="Center" Padding="10 0 0 0" FontSize="14" Foreground="{StaticResource MaterialDesignDarkForeground}"></TextBlock>

@@ -12,6 +12,7 @@ namespace CryptoMailClient.ViewModels
         #region Properties
 
         private string _login;
+
         public string Login
         {
             get => _login;
@@ -24,6 +25,7 @@ namespace CryptoMailClient.ViewModels
         }
 
         private bool _isRegistration;
+
         public bool IsRegistration
         {
             get => _isRegistration;
@@ -40,12 +42,15 @@ namespace CryptoMailClient.ViewModels
         public string Title => _isRegistration ? "Регистрация" : "Вход";
 
         public string CommandName =>
-            _isRegistration ? "Зарегистрироваться".ToUpper() : "Войти".ToUpper();
+            _isRegistration
+                ? "Зарегистрироваться".ToUpper()
+                : "Войти".ToUpper();
 
         public string AlternateCommandName =>
             _isRegistration ? "Отмена".ToUpper() : "Создать аккаунт".ToUpper();
 
         private SecureString _securePassword;
+
         public void SetPassword(SecureString securePassword)
         {
             _securePassword = securePassword.Copy();
@@ -54,6 +59,7 @@ namespace CryptoMailClient.ViewModels
         }
 
         private SecureString _securePasswordConfirmation;
+
         public void SetPasswordConfirmation(SecureString securePassword)
         {
             _securePasswordConfirmation = securePassword.Copy();
@@ -64,6 +70,7 @@ namespace CryptoMailClient.ViewModels
         private bool _loginValidation;
 
         private bool _passwordValidation;
+
         public bool PasswordValidation
         {
             get => _passwordValidation;
@@ -137,39 +144,39 @@ namespace CryptoMailClient.ViewModels
                     switch (propertyName)
                     {
                         case nameof(Login):
+                        {
+                            if (_loginValidation)
                             {
-                                if (_loginValidation)
-                                {
-                                    Error = GetLoginValidError(Login);
-                                }
-
-                                break;
+                                Error = GetLoginValidError(Login);
                             }
+
+                            break;
+                        }
                         case nameof(PasswordValidation):
+                        {
+                            if (PasswordValidation)
                             {
-                                if (PasswordValidation)
-                                {
-                                    Error = GetPasswordValidError(_securePassword);
-                                }
-
-                                break;
+                                Error = GetPasswordValidError(_securePassword);
                             }
+
+                            break;
+                        }
                         case nameof(ConfirmPasswordValidation):
+                        {
+                            if (ConfirmPasswordValidation)
                             {
-                                if (ConfirmPasswordValidation)
-                                {
-                                    Error = GetPasswordComparisonError(
-                                        _securePassword,
-                                        _securePasswordConfirmation);
-                                }
+                                Error = GetPasswordComparisonError(
+                                    _securePassword,
+                                    _securePasswordConfirmation);
+                            }
 
-                                break;
-                            }
+                            break;
+                        }
                         default:
-                            {
-                                Error = string.Empty;
-                                break;
-                            }
+                        {
+                            Error = string.Empty;
+                            break;
+                        }
                     }
                 }
 
@@ -197,18 +204,26 @@ namespace CryptoMailClient.ViewModels
 
         private void SignIn()
         {
-            if (UserManager.SignIn(Login,
-                SecureStringHelper.SecureStringToString(_securePassword)))
+            try
             {
-                _securePassword.Dispose();
-                _securePasswordConfirmation.Dispose();
-                OnCloseRequested();
+                if (UserManager.SignIn(Login,
+                    SecureStringHelper.SecureStringToString(_securePassword)))
+                {
+                    _securePassword.Dispose();
+                    _securePasswordConfirmation.Dispose();
+                    OnCloseRequested();
+                }
+                else
+                {
+                    OnMessageBoxDisplayRequest(Title,
+                        "Пользователь с данным логином" +
+                        " и паролем не зарегистрирован.");
+                }
             }
-            else
+            catch (Exception ex)
             {
                 OnMessageBoxDisplayRequest(Title,
-                    "Пользователь с данным логином" +
-                    " и паролем не зарегистрирован.");
+                    ex.Message);
             }
         }
 
@@ -216,18 +231,26 @@ namespace CryptoMailClient.ViewModels
         {
             if (IsUserDataValid())
             {
-                if (UserManager.SignUp(Login,
-                    SecureStringHelper.SecureStringToString(_securePassword))
-                )
+                try
                 {
-                    OnMessageBoxDisplayRequest(Title,
-                        "Вы успешно зарегистрированы.");
-                    AlternateCommand.Execute(null);
+                    if (UserManager.SignUp(Login,
+                        SecureStringHelper
+                            .SecureStringToString(_securePassword))
+                    )
+                    {
+                        OnMessageBoxDisplayRequest(Title,
+                            "Вы успешно зарегистрированы.");
+                        AlternateCommand.Execute(null);
+                    }
+                    else
+                    {
+                        OnMessageBoxDisplayRequest(Title,
+                            "Пользователь с данным логином уже зарегистрирован.");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    OnMessageBoxDisplayRequest(Title,
-                        "Пользователь с данным логином уже зарегистрирован.");
+                    OnMessageBoxDisplayRequest(Title, ex.Message);
                 }
             }
         }
