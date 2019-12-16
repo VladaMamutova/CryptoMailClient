@@ -82,6 +82,7 @@
     <Compile Include="Models\UserManager.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="ViewModels\FolderItem.cs" />
+    <Compile Include="ViewModels\MessageItem.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\EmailAccount.cs" />

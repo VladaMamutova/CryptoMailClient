@@ -48,16 +48,16 @@
                     <StackPanel>
                         <Button Content="Настройки" Command="{Binding RunEmailSettingsDialogCommand}"/>
                         <Separator Visibility="{Binding HasEmailAccounts, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                        <ListBox Name="EmailAccountListBox" ItemsSource="{Binding EmailAccounts}"  HorizontalContentAlignment="Stretch">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding}" HorizontalAlignment="Stretch">
-                                        <TextBlock.InputBindings>
-                                            <MouseBinding Command="{Binding Path=DataContext.SetEmailAccountCommand, RelativeSource={RelativeSource AncestorType=Window}}"  MouseAction="LeftClick" CommandParameter="{Binding}"/>
-                                        </TextBlock.InputBindings>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
+                        <ListBox Name="EmailAccountListBox" ItemsSource="{Binding EmailAccounts}" HorizontalContentAlignment="Stretch" Focusable="False" Cursor="Hand">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" HorizontalAlignment="Stretch">
+                                    <TextBlock.InputBindings>
+                                        <MouseBinding Command="{Binding Path=DataContext.SetEmailAccountCommand, RelativeSource={RelativeSource AncestorType=Window}}"  MouseAction="LeftClick" CommandParameter="{Binding}"/>
+                                    </TextBlock.InputBindings>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
                         </ListBox>
                         <Separator/>
                         <Button Content="Добавить почтовый ящик" Command="{Binding RunNewEmailDialogCommand}"/>
@@ -77,19 +77,17 @@
             <Grid Margin="15">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="0.3*"/>
-                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="15"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel>
-                    <Button Content="Написать" Margin="0 0 0 10"/>
-                    <ListBox ItemsSource="{Binding Folders}">
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Vertical" />
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
+                    <Button Content="Написать" Margin="0 0 0 15"/>
+                    <ListBox ItemsSource="{Binding Folders}"
+                             SelectedItem="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                             Cursor="Hand">
                         <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem">
+                            <Style TargetType="{x:Type ListBoxItem}"
+                                   BasedOn="{StaticResource MaterialDesignListBoxItem}">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                             </Style>
                         </ListBox.ItemContainerStyle>
@@ -110,12 +108,49 @@
                 <Grid Grid.Column="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <ListView Grid.Row="2">
-
-                    </ListView>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding Messages}" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}"
+                                   BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Focusable" Value="False" />
+                                <Setter Property="Cursor" Value="Hand" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border x:Name="Border" Padding="8" BorderThickness="0 0 0 1"
+                                    BorderBrush="{DynamicResource MaterialDesignDivider}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ToggleButton
+                                            VerticalAlignment="Center"
+                                            IsChecked="{Binding IsSelected}"
+                                            Style="{StaticResource MaterialDesignActionLightToggleButton}"
+                                            Content="{Binding Code}" />
+                                        <StackPanel Margin="8 0 0 0" Grid.Column="1">
+                                            <TextBlock FontWeight="Bold" Text="{Binding From}" />
+                                            <TextBlock Text="{Binding Subject}" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding Date}" />
+                                    </Grid>
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                        <Setter TargetName="Border" Property="Background"
+                                            Value="{DynamicResource MaterialDesignSelection}" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </Grid>
             </Grid>
         </materialDesign:DialogHost>

@@ -7,6 +7,7 @@ using CryptoMailClient.Models;
 using CryptoMailClient.Utilities;
 using CryptoMailClient.Views;
 using MaterialDesignThemes.Wpf;
+using MimeKit;
 
 namespace CryptoMailClient.ViewModels
 {
@@ -52,6 +53,30 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
+        private FolderItem _selectedFolder;
+
+        public FolderItem SelectedFolder
+        {
+            get => _selectedFolder;
+            set
+            {
+                _selectedFolder = value;
+                OnPropertyChanged(nameof(SelectedFolder));
+            }
+        }
+
+        private ObservableCollection<MessageItem> _messages;
+
+        public ObservableCollection<MessageItem> Messages
+        {
+            get => _messages;
+            set
+            {
+                _messages = value;
+                OnPropertyChanged(nameof(Messages));
+            }
+        }
+
         public RelayCommand RunNewEmailDialogCommand =>
             new RelayCommand(RunNewEmailDialog);
 
@@ -73,6 +98,7 @@ namespace CryptoMailClient.ViewModels
 
                         await Mailbox.ResetImapConnection();
                         await UpdateFolders();
+                        await LoadMessages();
                     }
                 }
                 catch (Exception ex)
@@ -136,14 +162,14 @@ namespace CryptoMailClient.ViewModels
             try
             {
                 await Mailbox.LoadFolders();
-                if (Mailbox.MailFolders != null)
+                if (Mailbox.Folders != null)
                 {
                     int inboxIndex = -1;
                     int sentIndex = -1;
                     var folders = new ObservableCollection<FolderItem>();
-                    for (var i = 0; i < Mailbox.MailFolders.Count; i++)
+                    for (var i = 0; i < Mailbox.Folders.Count; i++)
                     {
-                        var folder = Mailbox.MailFolders[i];
+                        var folder = Mailbox.Folders[i];
                         if (folder.Name.ToLower() == "отправленные")
                         {
                             sentIndex = i;
@@ -182,6 +208,44 @@ namespace CryptoMailClient.ViewModels
                     }
 
                     Folders = folders;
+
+                    SelectedFolder = Folders.Count > 0 ? Folders[0] : null;
+                    if (SelectedFolder != null)
+                    {
+                        Mailbox.OpenFolder(
+                            SelectedFolder.Name.ToLower() == "входящие"
+                                ? "inbox"
+                                : SelectedFolder.Name);
+                    }
+                }
+                else
+                {
+                    Folders = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                OnMessageBoxDisplayRequest(Title, ex.Message);
+            }
+        }
+
+
+        public async Task LoadMessages()
+        {
+            try
+            {
+                Messages.Clear();
+                await Mailbox.LoadMessages();
+                if (Mailbox.CurrentMessages != null)
+                {
+                    var messages = new ObservableCollection<MessageItem>();
+                    foreach (var message in Mailbox.CurrentMessages)
+                    {
+                        messages.Add(new MessageItem(message.From.First(),
+                            message.Subject, message.Date));
+                    }
+
+                    Messages = messages;
                 }
                 else
                 {
@@ -215,6 +279,8 @@ namespace CryptoMailClient.ViewModels
         public MainWindowViewModel()
         {
             _isPopupClose = true;
+            Messages = new ObservableCollection<MessageItem>();
+            Folders = new ObservableCollection<FolderItem>();
         }
     }
 }
