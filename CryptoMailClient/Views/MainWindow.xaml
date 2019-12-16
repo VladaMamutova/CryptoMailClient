@@ -76,7 +76,7 @@
         <materialDesign:DialogHost Identifier="RootDialog" Grid.Row="1">
             <Grid Margin="15">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.3*"/>
+                    <ColumnDefinition Width="0.3*" MinWidth="200"/>
                     <ColumnDefinition Width="15"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
@@ -108,9 +108,23 @@
                 <Grid Grid.Column="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10px"/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <ListBox Grid.Row="1" ItemsSource="{Binding Messages}" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock Text="{Binding MessageRangeText}" FontSize="14" VerticalAlignment="Center" Margin="10 0"></TextBlock>
+                        <Button Width="35" Height="35" Margin="10 0"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                                Command="{Binding GetPreviousMessagesCommand}">
+                            <materialDesign:PackIcon Width="20" Height="20" Kind="ChevronLeft"/>
+                        </Button>
+                        <Button Width="35" Height="35"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                                Command="{Binding GetNextMessagesCommand}">
+                            <materialDesign:PackIcon Width="20" Height="20" Kind="ChevronRight"/>
+                        </Button>
+                    </StackPanel>
+                    <ListBox Grid.Row="2" ItemsSource="{Binding Messages}" ScrollViewer.VerticalScrollBarVisibility="Auto">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="{x:Type ListBoxItem}"
                                    BasedOn="{StaticResource MaterialDesignListBoxItem}">

@@ -50,8 +50,8 @@ namespace CryptoMailClient.ViewModels
         {
             if (from != null)
             {
-                From = from.Name;
-                Code = From.Length > 0 ? From[0] : ' ';
+                From = from.Name?.Length > 0 ? from.Name : from.ToString();
+                Code = From.Length > 0 ? From.ToUpper()[0] : ' ';
             }
 
             Subject = subject;

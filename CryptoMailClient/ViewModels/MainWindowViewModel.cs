@@ -7,7 +7,6 @@ using CryptoMailClient.Models;
 using CryptoMailClient.Utilities;
 using CryptoMailClient.Views;
 using MaterialDesignThemes.Wpf;
-using MimeKit;
 
 namespace CryptoMailClient.ViewModels
 {
@@ -28,6 +27,8 @@ namespace CryptoMailClient.ViewModels
                 .Where(e => e.Address != CurrentEmailAddress).ToList();
 
         public bool HasEmailAccounts => EmailAccounts.Count != 0;
+
+        public string MessageRangeText => Mailbox.GetMessageRange();
 
         private bool _isPopupClose;
 
@@ -84,34 +85,71 @@ namespace CryptoMailClient.ViewModels
             new RelayCommand(RunEmailSettingsDialog);
 
         public RelayCommand SetEmailAccountCommand =>
-            new RelayCommand(async address =>
+            new RelayCommand(SetEmailAccount);
+
+        public RelayCommand GetNextMessagesCommand =>
+            new RelayCommand(async o =>
+            {
+                if (Mailbox.SetNextMessageRange())
+                {
+                    try
+                    {
+                        await LoadMessages();
+                        OnPropertyChanged(nameof(MessageRangeText));
+                    }
+                    catch (Exception ex)
+                    {
+                        OnMessageBoxDisplayRequest(Title, ex.Message);
+                    }
+                }
+            });
+
+        public RelayCommand GetPreviousMessagesCommand =>
+        new RelayCommand(async o =>
+        {
+            if (Mailbox.SetPreviousMessageRange())
             {
                 try
                 {
-                    if (UserManager.CurrentUser
-                        .SetCurrentEmailAccount((address ?? "").ToString()))
-                    {
-                        OnPropertyChanged(nameof(CurrentEmailAddress));
-                        OnPropertyChanged(nameof(EmailAccounts));
-
-                        UserManager.SaveCurrectUserInfo();
-
-                        await Mailbox.ResetImapConnection();
-                        await UpdateFolders();
-                        await LoadMessages();
-                    }
+                    await LoadMessages();
+                    OnPropertyChanged(nameof(MessageRangeText));
                 }
                 catch (Exception ex)
                 {
                     OnMessageBoxDisplayRequest(Title, ex.Message);
                 }
-            });
+            }
+        });
 
         public RelayCommand CloseCommand => new RelayCommand(async o =>
         {
             await Mailbox.ResetImapConnection();
             OnCloseRequested();
         });
+
+        private async void SetEmailAccount(object address)
+        {
+            try
+            {
+                if (UserManager.CurrentUser.SetCurrentEmailAccount((address ?? "").ToString()))
+                {
+                    OnPropertyChanged(nameof(CurrentEmailAddress));
+                    OnPropertyChanged(nameof(EmailAccounts));
+
+                    UserManager.SaveCurrectUserInfo();
+
+                    await Mailbox.ResetImapConnection();
+                    await UpdateFolders();
+                    await LoadMessages();
+
+                    OnPropertyChanged(nameof(MessageRangeText));
+                }
+            }
+            catch (Exception ex)
+            {
+                OnMessageBoxDisplayRequest(Title, ex.Message);
+            }
+        }
 
         private async void RunNewEmailDialog(object o)
         {
@@ -234,7 +272,6 @@ namespace CryptoMailClient.ViewModels
         {
             try
             {
-                Messages.Clear();
                 await Mailbox.LoadMessages();
                 if (Mailbox.CurrentMessages != null)
                 {
@@ -279,8 +316,6 @@ namespace CryptoMailClient.ViewModels
         public MainWindowViewModel()
         {
             _isPopupClose = true;
-            Messages = new ObservableCollection<MessageItem>();
-            Folders = new ObservableCollection<FolderItem>();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MailKit;
@@ -36,6 +37,8 @@ namespace CryptoMailClient.Models
         {
             Folders = new List<IMailFolder>();
             CurrentMessages = new List<MimeMessage>();
+            _startMessage = 0;
+            CurrentCount = 0;
         }
 
         public static async Task<bool> CheckImapConnection()
@@ -102,12 +105,15 @@ namespace CryptoMailClient.Models
             {
                 CurrentFolder.Open(FolderAccess.ReadOnly);
 
+                CurrentCount = 0;
                 for (int i = CurrentFolder.Count - StartMessage;
-                    i > CurrentFolder.Count - StartMessage - CurrentCount &&
+                    i > CurrentFolder.Count - StartMessage -
+                    DEFAULT_CURRENT_MESSAGES_COUNT &&
                     i > 0;
                     i--)
                 {
                     CurrentMessages.Add(CurrentFolder.GetMessage(i));
+                    CurrentCount++;
                 }
             }
         }
@@ -116,7 +122,35 @@ namespace CryptoMailClient.Models
         {
             CurrentFolder = Folders.First(f => f.Name.ToLower() == name);
             StartMessage = 1;
-            CurrentCount = DEFAULT_CURRENT_MESSAGES_COUNT;
+        }
+
+        public static bool SetNextMessageRange()
+        {
+            if (StartMessage == CurrentFolder?.Count) return false;
+            StartMessage += DEFAULT_CURRENT_MESSAGES_COUNT;
+            return true;
+        }
+
+        public static bool SetPreviousMessageRange()
+        {
+            if (StartMessage == 1) return false;
+            StartMessage -= DEFAULT_CURRENT_MESSAGES_COUNT;
+            return true;
+        }
+
+        public static string GetMessageRange()
+        {
+            string result = _startMessage.ToString();
+            if (_startMessage != CurrentCount)
+            {
+                result += " - " + (_startMessage + CurrentCount - 1);
+            }
+
+            result += " из " + (CurrentFolder?.Count > 0
+                          ? CurrentFolder.Count.ToString("N0")
+                          : 0.ToString());
+
+            return result;
         }
     }
 }
