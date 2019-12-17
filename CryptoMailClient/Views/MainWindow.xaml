@@ -49,15 +49,21 @@
                         <Button Content="Настройки" Command="{Binding RunEmailSettingsDialogCommand}"/>
                         <Separator Visibility="{Binding HasEmailAccounts, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         <ListBox Name="EmailAccountListBox" ItemsSource="{Binding EmailAccounts}" HorizontalContentAlignment="Stretch" Focusable="False" Cursor="Hand">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding}" HorizontalAlignment="Stretch">
-                                    <TextBlock.InputBindings>
-                                        <MouseBinding Command="{Binding Path=DataContext.SetEmailAccountCommand, RelativeSource={RelativeSource AncestorType=Window}}"  MouseAction="LeftClick" CommandParameter="{Binding}"/>
-                                    </TextBlock.InputBindings>
-                                </TextBlock>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListBoxItem}"
+                                       BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                                    <Setter Property="Padding" Value="0" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Padding="14 6 14 6" Text="{Binding}" HorizontalAlignment="Stretch">
+                                        <TextBlock.InputBindings>
+                                            <MouseBinding Command="{Binding Path=DataContext.SetEmailAccountCommand, RelativeSource={RelativeSource AncestorType=Window}}" MouseAction="LeftClick" CommandParameter="{Binding}"/>
+                                        </TextBlock.InputBindings>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
                         </ListBox>
                         <Separator/>
                         <Button Content="Добавить почтовый ящик" Command="{Binding RunNewEmailDialogCommand}"/>
@@ -83,23 +89,29 @@
                 <StackPanel>
                     <Button Content="Написать" Margin="0 0 0 15"/>
                     <ListBox ItemsSource="{Binding Folders}"
-                             SelectedItem="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                             SelectedItem="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                              Cursor="Hand">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="{x:Type ListBoxItem}"
                                    BasedOn="{StaticResource MaterialDesignListBoxItem}">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="0" />
                             </Style>
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
-                            <DataTemplate >
+                            <DataTemplate>
                                 <Grid>
-                                    <Grid.ColumnDefinitions>
+                                <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="{Binding Name}"></TextBlock>
-                                    <TextBlock Grid.Column="1" Text="{Binding Count}"></TextBlock>
+                                    <Grid.InputBindings>
+                                        <MouseBinding Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}},
+                                  Path=DataContext.SelectFolderCommand}" CommandParameter="{Binding Name}" MouseAction="LeftClick"/>
+                                    </Grid.InputBindings>
+                                    <TextBlock Grid.Column="0" Padding="14 6 0 6" Text="{Binding Name}"></TextBlock>
+                                    <TextBlock Grid.Column="1" Padding="0 6 14 6" Text="{Binding Count}"></TextBlock>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

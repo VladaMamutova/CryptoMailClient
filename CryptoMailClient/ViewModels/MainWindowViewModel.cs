@@ -54,17 +54,7 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
-        private FolderItem _selectedFolder;
-
-        public FolderItem SelectedFolder
-        {
-            get => _selectedFolder;
-            set
-            {
-                _selectedFolder = value;
-                OnPropertyChanged(nameof(SelectedFolder));
-            }
-        }
+        public FolderItem SelectedFolder { get; private set; }
 
         private ObservableCollection<MessageItem> _messages;
 
@@ -121,11 +111,35 @@ namespace CryptoMailClient.ViewModels
             }
         });
 
+        public RelayCommand SelectFolderCommand => new RelayCommand(SelectFolder);
+
         public RelayCommand CloseCommand => new RelayCommand(async o =>
         {
             await Mailbox.ResetImapConnection();
             OnCloseRequested();
         });
+
+        private async void SelectFolder(object o)
+        {
+            try
+            {
+                if(o is string folderName)
+                    if (Mailbox.OpenFolder(folderName.ToLower() == "входящие"
+                        ? "inbox"
+                        : folderName))
+                    {
+                        await LoadMessages();
+                        OnPropertyChanged(nameof(MessageRangeText));
+                        SelectedFolder = Folders.First(f =>
+                            f.Name == folderName);
+                        OnPropertyChanged(nameof(SelectedFolder));
+                    }
+            }
+            catch (Exception ex)
+            {
+                OnMessageBoxDisplayRequest(Title, ex.Message);
+            }
+        }
 
         private async void SetEmailAccount(object address)
         {
@@ -140,7 +154,7 @@ namespace CryptoMailClient.ViewModels
 
                     await Mailbox.ResetImapConnection();
                     await UpdateFolders();
-                    await LoadMessages();
+                    SelectFolder(SelectedFolder?.Name);
 
                     OnPropertyChanged(nameof(MessageRangeText));
                 }
@@ -248,13 +262,6 @@ namespace CryptoMailClient.ViewModels
                     Folders = folders;
 
                     SelectedFolder = Folders.Count > 0 ? Folders[0] : null;
-                    if (SelectedFolder != null)
-                    {
-                        Mailbox.OpenFolder(
-                            SelectedFolder.Name.ToLower() == "входящие"
-                                ? "inbox"
-                                : SelectedFolder.Name);
-                    }
                 }
                 else
                 {
@@ -286,7 +293,7 @@ namespace CryptoMailClient.ViewModels
                 }
                 else
                 {
-                    Folders = null;
+                    Messages = null;
                 }
             }
             catch (Exception ex)

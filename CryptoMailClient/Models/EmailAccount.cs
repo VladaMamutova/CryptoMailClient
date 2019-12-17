@@ -126,10 +126,14 @@ namespace CryptoMailClient.Models
             catch (SocketException ex)
             {
                 string message = "Невозможно установить соединение " +
-                                 "с почтовым сервером.";
+                                 "с почтовым сервером. ";
                 if (ex.ErrorCode == 11001)
                 {
-                    message += "\nПроверьте подключение к интернету.";
+                    message += "Проверьте подключение к интернету.";
+                }
+                else
+                {
+                    message += ex.Message;
                 }
 
                 throw new Exception(message);
@@ -149,9 +153,23 @@ namespace CryptoMailClient.Models
                 await client.AuthenticateAsync(Address, _password);
                 return client;
             }
+            catch (SocketException ex)
+            {
+                string message = "Соединение с почтовым сервером не установлено. ";
+                if (ex.ErrorCode == 11001)
+                {
+                    message += "Проверьте подключение к интернету.";
+                }
+                else
+                {
+                    message += ex.Message;
+                }
+
+                throw new Exception(message);
+            }
             catch
             {
-                return null;
+                throw new Exception("Логин или пароль неверны.");
             }
         }
 

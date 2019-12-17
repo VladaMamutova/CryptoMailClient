@@ -18,16 +18,16 @@ namespace CryptoMailClient.Models
         public static IMailFolder CurrentFolder { get; private set; }
         public static List<MimeMessage> CurrentMessages { get; }
 
-        private static int _startMessage;
+        private static int _firstMessage;
 
-        public static int StartMessage
+        public static int FirstMessage
         {
-            get => _startMessage;
+            get => _firstMessage;
             set
             {
-                if (value < 1) value = 1;
                 if (value > CurrentFolder?.Count) value = CurrentFolder.Count;
-                _startMessage = value;
+                if (value < 1) value = 1;
+                _firstMessage = value;
             }
         }
 
@@ -37,7 +37,7 @@ namespace CryptoMailClient.Models
         {
             Folders = new List<IMailFolder>();
             CurrentMessages = new List<MimeMessage>();
-            _startMessage = 0;
+            _firstMessage = 0;
             CurrentCount = 0;
         }
 
@@ -56,8 +56,16 @@ namespace CryptoMailClient.Models
             {
                 if (UserManager.CurrentUser.CurrentEmailAccount != null)
                 {
-                    _imapClient = await UserManager.CurrentUser
-                        .CurrentEmailAccount.GetImapClient();
+                    try
+                    {
+                        _imapClient = await UserManager.CurrentUser
+                            .CurrentEmailAccount.GetImapClient();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Невозможно подключиться к " +
+                                            "почтовому ящику.\n" + ex.Message);
+                    }
                 }
             }
 
@@ -85,7 +93,7 @@ namespace CryptoMailClient.Models
             {
                 IList<IMailFolder> folders = await _imapClient.GetFoldersAsync(
                     _imapClient.PersonalNamespaces[0]);
-                
+
                 foreach (var folder in folders)
                 {
                     if (folder.FullName != "[Gmail]")
@@ -105,45 +113,57 @@ namespace CryptoMailClient.Models
             {
                 CurrentFolder.Open(FolderAccess.ReadOnly);
 
-                CurrentCount = 0;
-                for (int i = CurrentFolder.Count - StartMessage;
-                    i > CurrentFolder.Count - StartMessage -
-                    DEFAULT_CURRENT_MESSAGES_COUNT &&
-                    i > 0;
+                CurrentCount = Math.Min(DEFAULT_CURRENT_MESSAGES_COUNT,
+                    CurrentFolder.Count - FirstMessage + 1);
+                for (int i = CurrentFolder.Count - FirstMessage;
+                    i > CurrentFolder.Count - FirstMessage - CurrentCount &&
+                    i > -1;
                     i--)
                 {
                     CurrentMessages.Add(CurrentFolder.GetMessage(i));
-                    CurrentCount++;
                 }
             }
         }
 
-        public static void OpenFolder(string name)
+        public static bool OpenFolder(string name)
         {
-            CurrentFolder = Folders.First(f => f.Name.ToLower() == name);
-            StartMessage = 1;
+            try
+            {
+                if (CurrentFolder?.Name == name) return false;
+
+                CurrentFolder = Folders.First(f => string.Equals(f.Name, name,
+                    StringComparison.CurrentCultureIgnoreCase));
+                FirstMessage = 1;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public static bool SetNextMessageRange()
         {
-            if (StartMessage == CurrentFolder?.Count) return false;
-            StartMessage += DEFAULT_CURRENT_MESSAGES_COUNT;
+            if (FirstMessage == CurrentFolder?.Count) return false;
+            FirstMessage += DEFAULT_CURRENT_MESSAGES_COUNT;
             return true;
         }
 
         public static bool SetPreviousMessageRange()
         {
-            if (StartMessage == 1) return false;
-            StartMessage -= DEFAULT_CURRENT_MESSAGES_COUNT;
+            if (FirstMessage == 1) return false;
+            FirstMessage -= DEFAULT_CURRENT_MESSAGES_COUNT;
             return true;
         }
 
         public static string GetMessageRange()
         {
-            string result = _startMessage.ToString();
-            if (_startMessage != CurrentCount)
+            string result = CurrentFolder?.Count > 0
+                ? _firstMessage.ToString()
+                : 0.ToString();
+            if (CurrentCount > 0)
             {
-                result += " - " + (_startMessage + CurrentCount - 1);
+                result += " - " + (_firstMessage + CurrentCount - 1);
             }
 
             result += " из " + (CurrentFolder?.Count > 0
