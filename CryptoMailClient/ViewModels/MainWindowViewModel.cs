@@ -74,11 +74,11 @@ namespace CryptoMailClient.ViewModels
         public RelayCommand RunEmailSettingsDialogCommand =>
             new RelayCommand(RunEmailSettingsDialog);
 
-        public RelayCommand SetEmailAccountCommand =>
-            new RelayCommand(SetEmailAccount);
+        public RelayAsyncCommand SetEmailAccountCommand =>
+            new RelayAsyncCommand(SetEmailAccount);
 
-        public RelayCommand GetNextMessagesCommand =>
-            new RelayCommand(async o =>
+        public RelayAsyncCommand GetNextMessagesCommand =>
+            new RelayAsyncCommand(async o =>
             {
                 if (Mailbox.SetNextMessageRange())
                 {
@@ -94,8 +94,8 @@ namespace CryptoMailClient.ViewModels
                 }
             });
 
-        public RelayCommand GetPreviousMessagesCommand =>
-        new RelayCommand(async o =>
+        public RelayAsyncCommand GetPreviousMessagesCommand =>
+        new RelayAsyncCommand(async o =>
         {
             if (Mailbox.SetPreviousMessageRange())
             {
@@ -111,7 +111,8 @@ namespace CryptoMailClient.ViewModels
             }
         });
 
-        public RelayCommand SelectFolderCommand => new RelayCommand(SelectFolder);
+        public RelayAsyncCommand SelectFolderCommand =>
+            new RelayAsyncCommand(SelectFolder);
 
         public RelayCommand CloseCommand => new RelayCommand(async o =>
         {
@@ -119,7 +120,7 @@ namespace CryptoMailClient.ViewModels
             OnCloseRequested();
         });
 
-        private async void SelectFolder(object o)
+        public async void SelectFolder(object o)
         {
             try
             {

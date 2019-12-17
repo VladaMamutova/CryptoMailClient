@@ -15,7 +15,7 @@ namespace CryptoMailClient.Views
             InitializeComponent();
         }
 
-        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             // Подключаем модель представления в событии первой загрузки окна,
             // а не в конструкторе, для того, чтобы подключились привязки
@@ -28,6 +28,10 @@ namespace CryptoMailClient.Views
             };
             viewModel.CloseRequested += Close;
             DataContext = viewModel;
+
+            await ((MainWindowViewModel)DataContext).UpdateFolders();
+            ((MainWindowViewModel) DataContext).SelectFolder(
+                ((MainWindowViewModel) DataContext).SelectedFolder?.Name);
         }
 
         private void Window_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

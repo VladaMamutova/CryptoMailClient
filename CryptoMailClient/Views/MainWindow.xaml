@@ -82,7 +82,7 @@
         <materialDesign:DialogHost Identifier="RootDialog" Grid.Row="1">
             <Grid Margin="15">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.3*" MinWidth="200"/>
+                    <ColumnDefinition Width="0.30*" MinWidth="210"/>
                     <ColumnDefinition Width="15"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
