@@ -16,9 +16,13 @@ namespace CryptoMailClient.Utilities
 
         // Делегаты для обработки событий.
         public event PropertyChangedEventHandler PropertyChanged;
+
         public event EventHandler<MessageBoxEventArgs>
             MessageBoxDisplayRequested;
+
         public event Action CloseRequested;
+        public event Action<bool> CloseDialogRequested;
+        public event Action<object> ShowDialogRequested;
 
         // Методы, выполняющиеся в событиях.
         [NotifyPropertyChangedInvocator]
@@ -44,6 +48,16 @@ namespace CryptoMailClient.Utilities
         protected void OnCloseRequested()
         {
             CloseRequested?.Invoke();
+        }
+
+        protected void OnCloseDialogRequested(bool result)
+        {
+            CloseDialogRequested?.Invoke(result);
+        }
+
+        protected void OnShowDialogRequested(object viewModel)
+        {
+            ShowDialogRequested?.Invoke(viewModel);
         }
     }
 }

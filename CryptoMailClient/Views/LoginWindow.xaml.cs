@@ -18,7 +18,7 @@ namespace CryptoMailClient.Views
             {
                 MessageBox.Show(e.MessageBoxText, e.Caption);
             };
-            loginViewModel.CloseRequested += () => DialogResult = true;
+            loginViewModel.CloseDialogRequested += result => DialogResult = result;
             loginViewModel.ClearPasswordFieldsRequested += () =>
             {
                 Password.Clear();
@@ -30,11 +30,6 @@ namespace CryptoMailClient.Views
         private void Window_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-        }
-
-        private void Close_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            DialogResult = false;
         }
 
         private void Password_OnPasswordChanged(object sender, RoutedEventArgs e)

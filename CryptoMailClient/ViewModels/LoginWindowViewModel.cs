@@ -128,6 +128,11 @@ namespace CryptoMailClient.ViewModels
             OnPropertyChanged(nameof(ConfirmPasswordValidation));
         });
 
+        public RelayCommand CloseCommand => new RelayCommand(o =>
+        {
+            OnCloseDialogRequested(false);
+        });
+
         #endregion
 
         #region IDataErrorInfo Members
@@ -211,7 +216,7 @@ namespace CryptoMailClient.ViewModels
                 {
                     _securePassword.Dispose();
                     _securePasswordConfirmation.Dispose();
-                    OnCloseRequested();
+                    OnCloseDialogRequested(true);
                 }
                 else
                 {

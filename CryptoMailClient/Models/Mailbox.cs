@@ -10,7 +10,7 @@ namespace CryptoMailClient.Models
 {
     static class Mailbox
     {
-        private const int DEFAULT_CURRENT_MESSAGES_COUNT = 20;
+        private const int DEFAULT_CURRENT_MESSAGES_COUNT = 10;
 
         private static ImapClient _imapClient;
 

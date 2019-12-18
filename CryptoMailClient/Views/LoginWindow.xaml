@@ -20,10 +20,15 @@
                 <GradientStop Color="{StaticResource Primary900}" Offset="1" />
             </LinearGradientBrush>
         </Grid.Background>
-        <materialDesign:PackIcon Kind="Close" Margin="10 10" Cursor="Hand" HorizontalAlignment="Right"
+        <Button Margin="10 10" Width="26" Height="26"
+                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                Background="{x:Null}" BorderBrush="{x:Null}"
+                HorizontalAlignment="Right" VerticalAlignment="Top"
+                Command="{Binding CloseCommand}">
+            <materialDesign:PackIcon Kind="Close" Cursor="Hand"
                                  Foreground="{StaticResource MaterialDesignLightBackground}"
-                                 Background="Transparent"
-                                 Opacity="0.2" Width="30" Height="30" MouseDown="Close_MouseDown"/>
+                                 Opacity="0.2" Width="26" Height="26"/>
+        </Button>
         <Grid Width="340" Margin="40" HorizontalAlignment="Center" VerticalAlignment="Center">
             <Rectangle RadiusY="5" RadiusX="5" Fill="{StaticResource MaterialDesignLightBackground}">
                 <Rectangle.Effect>

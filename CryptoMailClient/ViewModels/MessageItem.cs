@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using MimeKit;
 
@@ -32,10 +33,21 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
-        public string From { get; }
+        public MimeMessage Message { get; }
+
+        // Эти поля отображаются как в списке писем,
+        // так и в окне просмотра конкретного письма.
+        public string NameFrom { get; }
+        public char CodeFrom { get; }
         public string Subject { get; }
-        public string Date { get; }
-        public char Code { get; }
+        public string DateText { get; }
+
+        // Эти поля отображаются только
+        // в окне просмотра конкретного письма.
+        public string AddressFrom { get; set; }
+        public string AddressTo { get; set; }
+        public string HtmlBody { get; set; }
+        public string DateTimeText { get; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -46,21 +58,32 @@ namespace CryptoMailClient.ViewModels
                 new PropertyChangedEventArgs(propertyName));
         }
 
-        public MessageItem(InternetAddress from, string subject, DateTimeOffset date)
+        public MessageItem(MimeMessage message)
         {
-            if (from != null)
-            {
-                From = from.Name?.Length > 0 ? from.Name : from.ToString();
-                Code = From.Length > 0 ? From.ToUpper()[0] : ' ';
-            }
+            Message = message;
 
-            Subject = subject;
-            Date = date.UtcDateTime.ToString("d MMM");
+            MailboxAddress from = Message.From.Mailboxes.First();
+            NameFrom = from.Name?.Length > 0 ? from.Name : from.ToString();
+            AddressFrom = from.Address;
+            CodeFrom = NameFrom.Length > 0 ? NameFrom.ToUpper()[0] : ' ';
+
+            Subject = string.IsNullOrEmpty(message.Subject)
+                ? "(без темы)"
+                : message.Subject;
+
+            AddressTo = message.To.Mailboxes.First().Address;
+            DateTime mailDate = message.Date.UtcDateTime;
+            DateText = mailDate.ToString(mailDate.Year == DateTime.Today.Year
+                ? "d MMM"
+                : "dd.MM.yyyy");
+
+            DateTimeText = DateText + " в " + mailDate.ToString("HH:mm");
         }
 
         public override string ToString()
         {
-            return $"From: {From}, Subject: {Subject}, Date: {Date}";
+            return $"Name: {NameFrom}, Address: {AddressFrom}, " +
+                   $"Subject: {Subject}, Date: {DateTimeText}";
         }
     }
 }

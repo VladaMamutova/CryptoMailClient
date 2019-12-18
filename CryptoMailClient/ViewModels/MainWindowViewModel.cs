@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using CryptoMailClient.Models;
 using CryptoMailClient.Utilities;
 using CryptoMailClient.Views;
+using MailKit;
 using MaterialDesignThemes.Wpf;
+using MimeKit;
 
 namespace CryptoMailClient.ViewModels
 {
@@ -114,6 +117,9 @@ namespace CryptoMailClient.ViewModels
         public RelayAsyncCommand SelectFolderCommand =>
             new RelayAsyncCommand(SelectFolder);
 
+        public RelayCommand ReadEmailCommand =>
+            new RelayCommand(ReadEmail);
+
         public RelayCommand CloseCommand => new RelayCommand(async o =>
         {
             await Mailbox.ResetImapConnection();
@@ -210,6 +216,36 @@ namespace CryptoMailClient.ViewModels
             IsPopupClose = true;
         }
 
+        private void ReadEmail(object o)
+        {
+            if (o != null && o is MessageItem item)
+            {
+                string content;
+                if (!string.IsNullOrEmpty(item.Message.HtmlBody))
+                {
+                    int index = item.Message.HtmlBody.IndexOf("<html>",
+                        StringComparison.OrdinalIgnoreCase);
+                    if (index < 0)
+                    {
+                        content = "<html><meta charset=\"utf-8\"><body>" +
+                                  item.Message.HtmlBody + "</body></html>";
+                    }
+                    else
+                        content = item.Message.HtmlBody.Insert(
+                            index + "<html>".Length,
+                            "<meta charset=\"utf-8\">");
+                }
+                else
+                    content =
+                        "<!doctype html><head><meta charset = \"utf-8\"></head>" +
+                        "<body>" + item.Message.TextBody + "</body></html>";
+
+                item.HtmlBody = content;
+
+                OnShowDialogRequested(item);
+            }
+        }
+
         public async Task UpdateFolders()
         {
             try
@@ -286,8 +322,7 @@ namespace CryptoMailClient.ViewModels
                     var messages = new ObservableCollection<MessageItem>();
                     foreach (var message in Mailbox.CurrentMessages)
                     {
-                        messages.Add(new MessageItem(message.From.First(),
-                            message.Subject, message.Date));
+                        messages.Add(new MessageItem(message));
                     }
 
                     Messages = messages;

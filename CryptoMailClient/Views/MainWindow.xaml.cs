@@ -27,6 +27,18 @@ namespace CryptoMailClient.Views
                 MessageBox.Show(o.MessageBoxText, o.Caption);
             };
             viewModel.CloseRequested += Close;
+            viewModel.ShowDialogRequested += dialogViewModel =>
+            {
+                if (dialogViewModel is MessageItem item)
+                {
+                    var readEmailWindow = new ReadEmailWindow
+                    {
+                        DataContext = item
+                    };
+                    readEmailWindow.ShowDialog();
+                }
+            };
+            
             DataContext = viewModel;
 
             await ((MainWindowViewModel)DataContext).UpdateFolders();

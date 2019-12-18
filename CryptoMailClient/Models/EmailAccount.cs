@@ -4,8 +4,8 @@ using System.Net.Mail;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using MailKit;
 using MailKit.Net.Imap;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
@@ -63,6 +63,14 @@ namespace CryptoMailClient.Models
             MailAddress mailAddress;
             try
             {
+                Regex regex =
+                    new Regex(
+                        @"[A-Za-z0-9._%+-]+@[A-Za-z0-9._%+-]+\.[A-Za-z]{2,4}");
+                if (!regex.IsMatch(address))
+                {
+                    throw new Exception();
+                }
+
                 mailAddress = new MailAddress(address);
             }
             catch
