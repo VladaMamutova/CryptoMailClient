@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using CryptoMailClient.Models;
 using CryptoMailClient.Utilities;
 using CryptoMailClient.Views;
-using MailKit;
 using MaterialDesignThemes.Wpf;
-using MimeKit;
 
 namespace CryptoMailClient.ViewModels
 {
@@ -130,10 +127,17 @@ namespace CryptoMailClient.ViewModels
         {
             try
             {
-                if(o is string folderName)
-                    if (Mailbox.OpenFolder(folderName.ToLower() == "входящие"
-                        ? "inbox"
-                        : folderName))
+                if (o is string folderName)
+                {
+                    string engFolderName = null;
+                    if(folderName.ToLower() == "входящие")
+                        engFolderName = "inbox";
+                    if (folderName.ToLower() == "социальные сети")
+                        engFolderName = "social";
+                    if (folderName.ToLower() == "рассылки")
+                        engFolderName = "newsletters";
+
+                    if (Mailbox.OpenFolder(engFolderName ?? folderName))
                     {
                         await LoadMessages();
                         OnPropertyChanged(nameof(MessageRangeText));
@@ -141,6 +145,7 @@ namespace CryptoMailClient.ViewModels
                             f.Name == folderName);
                         OnPropertyChanged(nameof(SelectedFolder));
                     }
+                }
             }
             catch (Exception ex)
             {
@@ -272,7 +277,14 @@ namespace CryptoMailClient.ViewModels
                         }
                         else
                         {
-                            folders.Add(new FolderItem(folder.Name,
+                            string ruFolderName = null;
+                            if (folder.Name.ToLower() == "social")
+                                ruFolderName = "Социальные сети";
+                            if (folder.Name.ToLower() == "newsletters")
+                                ruFolderName = "Рассылки";
+
+                            folders.Add(new FolderItem(
+                                ruFolderName ?? folder.Name,
                                 folder.Count));
                         }
                     }

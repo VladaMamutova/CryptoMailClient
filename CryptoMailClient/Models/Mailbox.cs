@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MailKit;
@@ -92,7 +93,7 @@ namespace CryptoMailClient.Models
             if (await CheckImapConnection())
             {
                 IList<IMailFolder> folders = await _imapClient.GetFoldersAsync(
-                    _imapClient.PersonalNamespaces[0]);
+                    _imapClient.PersonalNamespaces.First());
 
                 foreach (var folder in folders)
                 {
@@ -122,6 +123,136 @@ namespace CryptoMailClient.Models
                 {
                     CurrentMessages.Add(CurrentFolder.GetMessage(i));
                 }
+            }
+        }
+
+        public static async Task Synchronize()
+        {
+            if (!await CheckImapConnection()) return;
+
+            string emailFolderPath =
+                UserManager.GetCurrentUserEmailFolder();
+
+            if (!Directory.Exists(emailFolderPath))
+            {
+                Directory.CreateDirectory(emailFolderPath);
+            }
+
+            // Получаем папки на сервере.
+            IList<IMailFolder> serverFolders =
+                await _imapClient.GetFoldersAsync(_imapClient.PersonalNamespaces
+                    .First());
+
+            // Получаем папки на клиенте. 
+            List<string> localFolders = Directory
+                .GetDirectories(emailFolderPath, "*.*",
+                    SearchOption.AllDirectories).ToList();
+
+            foreach (var serverFolder in serverFolders)
+            {
+                string serverFolderName = serverFolder.FullName
+                    .Replace('/', '\\');
+
+                var localFolderName =
+                    localFolders.Find(f => f.EndsWith(serverFolderName));
+                if (localFolderName != null)
+                {
+                    // Если папка существовала на клиенте, значит
+                    // удаляем её из списка папок,
+                    // которые необходимо ещё просмотреть.
+                    localFolders.Remove(localFolderName);
+                }
+
+                string folderPath =
+                    Path.Combine(emailFolderPath, serverFolderName);
+
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+
+                if (serverFolder.FullName == "[Gmail]")
+                {
+                    continue;
+                }
+
+                // Получаем идентификаторы и флаги писем в папке на сервере.
+                await serverFolder.OpenAsync(FolderAccess.ReadOnly);
+                IList<IMessageSummary> serverLetters =
+                    await serverFolder.FetchAsync(0, -1,
+                        MessageSummaryItems.UniqueId |
+                        MessageSummaryItems.Flags);
+
+                // Получаем имена файлов писем и их идентификаторы в папке на клиенте.
+                // Формат имени файла: "<uid> (<flag>[, <flag>]).msg".
+                List<string> localLetters =
+                    Directory.GetFiles(folderPath, "*.msg").ToList();
+                List<uint> localUids = new List<uint>(localLetters
+                    .Select(l => l.Substring(l.LastIndexOf('\\') + 1,
+                        l.LastIndexOf('(') - l.LastIndexOf('\\') - 2))
+                    // -1 на пробел перед "("
+                    .ToList().Select(uint.Parse).ToList());
+
+                foreach (var serverLetter in serverLetters)
+                {
+                    var uid = serverLetter.UniqueId;
+                    if (serverLetter.Flags != null)
+                    {
+                        // Получаем ожидаемое имя файла письма.
+                        var letterName = uid + " (" + serverLetter.Flags.Value + ")";
+
+                        // Проверяем, есть ли письмо на клиенте
+                        // с данным идентификатором.
+                        int index =
+                            localUids.FindIndex(x => x == uid.Id);
+                        if (index != -1)
+                        {
+                            // Если письмо на клиенте существует,
+                            // проверяем имя файла.
+                            var localLetter = localLetters[index];
+                            if (!localLetter.EndsWith(letterName))
+                            {
+                                // Если фактическое имя отличается от ожидаемого
+                                // (флаги были изменены), переименовываем файл.
+                                string localLetterWithNewFlag =
+                                    localLetter.Substring(0,
+                                        localLetter.LastIndexOf('\\') + 1) +
+                                    letterName + ".msg";
+
+                                File.Move(localLetter,
+                                    localLetterWithNewFlag);
+                            }
+
+                            // Письмо просмотрено, удаляем его из списка писем,
+                            // которые необходимо ещё просмотреть.
+                            localLetters.Remove(localLetter);
+                            localUids.RemoveAt(index);
+                        }
+                        else
+                        {
+                            // Если письмо на клиенте не существует, создаём его.
+                            await (await serverFolder.GetMessageAsync(uid))
+                                .WriteToAsync(Path.Combine(folderPath,
+                                    letterName + ".msg"));
+                        }
+                    }
+                }
+
+                // Если какие-то письма остались не просмотренными,
+                // значит на сервере они были удалены. Удаляем их и на клиенте.
+                foreach (var letter in localLetters)
+                {
+                    File.Delete(letter);
+                }
+
+                await serverFolder.CloseAsync();
+            }
+
+            // Если какие-то папки на клиенте остались не просмотренными,
+            // значит на сервере они были удалены. Удаляем их и на клиенте.
+            foreach (var folder in localFolders)
+            {
+                Directory.Delete(folder, true);
             }
         }
 

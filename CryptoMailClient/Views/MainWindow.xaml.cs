@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using CryptoMailClient.Models;
 using CryptoMailClient.ViewModels;
 
 namespace CryptoMailClient.Views
@@ -41,6 +42,7 @@ namespace CryptoMailClient.Views
             
             DataContext = viewModel;
 
+            await Mailbox.Synchronize();
             await ((MainWindowViewModel)DataContext).UpdateFolders();
             ((MainWindowViewModel) DataContext).SelectFolder(
                 ((MainWindowViewModel) DataContext).SelectedFolder?.Name);

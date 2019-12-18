@@ -22,6 +22,17 @@ namespace CryptoMailClient.Models
             return Path.Combine(USERS_DIRECTORY, login, USER_INFO_FILE);
         }
 
+        public static string GetCurrentUserEmailFolder()
+        {
+            if (CurrentUser?.CurrentEmailAccount != null)
+            {
+                return Path.Combine(USERS_DIRECTORY, CurrentUser.Login,
+                    CurrentUser.CurrentEmailAccount.Address);
+            }
+
+            return null;
+        }
+
         private static bool HasUserInfoFile(string login)
         {
             if (!Directory.Exists(USERS_DIRECTORY))
