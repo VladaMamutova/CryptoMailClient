@@ -94,6 +94,8 @@ namespace CryptoMailClient.Models.Offline
             Folders.Clear();
 
             string emailFolder = UserManager.GetCurrentUserEmailFolder();
+            if(emailFolder == null) return;
+
             DirectoryInfo emailFolderInfo = new DirectoryInfo(emailFolder);
             if (!emailFolderInfo.Exists)
             {

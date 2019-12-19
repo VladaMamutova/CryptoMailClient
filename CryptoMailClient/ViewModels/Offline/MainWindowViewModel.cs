@@ -176,6 +176,9 @@ namespace CryptoMailClient.ViewModels.Offline
                         OnPropertyChanged(nameof(HasCurrentEmailAccount));
                         OnPropertyChanged(nameof(EmailAccounts));
                         OnPropertyChanged(nameof(HasEmailAccounts));
+
+                        UpdateFolders();
+                        SelectFolder(SelectedFolder?.Name);
                     }
                 }
             }
@@ -231,6 +234,7 @@ namespace CryptoMailClient.ViewModels.Offline
                 else
                 {
                     Messages = new ObservableCollection<MessageItem>();
+                    OnPropertyChanged(nameof(MessageRangeText));
                 }
             }
             catch (Exception ex)

@@ -15,7 +15,8 @@ namespace CryptoMailClient.Models
         public List<EmailAccount> EmailAccounts { get; }
 
         public EmailAccount CurrentEmailAccount =>
-            EmailAccounts.Count > _currentEmailAccountIndex
+            _currentEmailAccountIndex >= 0 &&
+            _currentEmailAccountIndex < EmailAccounts.Count
                 ? EmailAccounts[_currentEmailAccountIndex]
                 : null;
         
