@@ -71,7 +71,7 @@ namespace CryptoMailClient.ViewModels
                 ? "(без темы)"
                 : message.Subject;
 
-            AddressTo = message.To.Mailboxes.First().Address;
+            AddressTo = message.To.Mailboxes.Any() ? message.To.Mailboxes.First()?.Address : "0 получателей";
             DateTime mailDate = message.Date.UtcDateTime;
             DateText = mailDate.ToString(mailDate.Year == DateTime.Today.Year
                 ? "d MMM"

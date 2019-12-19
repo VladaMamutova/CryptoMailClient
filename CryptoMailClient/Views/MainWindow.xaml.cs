@@ -16,7 +16,7 @@ namespace CryptoMailClient.Views
             InitializeComponent();
         }
 
-        private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             // Подключаем модель представления в событии первой загрузки окна,
             // а не в конструкторе, для того, чтобы подключились привязки

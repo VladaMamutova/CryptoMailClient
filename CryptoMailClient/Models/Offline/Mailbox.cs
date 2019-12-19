@@ -97,9 +97,7 @@ namespace CryptoMailClient.Models.Offline
             DirectoryInfo emailFolderInfo = new DirectoryInfo(emailFolder);
             if (!emailFolderInfo.Exists)
             {
-                throw new Exception("Этот почтовый ящик не был " +
-                                    "синхронизирован. Чтобы продолжить работу, " +
-                                    "необходимо выполнить синхронизацию.");
+                emailFolderInfo.Create();
             }
 
             foreach (var directoryInfo in emailFolderInfo.GetDirectories("*",
@@ -249,6 +247,8 @@ namespace CryptoMailClient.Models.Offline
                                 .WriteToAsync(Path.Combine(folderPath,
                                     letterName + ".msg"));
                         }
+
+                        await _imapClient.NoOpAsync();
                     }
                 }
 

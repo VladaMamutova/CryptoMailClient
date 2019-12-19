@@ -34,11 +34,11 @@
                     <materialDesign:PackIcon Kind="User" Foreground="{StaticResource MaterialDesignDarkForeground}" Width="20" Height="20"/>
                     <TextBlock Text="{Binding CurrentUserLogin}" VerticalAlignment="Center" Padding="10 0 0 0" FontSize="14" Foreground="{StaticResource MaterialDesignDarkForeground}"></TextBlock>
                 </StackPanel>
-                <Button IsEnabled="{Binding IsPopupClose}" Content="Добавить почтовый ящик" Grid.Column="3"
+                <Button IsEnabled="{Binding IsDialogClose}" Content="Добавить почтовый ящик" Grid.Column="3"
                         Visibility="{Binding HasCurrentEmailAccount, Converter={StaticResource InverseBoolToVisConverter}}"
                         Style="{StaticResource MaterialDesignRaisedButton}"
                         Command="{Binding RunNewEmailDialogCommand}"/>
-                <materialDesign:PopupBox Grid.Column="3" IsEnabled="{Binding IsPopupClose}" Visibility="{Binding HasCurrentEmailAccount, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Right" PlacementMode="BottomAndAlignRightEdges" StaysOpen="False">
+                <materialDesign:PopupBox Grid.Column="3" IsEnabled="{Binding IsDialogClose}" Visibility="{Binding HasCurrentEmailAccount, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Right" PlacementMode="BottomAndAlignRightEdges" StaysOpen="False">
                     <materialDesign:PopupBox.ToggleContent>
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="MailOutline" Foreground="{StaticResource MaterialDesignDarkForeground}" Width="20" Height="20" Cursor="Hand"/>
@@ -79,7 +79,7 @@
                 </StackPanel>
             </Grid>
         </materialDesign:ColorZone>
-        <materialDesign:DialogHost Identifier="RootDialog" Grid.Row="1">
+        <materialDesign:DialogHost Identifier="RootDialog" IsOpen="{Binding IsDialogOpen, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Grid.Row="1">
             <Grid Margin="15">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="0.30*" MinWidth="210"/>
@@ -87,7 +87,17 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel>
-                    <Button Content="Написать" Margin="0 0 0 15"/>
+                    <Grid Margin="0 0 0 15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Написать"/>
+                        <Button Grid.Column="2" ToolTip="Обновить" Command="{Binding SynchronizeCommand}">
+                            <materialDesign:PackIcon Kind="Sync" Foreground="{StaticResource MaterialDesignDarkForeground}" Width="20" Height="20" Cursor="Hand"/>
+                        </Button>
+                    </Grid>
                     <ListBox ItemsSource="{Binding Folders}"
                              SelectedItem="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                              Cursor="Hand">

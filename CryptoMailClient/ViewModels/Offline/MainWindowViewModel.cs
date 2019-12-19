@@ -31,17 +31,20 @@ namespace CryptoMailClient.ViewModels.Offline
 
         public string MessageRangeText => Mailbox.GetMessageRange();
 
-        private bool _isPopupClose;
+        private bool _isDialogOpen;
 
-        public bool IsPopupClose
+        public bool IsDialogOpen
         {
-            get => _isPopupClose;
+            get => _isDialogOpen;
             set
             {
-                _isPopupClose = value;
-                OnPropertyChanged(nameof(IsPopupClose));
+                _isDialogOpen = value;
+                OnPropertyChanged(nameof(IsDialogOpen));
+                OnPropertyChanged(nameof(IsDialogClose));
             }
         }
+
+        public bool IsDialogClose => !_isDialogOpen;
 
         private ObservableCollection<FolderItem> _folders;
 
@@ -76,7 +79,7 @@ namespace CryptoMailClient.ViewModels.Offline
             new RelayCommand(RunEmailSettingsDialog);
 
         public RelayCommand SetEmailAccountCommand =>
-            new RelayCommand(SetEmailAccount);
+            new RelayCommand(SetEmailAccount, o => !IsDialogOpen);
 
         public RelayCommand GetNextMessagesCommand =>
             new RelayCommand(o =>
@@ -96,21 +99,21 @@ namespace CryptoMailClient.ViewModels.Offline
             });
 
         public RelayCommand GetPreviousMessagesCommand =>
-        new RelayCommand(o =>
-        {
-            if (Mailbox.SetPreviousMessageRange())
+            new RelayCommand(o =>
             {
-                try
+                if (Mailbox.SetPreviousMessageRange())
                 {
-                    LoadMessages();
-                    OnPropertyChanged(nameof(MessageRangeText));
+                    try
+                    {
+                        LoadMessages();
+                        OnPropertyChanged(nameof(MessageRangeText));
+                    }
+                    catch (Exception ex)
+                    {
+                        OnMessageBoxDisplayRequest(Title, ex.Message);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    OnMessageBoxDisplayRequest(Title, ex.Message);
-                }
-            }
-        });
+            });
 
         public RelayCommand SelectFolderCommand =>
             new RelayCommand(SelectFolder);
@@ -122,7 +125,36 @@ namespace CryptoMailClient.ViewModels.Offline
         {
             await Mailbox.ResetImapConnection();
             OnCloseRequested();
+        }, o => !IsDialogOpen);
+
+        public RelayCommand SynchronizeCommand => new RelayCommand(async o =>
+        {
+            await SynchronizeMailbox();
         });
+
+        public async Task SynchronizeMailbox()
+        {
+            DialogHost.OpenDialogCommand.Execute(new ProgressDialog(), null);
+
+            try
+            {
+                await Mailbox.Synchronize();
+                UpdateFolders();
+                SelectFolder(SelectedFolder?.Name);
+                DialogHost.CloseDialogCommand.Execute(null, null);
+                IsDialogOpen = false;
+            }
+            catch (Exception e)
+            {
+                UpdateFolders();
+                SelectFolder(SelectedFolder?.Name);
+                DialogHost.CloseDialogCommand.Execute(null, null);
+                IsDialogOpen = false;
+                OnMessageBoxDisplayRequest(Title,
+                    "Не удалось синхронизировать почтовый ящик.\n" + e.Message);
+            }
+
+        }
 
         public void SelectFolder(object o)
         {
@@ -131,7 +163,7 @@ namespace CryptoMailClient.ViewModels.Offline
                 if (o is string folderName)
                 {
                     string engFolderName = null;
-                    if(folderName.ToLower() == "входящие")
+                    if (folderName.ToLower() == "входящие")
                         engFolderName = "inbox";
                     if (folderName.ToLower() == "социальные сети")
                         engFolderName = "social";
@@ -147,6 +179,10 @@ namespace CryptoMailClient.ViewModels.Offline
                         OnPropertyChanged(nameof(SelectedFolder));
                     }
                 }
+                else
+                {
+                    Messages = new ObservableCollection<MessageItem>();
+                }
             }
             catch (Exception ex)
             {
@@ -158,7 +194,8 @@ namespace CryptoMailClient.ViewModels.Offline
         {
             try
             {
-                if (UserManager.CurrentUser.SetCurrentEmailAccount((address ?? "").ToString()))
+                if (UserManager.CurrentUser.SetCurrentEmailAccount(
+                    (address ?? "").ToString()))
                 {
                     OnPropertyChanged(nameof(CurrentEmailAddress));
                     OnPropertyChanged(nameof(EmailAccounts));
@@ -166,7 +203,6 @@ namespace CryptoMailClient.ViewModels.Offline
                     UserManager.SaveCurrectUserInfo();
 
                     await Mailbox.ResetImapConnection();
-                    
                     UpdateFolders();
                     SelectFolder(SelectedFolder?.Name);
 
@@ -181,7 +217,6 @@ namespace CryptoMailClient.ViewModels.Offline
 
         private async void RunNewEmailDialog(object o)
         {
-            IsPopupClose = false;
             var view = new EmailSettingsDialog(true);
 
             var result = await DialogHost.Show(view, "RootDialog");
@@ -196,14 +231,10 @@ namespace CryptoMailClient.ViewModels.Offline
                     OnPropertyChanged(nameof(HasEmailAccounts));
                 }
             }
-
-            IsPopupClose = true;
         }
 
         private async void RunEmailSettingsDialog(object o)
         {
-            IsPopupClose = false;
-
             var view = new EmailSettingsDialog(false);
 
             var result =
@@ -219,8 +250,6 @@ namespace CryptoMailClient.ViewModels.Offline
                     OnPropertyChanged(nameof(HasEmailAccounts));
                 }
             }
-
-            IsPopupClose = true;
         }
 
         private void ReadEmail(object o)
@@ -352,35 +381,9 @@ namespace CryptoMailClient.ViewModels.Offline
             }
         }
 
-        private void ClosingEventHandler(object sender,
-            DialogClosingEventArgs eventArgs)
-        {
-            //if ((bool)eventArgs.Parameter == false) return;
-
-            ////OK, lets cancel the close...
-            //eventArgs.Cancel();
-
-            ////...now, lets update the "session" with some new content!
-            //eventArgs.Session.UpdateContent(new ProgressDialog());
-            ////note, you can also grab the session when the dialog opens via the DialogOpenedEventHandler
-
-            ////lets run a fake operation for 3 seconds then close this baby.
-            //Task.Delay(TimeSpan.FromSeconds(3))
-            //    .ContinueWith((t, _) => eventArgs.Session.Close(false), null,
-            //        TaskScheduler.FromCurrentSynchronizationContext());
-        }
-
         public MainWindowViewModel()
         {
-            _isPopupClose = true;
-        }
-
-        public async Task SynchronizeMailbox()
-        {
-            //await DialogHost.Show(new ProgressDialog(), "RootDialog");
-            await Mailbox.Synchronize();
-            UpdateFolders();
-            SelectFolder(SelectedFolder?.Name);
+            _isDialogOpen = false;
         }
     }
 }
