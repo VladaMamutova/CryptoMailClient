@@ -84,6 +84,7 @@
     <Compile Include="Models\User.cs" />
     <Compile Include="Utilities\RelayAsyncCommand.cs" />
     <Compile Include="Utilities\SafeNativeMethods.cs" />
+    <Compile Include="ViewModels\AttachmentItem.cs" />
     <Compile Include="ViewModels\FolderItem.cs" />
     <Compile Include="ViewModels\MessageItem.cs" />
     <Compile Include="ViewModels\Offline\MainWindowViewModel.cs" />

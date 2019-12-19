@@ -23,26 +23,27 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <materialDesign:ColorZone Padding="15" materialDesign:ShadowAssist.ShadowDepth="Depth2" Mode="PrimaryMid" DockPanel.Dock="Top" MouseLeftButtonDown="Window_OnMouseLeftButtonDown">
-           <Grid>
-               <Grid.ColumnDefinitions>
-                   <ColumnDefinition/>
-                   <ColumnDefinition Width="15"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="15"/>
                     <ColumnDefinition Width="Auto"/>
-               </Grid.ColumnDefinitions>
+                </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" FontSize="18" Text="{Binding Subject}" FontWeight="Medium" TextWrapping="Wrap"></TextBlock>
                 <Button Grid.Column="2" Width="24" Height="24" Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top"
                     Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
                     Background="{x:Null}" BorderBrush="{x:Null}" Click="Close_OnClick">
-                <materialDesign:PackIcon Width="24" Height="24" Kind="Close" 
+                    <materialDesign:PackIcon Width="24" Height="24" Kind="Close" 
                                          Foreground="{StaticResource PrimaryHueLightBrush}"/>
-            </Button>
-               </Grid>
+                </Button>
+            </Grid>
         </materialDesign:ColorZone>
         <Grid Grid.Row="1" Margin="15">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="10"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0" Background="Transparent">
@@ -72,9 +73,33 @@
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding DateTimeText}" VerticalAlignment="Top" FontSize="14" Foreground="{StaticResource MaterialDesignBodyLight}"></TextBlock>
             </Grid>
             <WebBrowser Grid.Row="2" x:Name="WebBrowser"></WebBrowser>
-        <WrapPanel Grid.Row="3" >
-            <!--Сюда будут добавляться кнопки с вложениями.-->
-        </WrapPanel>
-    </Grid>
+            <TextBlock Grid.Row="3" Height="10" Visibility="{Binding HasAttachments, Converter={StaticResource BooleanToVisibilityConverter}}"></TextBlock>
+            <ItemsControl Grid.Row="4" ItemsSource="{Binding Attachments}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <materialDesign:Chip ToolTip="Нажмите для скачивания" Margin="0 0 10 0"
+                                                 Command="{Binding Path=DataContext.DownloadAttachmentCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}">
+                                <materialDesign:Chip.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding FileName}" VerticalAlignment="Center"/>
+                                        <materialDesign:PackIcon Kind="Download" Margin="5 0 0 0" Foreground="{StaticResource PrimaryHueLightForegroundBrush}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </materialDesign:Chip.Content>
+                            </materialDesign:Chip>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
+    </Grid>
 </Window>
