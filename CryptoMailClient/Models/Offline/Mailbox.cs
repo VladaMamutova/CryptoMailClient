@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CryptoMailClient.Utilities;
+using CryptoMailClient.ViewModels;
 using MailKit;
 using MailKit.Net.Imap;
 using MimeKit;
 
-namespace CryptoMailClient.Models
+namespace CryptoMailClient.Models.Offline
 {
     static class Mailbox
     {
@@ -15,8 +17,8 @@ namespace CryptoMailClient.Models
 
         private static ImapClient _imapClient;
 
-        public static IList<IMailFolder> Folders { get; }
-        public static IMailFolder CurrentFolder { get; private set; }
+        public static List<FolderItem> Folders { get; }
+        public static FolderItem CurrentFolder { get; private set; }
         public static List<MimeMessage> CurrentMessages { get; }
 
         private static int _firstMessage;
@@ -36,7 +38,7 @@ namespace CryptoMailClient.Models
 
         static Mailbox()
         {
-            Folders = new List<IMailFolder>();
+            Folders = new List<FolderItem>();
             CurrentMessages = new List<MimeMessage>();
             _firstMessage = 0;
             CurrentCount = 0;
@@ -87,42 +89,54 @@ namespace CryptoMailClient.Models
             }
         }
 
-        public static async Task LoadFolders()
+        public static void LoadFolders()
         {
             Folders.Clear();
-            if (await CheckImapConnection())
-            {
-                IList<IMailFolder> folders = await _imapClient.GetFoldersAsync(
-                    _imapClient.PersonalNamespaces.First());
 
-                foreach (var folder in folders)
+            string emailFolder = UserManager.GetCurrentUserEmailFolder();
+            DirectoryInfo emailFolderInfo = new DirectoryInfo(emailFolder);
+            if (!emailFolderInfo.Exists)
+            {
+                throw new Exception("Этот почтовый ящик не был " +
+                                    "синхронизирован. Чтобы продолжить работу, " +
+                                    "необходимо выполнить синхронизацию.");
+            }
+
+            foreach (var directoryInfo in emailFolderInfo.GetDirectories("*",
+                SearchOption.AllDirectories))
+            {
+                if (directoryInfo.Name != "[Gmail]")
                 {
-                    if (folder.FullName != "[Gmail]")
-                    {
-                        await folder.OpenAsync(FolderAccess.ReadWrite);
-                        Folders.Add(folder);
-                        await folder.CloseAsync();
-                    }
+                    int count = directoryInfo
+                        .GetFiles("*.msg", SearchOption.TopDirectoryOnly)
+                        .Length;
+                    Folders.Add(new FolderItem(
+                        directoryInfo.FullName.Substring(
+                            emailFolderInfo.FullName.Length + 1),
+                        directoryInfo.Name, count));
                 }
             }
         }
 
-        public static async Task LoadMessages()
+        public static void LoadMessages()
         {
             CurrentMessages.Clear();
-            if (await CheckImapConnection() && CurrentFolder != null)
-            {
-                CurrentFolder.Open(FolderAccess.ReadOnly);
 
-                CurrentCount = Math.Min(DEFAULT_CURRENT_MESSAGES_COUNT,
-                    CurrentFolder.Count - FirstMessage + 1);
-                for (int i = CurrentFolder.Count - FirstMessage;
-                    i > CurrentFolder.Count - FirstMessage - CurrentCount &&
-                    i > -1;
-                    i--)
-                {
-                    CurrentMessages.Add(CurrentFolder.GetMessage(i));
-                }
+            string folderPath =
+                Path.Combine(UserManager.GetCurrentUserEmailFolder(),
+                    CurrentFolder.RelativePath);
+            List<string> messagesFiles =
+                Directory.GetFiles(folderPath, "*.msg").ToList();
+            messagesFiles.Sort(new NaturalStringComparer());
+
+            CurrentCount = Math.Min(DEFAULT_CURRENT_MESSAGES_COUNT,
+                CurrentFolder.Count - FirstMessage + 1);
+            for (int i = CurrentFolder.Count - FirstMessage;
+                i > CurrentFolder.Count - FirstMessage - CurrentCount &&
+                i > -1;
+                i--)
+            {
+                CurrentMessages.Add(MimeMessage.Load(messagesFiles[i]));
             }
         }
 
@@ -145,7 +159,7 @@ namespace CryptoMailClient.Models
 
             // Получаем папки на клиенте. 
             List<string> localFolders = Directory
-                .GetDirectories(emailFolderPath, "*.*",
+                .GetDirectories(emailFolderPath, "*",
                     SearchOption.AllDirectories).ToList();
 
             foreach (var serverFolder in serverFolders)

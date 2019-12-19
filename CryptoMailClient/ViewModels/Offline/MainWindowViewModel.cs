@@ -4,11 +4,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CryptoMailClient.Models;
+using CryptoMailClient.Models.Offline;
 using CryptoMailClient.Utilities;
 using CryptoMailClient.Views;
 using MaterialDesignThemes.Wpf;
 
-namespace CryptoMailClient.ViewModels
+namespace CryptoMailClient.ViewModels.Offline
 {
     class MainWindowViewModel : ViewModelBase
     {
@@ -74,17 +75,17 @@ namespace CryptoMailClient.ViewModels
         public RelayCommand RunEmailSettingsDialogCommand =>
             new RelayCommand(RunEmailSettingsDialog);
 
-        public RelayAsyncCommand SetEmailAccountCommand =>
-            new RelayAsyncCommand(SetEmailAccount);
+        public RelayCommand SetEmailAccountCommand =>
+            new RelayCommand(SetEmailAccount);
 
-        public RelayAsyncCommand GetNextMessagesCommand =>
-            new RelayAsyncCommand(async o =>
+        public RelayCommand GetNextMessagesCommand =>
+            new RelayCommand(o =>
             {
                 if (Mailbox.SetNextMessageRange())
                 {
                     try
                     {
-                        await LoadMessages();
+                        LoadMessages();
                         OnPropertyChanged(nameof(MessageRangeText));
                     }
                     catch (Exception ex)
@@ -94,14 +95,14 @@ namespace CryptoMailClient.ViewModels
                 }
             });
 
-        public RelayAsyncCommand GetPreviousMessagesCommand =>
-        new RelayAsyncCommand(async o =>
+        public RelayCommand GetPreviousMessagesCommand =>
+        new RelayCommand(o =>
         {
             if (Mailbox.SetPreviousMessageRange())
             {
                 try
                 {
-                    await LoadMessages();
+                    LoadMessages();
                     OnPropertyChanged(nameof(MessageRangeText));
                 }
                 catch (Exception ex)
@@ -111,8 +112,8 @@ namespace CryptoMailClient.ViewModels
             }
         });
 
-        public RelayAsyncCommand SelectFolderCommand =>
-            new RelayAsyncCommand(SelectFolder);
+        public RelayCommand SelectFolderCommand =>
+            new RelayCommand(SelectFolder);
 
         public RelayCommand ReadEmailCommand =>
             new RelayCommand(ReadEmail);
@@ -123,7 +124,7 @@ namespace CryptoMailClient.ViewModels
             OnCloseRequested();
         });
 
-        public async void SelectFolder(object o)
+        public void SelectFolder(object o)
         {
             try
             {
@@ -139,7 +140,7 @@ namespace CryptoMailClient.ViewModels
 
                     if (Mailbox.OpenFolder(engFolderName ?? folderName))
                     {
-                        await LoadMessages();
+                        LoadMessages();
                         OnPropertyChanged(nameof(MessageRangeText));
                         SelectedFolder = Folders.First(f =>
                             f.Name == folderName);
@@ -165,7 +166,8 @@ namespace CryptoMailClient.ViewModels
                     UserManager.SaveCurrectUserInfo();
 
                     await Mailbox.ResetImapConnection();
-                    await UpdateFolders();
+                    
+                    UpdateFolders();
                     SelectFolder(SelectedFolder?.Name);
 
                     OnPropertyChanged(nameof(MessageRangeText));
@@ -251,11 +253,11 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
-        public async Task UpdateFolders()
+        public void UpdateFolders()
         {
             try
             {
-                await Mailbox.LoadFolders();
+                Mailbox.LoadFolders();
                 if (Mailbox.Folders != null)
                 {
                     int inboxIndex = -1;
@@ -324,11 +326,11 @@ namespace CryptoMailClient.ViewModels
         }
 
 
-        public async Task LoadMessages()
+        public void LoadMessages()
         {
             try
             {
-                await Mailbox.LoadMessages();
+                Mailbox.LoadMessages();
                 if (Mailbox.CurrentMessages != null)
                 {
                     var messages = new ObservableCollection<MessageItem>();
@@ -371,6 +373,14 @@ namespace CryptoMailClient.ViewModels
         public MainWindowViewModel()
         {
             _isPopupClose = true;
+        }
+
+        public async Task SynchronizeMailbox()
+        {
+            //await DialogHost.Show(new ProgressDialog(), "RootDialog");
+            await Mailbox.Synchronize();
+            UpdateFolders();
+            SelectFolder(SelectedFolder?.Name);
         }
     }
 }

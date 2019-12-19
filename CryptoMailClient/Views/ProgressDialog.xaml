@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="CryptoMailClient.Views.ProgressDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d"
+             FontSize="14">
+    <StackPanel Margin="15">
+        <ProgressBar Width="50" Height="50" Margin="20"
+                 Style="{DynamicResource MaterialDesignCircularProgressBar}"
+                 IsIndeterminate="True"
+                 Value="33"/>
+        <TextBlock HorizontalAlignment="Center" Text="Выполняется синхронизация"></TextBlock>
+        <TextBlock HorizontalAlignment="Center" Text="Пожалуйта, подождите..."></TextBlock>
+    </StackPanel>
+</UserControl>
