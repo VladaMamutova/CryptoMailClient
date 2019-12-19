@@ -4,12 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CryptoMailClient.Models;
-using CryptoMailClient.Models.Offline;
 using CryptoMailClient.Utilities;
 using CryptoMailClient.Views;
 using MaterialDesignThemes.Wpf;
 
-namespace CryptoMailClient.ViewModels.Offline
+namespace CryptoMailClient.ViewModels
 {
     class MainWindowViewModel : ViewModelBase
     {
@@ -259,14 +258,18 @@ namespace CryptoMailClient.ViewModels.Offline
                                   item.Message.HtmlBody + "</body></html>";
                     }
                     else
+                    {
                         content = item.Message.HtmlBody.Insert(
                             index + "<html>".Length,
                             "<meta charset=\"utf-8\">");
+                    }
                 }
                 else
+                {
                     content =
                         "<!doctype html><head><meta charset = \"utf-8\"></head>" +
                         "<body>" + item.Message.TextBody + "</body></html>";
+                }
 
                 item.HtmlBody = content;
 

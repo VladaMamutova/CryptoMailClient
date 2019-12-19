@@ -9,7 +9,7 @@ using MailKit;
 using MailKit.Net.Imap;
 using MimeKit;
 
-namespace CryptoMailClient.Models.Offline
+namespace CryptoMailClient.Models
 {
     static class Mailbox
     {

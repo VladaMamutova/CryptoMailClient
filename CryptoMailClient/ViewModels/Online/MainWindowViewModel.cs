@@ -4,10 +4,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CryptoMailClient.Models;
-using CryptoMailClient.Models.Online;
 using CryptoMailClient.Utilities;
 using CryptoMailClient.Views;
 using MaterialDesignThemes.Wpf;
+using Mailbox = CryptoMailClient.Models.Online.Mailbox;
 
 namespace CryptoMailClient.ViewModels.Online
 {

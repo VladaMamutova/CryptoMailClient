@@ -2,7 +2,6 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using CryptoMailClient.ViewModels;
-using CryptoMailClient.ViewModels.Offline;
 
 namespace CryptoMailClient.Views
 {
