@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         FontFamily="Segoe UI"
         FontSize="16"
@@ -37,7 +38,11 @@
                 <Button IsEnabled="{Binding IsDialogClose}" Content="Добавить почтовый ящик" Grid.Column="3"
                         Visibility="{Binding HasCurrentEmailAccount, Converter={StaticResource InverseBoolToVisConverter}}"
                         Style="{StaticResource MaterialDesignRaisedButton}"
-                        Command="{Binding RunNewEmailDialogCommand}"/>
+                        Command="{Binding RunEmailDialogCommand}">
+                    <Button.CommandParameter>
+                        <system:Boolean>True</system:Boolean>
+                    </Button.CommandParameter>
+                </Button>
                 <materialDesign:PopupBox Grid.Column="3" IsEnabled="{Binding IsDialogClose}" Visibility="{Binding HasCurrentEmailAccount, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Right" PlacementMode="BottomAndAlignRightEdges" StaysOpen="False">
                     <materialDesign:PopupBox.ToggleContent>
                         <StackPanel Orientation="Horizontal">
@@ -46,7 +51,11 @@
                         </StackPanel>
                     </materialDesign:PopupBox.ToggleContent>
                     <StackPanel>
-                        <Button Content="Настройки" Command="{Binding RunEmailSettingsDialogCommand}"/>
+                        <Button Content="Управление аккаунтом" Command="{Binding RunEmailDialogCommand}">
+                            <Button.CommandParameter>
+                                <system:Boolean>False</system:Boolean>
+                            </Button.CommandParameter>
+                        </Button>
                         <Separator Visibility="{Binding HasEmailAccounts, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         <ListBox Name="EmailAccountListBox" ItemsSource="{Binding EmailAccounts}" HorizontalContentAlignment="Stretch" Focusable="False" Cursor="Hand">
                             <ListBox.ItemContainerStyle>
@@ -66,7 +75,11 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
                         <Separator/>
-                        <Button Content="Добавить почтовый ящик" Command="{Binding RunNewEmailDialogCommand}"/>
+                        <Button Content="Добавить почтовый ящик" Command="{Binding RunEmailDialogCommand}">
+                            <Button.CommandParameter>
+                                <system:Boolean>True</system:Boolean>
+                            </Button.CommandParameter>
+                        </Button>
                     </StackPanel>
                 </materialDesign:PopupBox>
                 <StackPanel Grid.Column="5" x:Name="WindowHeader" Orientation="Horizontal" Height="40" VerticalAlignment="Center" HorizontalAlignment="Right">

@@ -13,6 +13,8 @@ namespace CryptoMailClient.ViewModels.Offline
 {
     class MainWindowViewModel : ViewModelBase
     {
+        #region Properties
+
         public string Title => "Crypto Mail Client";
 
         public string CurrentUserLogin => UserManager.CurrentUser?.Login;
@@ -72,67 +74,65 @@ namespace CryptoMailClient.ViewModels.Offline
             }
         }
 
-        public RelayCommand RunNewEmailDialogCommand =>
-            new RelayCommand(RunNewEmailDialog);
+        #endregion
 
-        public RelayCommand RunEmailSettingsDialogCommand =>
-            new RelayCommand(RunEmailSettingsDialog);
+        #region Commands
 
-        public RelayCommand SetEmailAccountCommand =>
-            new RelayCommand(SetEmailAccount, o => !IsDialogOpen);
+        public RelayCommand RunEmailDialogCommand { get; }
+        public RelayCommand SetEmailAccountCommand { get; }
+        public RelayCommand SelectFolderCommand { get; }
+        public RelayCommand ReadEmailCommand { get; }
+        public RelayCommand SynchronizeCommand { get; }
+        public RelayCommand GetNextMessagesCommand { get; }
+        public RelayCommand GetPreviousMessagesCommand { get; }
+        public RelayCommand CloseCommand { get; }
 
-        public RelayCommand GetNextMessagesCommand =>
-            new RelayCommand(o =>
+        #endregion
+
+        public MainWindowViewModel()
+        {
+            _isDialogOpen = false;
+            RunEmailDialogCommand = new RelayCommand(RunEmailDialog);
+            SetEmailAccountCommand =
+                new RelayCommand(SetEmailAccount, o => !IsDialogOpen);
+
+            SelectFolderCommand =
+                new RelayCommand(SelectFolder);
+
+            ReadEmailCommand =
+                new RelayCommand(ReadEmail);
+
+            SynchronizeCommand = new RelayCommand(async o =>
             {
-                if (Mailbox.SetNextMessageRange())
-                {
-                    try
-                    {
-                        LoadMessages();
-                        OnPropertyChanged(nameof(MessageRangeText));
-                    }
-                    catch (Exception ex)
-                    {
-                        OnMessageBoxDisplayRequest(Title, ex.Message);
-                    }
-                }
+                await SynchronizeMailbox();
             });
 
-        public RelayCommand GetPreviousMessagesCommand =>
-            new RelayCommand(o =>
-            {
-                if (Mailbox.SetPreviousMessageRange())
+            GetNextMessagesCommand =
+                new RelayCommand(o =>
                 {
-                    try
+                    if (Mailbox.SetNextMessageRange())
                     {
                         LoadMessages();
-                        OnPropertyChanged(nameof(MessageRangeText));
                     }
-                    catch (Exception ex)
+                });
+
+            GetPreviousMessagesCommand =
+                new RelayCommand(o =>
+                {
+                    if (Mailbox.SetPreviousMessageRange())
                     {
-                        OnMessageBoxDisplayRequest(Title, ex.Message);
+                        LoadMessages();
                     }
-                }
-            });
+                });
 
-        public RelayCommand SelectFolderCommand =>
-            new RelayCommand(SelectFolder);
+            CloseCommand = new RelayCommand(async o =>
+            {
+                await Mailbox.ResetImapConnection();
+                OnCloseRequested();
+            }, o => !IsDialogOpen);
+        }
 
-        public RelayCommand ReadEmailCommand =>
-            new RelayCommand(ReadEmail);
-
-        public RelayCommand CloseCommand => new RelayCommand(async o =>
-        {
-            await Mailbox.ResetImapConnection();
-            OnCloseRequested();
-        }, o => !IsDialogOpen);
-
-        public RelayCommand SynchronizeCommand => new RelayCommand(async o =>
-        {
-            await SynchronizeMailbox();
-        });
-
-        public async Task SynchronizeMailbox()
+        private async Task SynchronizeMailbox()
         {
             DialogHost.OpenDialogCommand.Execute(new ProgressDialog(), null);
 
@@ -142,6 +142,8 @@ namespace CryptoMailClient.ViewModels.Offline
                 UpdateFolders();
                 SelectFolder(SelectedFolder?.Name);
                 DialogHost.CloseDialogCommand.Execute(null, null);
+                // Явно закрываем диалог, так как предыдущая
+                // команда иногда может не выполняться.
                 IsDialogOpen = false;
             }
             catch (Exception e)
@@ -149,6 +151,8 @@ namespace CryptoMailClient.ViewModels.Offline
                 UpdateFolders();
                 SelectFolder(SelectedFolder?.Name);
                 DialogHost.CloseDialogCommand.Execute(null, null);
+                // Явно закрываем диалог, так как предыдущая
+                // команда иногда может не выполняться.
                 IsDialogOpen = false;
                 OnMessageBoxDisplayRequest(Title,
                     "Не удалось синхронизировать почтовый ящик.\n" + e.Message);
@@ -156,37 +160,24 @@ namespace CryptoMailClient.ViewModels.Offline
 
         }
 
-        public void SelectFolder(object o)
+        private async void RunEmailDialog(object o)
         {
-            try
+            if (o is bool isNewEmailAccount)
             {
-                if (o is string folderName)
-                {
-                    string engFolderName = null;
-                    if (folderName.ToLower() == "входящие")
-                        engFolderName = "inbox";
-                    if (folderName.ToLower() == "социальные сети")
-                        engFolderName = "social";
-                    if (folderName.ToLower() == "рассылки")
-                        engFolderName = "newsletters";
+                var view = new EmailSettingsDialog(isNewEmailAccount);
 
-                    if (Mailbox.OpenFolder(engFolderName ?? folderName))
+                var result = await DialogHost.Show(view, "RootDialog");
+
+                if (result != null && result is bool boolResult)
+                {
+                    if (boolResult)
                     {
-                        LoadMessages();
-                        OnPropertyChanged(nameof(MessageRangeText));
-                        SelectedFolder = Folders.First(f =>
-                            f.Name == folderName);
-                        OnPropertyChanged(nameof(SelectedFolder));
+                        OnPropertyChanged(nameof(CurrentEmailAddress));
+                        OnPropertyChanged(nameof(HasCurrentEmailAccount));
+                        OnPropertyChanged(nameof(EmailAccounts));
+                        OnPropertyChanged(nameof(HasEmailAccounts));
                     }
                 }
-                else
-                {
-                    Messages = new ObservableCollection<MessageItem>();
-                }
-            }
-            catch (Exception ex)
-            {
-                OnMessageBoxDisplayRequest(Title, ex.Message);
             }
         }
 
@@ -215,42 +206,39 @@ namespace CryptoMailClient.ViewModels.Offline
             }
         }
 
-        private async void RunNewEmailDialog(object o)
+        public void SelectFolder(object o)
         {
-            var view = new EmailSettingsDialog(true);
-
-            var result = await DialogHost.Show(view, "RootDialog");
-
-            if (result != null && result is bool boolResult)
+            try
             {
-                if (boolResult)
+                if (o is string folderName)
                 {
-                    OnPropertyChanged(nameof(CurrentEmailAddress));
-                    OnPropertyChanged(nameof(HasCurrentEmailAccount));
-                    OnPropertyChanged(nameof(EmailAccounts));
-                    OnPropertyChanged(nameof(HasEmailAccounts));
+                    string engFolderName = null;
+                    if (folderName.ToLower() == "входящие")
+                        engFolderName = "inbox";
+                    if (folderName.ToLower() == "социальные сети")
+                        engFolderName = "social";
+                    if (folderName.ToLower() == "рассылки")
+                        engFolderName = "newsletters";
+
+                    if (Mailbox.OpenFolder(engFolderName ?? folderName))
+                    {
+                        LoadMessages();
+                        SelectedFolder = Folders.First(f =>
+                            f.Name == folderName);
+                        OnPropertyChanged(nameof(SelectedFolder));
+                    }
                 }
+                else
+                {
+                    Messages = new ObservableCollection<MessageItem>();
+                }
+            }
+            catch (Exception ex)
+            {
+                OnMessageBoxDisplayRequest(Title, ex.Message);
             }
         }
 
-        private async void RunEmailSettingsDialog(object o)
-        {
-            var view = new EmailSettingsDialog(false);
-
-            var result =
-                await DialogHost.Show(view, "RootDialog");
-
-            if (result != null && result is bool boolResult)
-            {
-                if (boolResult)
-                {
-                    OnPropertyChanged(nameof(CurrentEmailAddress));
-                    OnPropertyChanged(nameof(HasCurrentEmailAccount));
-                    OnPropertyChanged(nameof(EmailAccounts));
-                    OnPropertyChanged(nameof(HasEmailAccounts));
-                }
-            }
-        }
 
         private void ReadEmail(object o)
         {
@@ -379,11 +367,10 @@ namespace CryptoMailClient.ViewModels.Offline
             {
                 OnMessageBoxDisplayRequest(Title, ex.Message);
             }
-        }
-
-        public MainWindowViewModel()
-        {
-            _isDialogOpen = false;
+            finally
+            {
+                OnPropertyChanged(nameof(MessageRangeText));
+            }
         }
     }
 }

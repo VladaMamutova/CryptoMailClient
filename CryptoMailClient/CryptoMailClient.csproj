@@ -100,12 +100,12 @@
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Utilities\RelayCommand.cs" />
     <Compile Include="Utilities\SecureStringHelper.cs" />
-    <Compile Include="ViewModels\EmailSettingsDialogViewModel.cs" />
+    <Compile Include="ViewModels\EmailAccountDialogViewModel.cs" />
     <Compile Include="ViewModels\LoginWindowViewModel.cs" />
     <Compile Include="Utilities\ViewModelBase.cs" />
     <Compile Include="ViewModels\Online\MainWindowViewModel.cs" />
-    <Compile Include="Views\EmailSettingsDialog.xaml.cs">
-      <DependentUpon>EmailSettingsDialog.xaml</DependentUpon>
+    <Compile Include="Views\EmailAccountDialog.xaml.cs">
+      <DependentUpon>EmailAccountDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
@@ -140,7 +140,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Views\EmailSettingsDialog.xaml">
+    <Page Include="Views\EmailAccountDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

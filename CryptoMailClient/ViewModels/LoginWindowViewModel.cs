@@ -98,40 +98,9 @@ namespace CryptoMailClient.ViewModels
 
         #region Commands
 
-        public RelayCommand Command => new RelayCommand(o =>
-        {
-            if (IsRegistration)
-            {
-                SignUp();
-            }
-            else
-            {
-                SignIn();
-            }
-        });
-
-        public RelayCommand AlternateCommand => new RelayCommand(o =>
-        {
-            IsRegistration = !IsRegistration;
-
-            // При смене типа действия очищаем все поля и устанавливаем
-            // флаги, что пустые поля не проверяеются на ошибки
-            // (до первого обновления значения в поле).
-            Login = string.Empty;
-            _loginValidation = false;
-            OnPropertyChanged(nameof(Login));
-
-            ClearPasswordFieldsRequested?.Invoke();
-            PasswordValidation = false;
-            ConfirmPasswordValidation = false;
-            OnPropertyChanged(nameof(PasswordValidation));
-            OnPropertyChanged(nameof(ConfirmPasswordValidation));
-        });
-
-        public RelayCommand CloseCommand => new RelayCommand(o =>
-        {
-            OnCloseDialogRequested(false);
-        });
+        public RelayCommand Command { get; }
+        public RelayCommand AlternateCommand { get; }
+        public RelayCommand CloseCommand { get; }
 
         #endregion
 
@@ -205,7 +174,42 @@ namespace CryptoMailClient.ViewModels
             _confirmPasswordValidation = false;
 
             IsRegistration = false;
-        }
+
+        Command = new RelayCommand(o =>
+        {
+            if (IsRegistration)
+            {
+                SignUp();
+            }
+            else
+            {
+                SignIn();
+            }
+        });
+
+        AlternateCommand = new RelayCommand(o =>
+        {
+            IsRegistration = !IsRegistration;
+
+            // При смене типа действия очищаем все поля и устанавливаем
+            // флаги, что пустые поля не проверяеются на ошибки
+            // (до первого обновления значения в поле).
+            Login = string.Empty;
+            _loginValidation = false;
+            OnPropertyChanged(nameof(Login));
+
+            ClearPasswordFieldsRequested?.Invoke();
+            PasswordValidation = false;
+            ConfirmPasswordValidation = false;
+            OnPropertyChanged(nameof(PasswordValidation));
+            OnPropertyChanged(nameof(ConfirmPasswordValidation));
+        });
+
+        CloseCommand = new RelayCommand(o =>
+        {
+            OnCloseDialogRequested(false);
+        });
+    }
 
         private void SignIn()
         {

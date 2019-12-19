@@ -67,7 +67,7 @@
                 <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
                     <TextBlock Text="кому:" FontSize="14" Margin="0 0 10 0" Foreground="{StaticResource MaterialDesignBodyLight}"/>
                     <TextBlock Text="{Binding AddressTo}" FontSize="14" Foreground="{StaticResource MaterialDesignBodyLight}"/>
-                    <materialDesign:PackIcon Margin="10 0 0 0" Kind="SecurityLock" Foreground="#FF5ADC78" Background="Transparent" ToolTip="Письмо зашифровано, содержимое успещно расшифровано" VerticalAlignment="Center" Cursor="Hand"/>
+                    <materialDesign:PackIcon Margin="10 0 0 0" Kind="SecurityLock" Foreground="#FF5ADC78" Background="Transparent" ToolTip="Письмо зашифровано, содержимое успешно расшифровано" VerticalAlignment="Center" Cursor="Hand"/>
                 </StackPanel>
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding DateTimeText}" VerticalAlignment="Top" FontSize="14" Foreground="{StaticResource MaterialDesignBodyLight}"></TextBlock>
             </Grid>

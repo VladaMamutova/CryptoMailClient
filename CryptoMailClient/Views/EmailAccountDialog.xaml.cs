@@ -17,7 +17,7 @@ namespace CryptoMailClient.Views
         public EmailSettingsDialog(bool isNewEmailAccount)
         {
             InitializeComponent();
-            var viewModel = new EmailSettingsDialogViewModel(isNewEmailAccount);
+            var viewModel = new EmailAccountDialogViewModel(isNewEmailAccount);
             viewModel.MessageBoxDisplayRequested += (s, o) =>
             {
                 MessageBox.Show(o.MessageBoxText, o.Caption);
@@ -29,7 +29,7 @@ namespace CryptoMailClient.Views
         {
             if (DataContext != null && sender is PasswordBox passwordBox)
             {
-                ((EmailSettingsDialogViewModel) DataContext).SecurePassword =
+                ((EmailAccountDialogViewModel) DataContext).SecurePassword =
                     passwordBox.SecurePassword;
             }
         }

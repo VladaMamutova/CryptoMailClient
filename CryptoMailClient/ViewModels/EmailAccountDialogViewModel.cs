@@ -7,7 +7,7 @@ using MaterialDesignThemes.Wpf;
 
 namespace CryptoMailClient.ViewModels
 {
-    class EmailSettingsDialogViewModel : ViewModelBase
+    class EmailAccountDialogViewModel : ViewModelBase
     {
         private string _address;
 
@@ -81,7 +81,7 @@ namespace CryptoMailClient.ViewModels
         public bool IsNewEmailAccount { get; }
 
         public string Title =>
-            IsNewEmailAccount ? "Добавление ящика" : "Настройки";
+            IsNewEmailAccount ? "Добавление ящика" : "Управление аккаунтом";
 
         public bool IsReadOnly => !IsNewEmailAccount;
 
@@ -148,7 +148,7 @@ namespace CryptoMailClient.ViewModels
             DialogHost.CloseDialogCommand.Execute(true, null);
         });
 
-        public EmailSettingsDialogViewModel(bool isNewEmailAccount)
+        public EmailAccountDialogViewModel(bool isNewEmailAccount)
         {
             IsNewEmailAccount = isNewEmailAccount;
             SecurePassword = new SecureString();

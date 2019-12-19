@@ -9,7 +9,6 @@ namespace CryptoMailClient.ViewModels
     public class MessageItem : INotifyPropertyChanged
     {
         private bool _isSelected;
-        private bool _wasSeen;
 
         public bool IsSelected
         {
@@ -22,14 +21,16 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
-        public bool WasSeen
+        private bool _seen;
+
+        public bool Seen
         {
-            get => _wasSeen;
+            get => _seen;
             set
             {
-                if (_wasSeen == value) return;
-                _wasSeen = value;
-                OnPropertyChanged(nameof(WasSeen));
+                if (_seen == value) return;
+                _seen = value;
+                OnPropertyChanged(nameof(Seen));
             }
         }
 
