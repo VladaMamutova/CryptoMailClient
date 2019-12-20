@@ -81,6 +81,7 @@ namespace CryptoMailClient.ViewModels
         public RelayCommand SetEmailAccountCommand { get; }
         public RelayCommand SelectFolderCommand { get; }
         public RelayCommand ReadEmailCommand { get; }
+        public RelayCommand WriteEmailCommand { get; }
         public RelayCommand SynchronizeCommand { get; }
         public RelayCommand GetNextMessagesCommand { get; }
         public RelayCommand GetPreviousMessagesCommand { get; }
@@ -94,12 +95,9 @@ namespace CryptoMailClient.ViewModels
             RunEmailDialogCommand = new RelayCommand(RunEmailDialog);
             SetEmailAccountCommand =
                 new RelayCommand(SetEmailAccount, o => !IsDialogOpen);
-
-            SelectFolderCommand =
-                new RelayCommand(SelectFolder);
-
-            ReadEmailCommand =
-                new RelayCommand(ReadEmail);
+            SelectFolderCommand = new RelayCommand(SelectFolder);
+            ReadEmailCommand = new RelayCommand(ReadEmail);
+            WriteEmailCommand = new RelayCommand(WriteEmail);
 
             SynchronizeCommand = new RelayCommand(async o =>
             {
@@ -131,40 +129,11 @@ namespace CryptoMailClient.ViewModels
             }, o => !IsDialogOpen);
         }
 
-        private async Task SynchronizeMailbox()
-        {
-            DialogHost.OpenDialogCommand.Execute(new ProgressDialog(), null);
-
-            try
-            {
-                await Mailbox.Synchronize();
-                UpdateFolders();
-                SelectFolder(SelectedFolder?.Name);
-                DialogHost.CloseDialogCommand.Execute(null, null);
-                // Явно закрываем диалог, так как предыдущая
-                // команда иногда может не выполняться.
-                IsDialogOpen = false;
-            }
-            catch (Exception e)
-            {
-                UpdateFolders();
-                SelectFolder(SelectedFolder?.Name);
-                DialogHost.CloseDialogCommand.Execute(null, null);
-                // Явно закрываем диалог, так как предыдущая
-                // команда иногда может не выполняться.
-                IsDialogOpen = false;
-                OnMessageBoxDisplayRequest(Title,
-                    "Не удалось синхронизировать почтовый ящик.\n" + e.Message);
-            }
-
-        }
-
         private async void RunEmailDialog(object o)
         {
             if (o is bool isNewEmailAccount)
             {
                 var view = new EmailSettingsDialog(isNewEmailAccount);
-
                 var result = await DialogHost.Show(view, "RootDialog");
 
                 if (result != null && result is bool boolResult)
@@ -242,7 +211,6 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
-
         private void ReadEmail(object o)
         {
             if (o != null && o is MessageItem item)
@@ -250,18 +218,20 @@ namespace CryptoMailClient.ViewModels
                 string content;
                 if (!string.IsNullOrEmpty(item.Message.HtmlBody))
                 {
-                    int index = item.Message.HtmlBody.IndexOf("<html>",
+                    int index = item.Message.HtmlBody.IndexOf("html>",
                         StringComparison.OrdinalIgnoreCase);
                     if (index < 0)
                     {
-                        content = "<html><meta charset=\"utf-8\"><body>" +
-                                  item.Message.HtmlBody + "</body></html>";
+                        content = "<!doctype html>" +
+                                  "<head><meta charset = \"utf-8\"></head>" +
+                                  "<body>" + item.Message.HtmlBody + "</body>" +
+                                  "</html>";
                     }
                     else
                     {
                         content = item.Message.HtmlBody.Insert(
-                            index + "<html>".Length,
-                            "<meta charset=\"utf-8\">");
+                            index + "html>".Length,
+                            "<head><meta charset=\"utf-8\"></head>");
                     }
                 }
                 else
@@ -274,6 +244,38 @@ namespace CryptoMailClient.ViewModels
                 item.HtmlBody = content;
 
                 OnShowDialogRequested(item);
+            }
+        }
+
+        private void WriteEmail(object o)
+        {
+            OnShowDialogRequested(null);
+        }
+
+        private async Task SynchronizeMailbox()
+        {
+            DialogHost.OpenDialogCommand.Execute(new ProgressDialog(), null);
+
+            try
+            {
+                await Mailbox.Synchronize();
+                UpdateFolders();
+                SelectFolder(SelectedFolder?.Name);
+                DialogHost.CloseDialogCommand.Execute(null, null);
+                // Явно закрываем диалог, так как предыдущая
+                // команда иногда может не выполняться.
+                IsDialogOpen = false;
+            }
+            catch (Exception e)
+            {
+                UpdateFolders();
+                SelectFolder(SelectedFolder?.Name);
+                DialogHost.CloseDialogCommand.Execute(null, null);
+                // Явно закрываем диалог, так как предыдущая
+                // команда иногда может не выполняться.
+                IsDialogOpen = false;
+                OnMessageBoxDisplayRequest(Title,
+                    "Не удалось синхронизировать почтовый ящик.\n" + e.Message);
             }
         }
 
@@ -348,7 +350,6 @@ namespace CryptoMailClient.ViewModels
                 OnMessageBoxDisplayRequest(Title, ex.Message);
             }
         }
-
 
         public void LoadMessages()
         {

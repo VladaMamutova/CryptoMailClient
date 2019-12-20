@@ -29,7 +29,11 @@ namespace CryptoMailClient.Views
             viewModel.CloseRequested += Close;
             viewModel.ShowDialogRequested += dialogViewModel =>
             {
-                if (dialogViewModel is MessageItem item)
+                if (dialogViewModel == null)
+                {
+                    new WriteEmailWindow().ShowDialog();
+                }
+                else if (dialogViewModel is MessageItem item)
                 {
                     var readEmailWindow = new ReadEmailWindow
                     {

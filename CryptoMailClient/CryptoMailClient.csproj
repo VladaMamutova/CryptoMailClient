@@ -95,6 +95,9 @@
     <Compile Include="Views\ReadEmailWindow.xaml.cs">
       <DependentUpon>ReadEmailWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\WriteEmailWindow.xaml.cs">
+      <DependentUpon>WriteEmailWindow.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\EmailAccount.cs" />
@@ -159,6 +162,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\WriteEmailWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

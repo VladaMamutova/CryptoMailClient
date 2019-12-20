@@ -106,7 +106,7 @@
                             <ColumnDefinition Width="10"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Написать"/>
+                        <Button Grid.Column="0" Content="Написать" Command="{Binding WriteEmailCommand}"/>
                         <Button Grid.Column="2" ToolTip="Обновить" Command="{Binding SynchronizeCommand}">
                             <materialDesign:PackIcon Kind="Sync" Foreground="{StaticResource MaterialDesignDarkForeground}" Width="20" Height="20" Cursor="Hand"/>
                         </Button>
