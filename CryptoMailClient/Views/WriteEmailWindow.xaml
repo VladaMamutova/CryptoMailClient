@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:htmlEditor="clr-namespace:Smith.WPF.HtmlEditor;assembly=Smith.WPF.HtmlEditor"
         mc:Ignorable="d"
         FontFamily="Segoe UI"
         FontSize="16"
@@ -13,6 +14,11 @@
         BorderThickness="1" BorderBrush="{StaticResource PrimaryHueDarkBrush}"
         WindowStyle="None"
         ResizeMode="NoResize">
+    <Window.Resources>
+        <Style TargetType="htmlEditor:HtmlEditor">
+            <Setter Property="TextBox.AcceptsReturn" Value="True"/>
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -42,26 +48,57 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="10"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="10"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="30"/>
+                <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" Text="Кому" VerticalAlignment="Center" Foreground="{StaticResource MaterialDesignBodyLight}"></TextBlock>
             <TextBox Grid.Row="0" Text="{Binding EmailAddress}" Padding="22 0 0 0"/>
             <TextBlock Grid.Row="2" Text="Тема" VerticalAlignment="Center" Foreground="{StaticResource MaterialDesignBodyLight}"></TextBlock>
             <TextBox Grid.Row="2" Text="{Binding Subject}" Padding="22 0 0 0"/>
-            <TextBox Grid.Row="4" Text="{Binding Body}" materialDesign:HintAssist.Hint="Текст сообщения" VerticalContentAlignment="Stretch" TextWrapping="Wrap"/>
-            <Grid Grid.Row="6" Visibility="{Binding IsNewEmailAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel Grid.Row="4" Orientation="Horizontal">
+                <ListBox Margin="0 0 10 0" SelectionMode="Extended"
+                         Style="{StaticResource MaterialDesignToolToggleFlatListBox}">
+                    <ListBoxItem>
+                        <materialDesign:PackIcon Kind="FormatBold" />
+                    </ListBoxItem>
+                    <ListBoxItem>
+                        <materialDesign:PackIcon Kind="FormatItalic" />
+                    </ListBoxItem>
+                    <ListBoxItem>
+                        <materialDesign:PackIcon Kind="FormatUnderline" />
+                    </ListBoxItem>
+                </ListBox>
+                <ListBox Style="{StaticResource MaterialDesignToolToggleFlatListBox}" SelectedIndex="0">
+                    <ListBoxItem>
+                        <materialDesign:PackIcon Kind="FormatAlignLeft" />
+                    </ListBoxItem>
+                    <ListBoxItem>
+                        <materialDesign:PackIcon
+                            Kind="FormatAlignCenter" />
+                    </ListBoxItem>
+                    <ListBoxItem>
+                        <materialDesign:PackIcon
+                            Kind="FormatAlignRight" />
+                    </ListBoxItem>
+                    <ListBoxItem>
+                        <materialDesign:PackIcon
+                            Kind="FormatAlignJustify" />
+                    </ListBoxItem>
+                </ListBox>
+            </StackPanel>
+            <htmlEditor:HtmlEditor Grid.Row="6" x:Name="Editor"/>
+            <Grid Grid.Row="8" Visibility="{Binding IsNewEmailAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition></ColumnDefinition>
                     <ColumnDefinition Width="10"></ColumnDefinition>
                     <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Content="СОХРАНИТЬ ЧЕРНОВИК" Style="{StaticResource MaterialDesignFlatButton}"
-                        HorizontalAlignment="Left">
-                </Button>
-                <Button Grid.Column="2" IsDefault="True" Content="ОТПРАВИТЬ" HorizontalAlignment="Right" Command="{Binding AddCommand}"/>
+                <Button Grid.Column="0" Content="СОХРАНИТЬ ЧЕРНОВИК" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left"/>
+                <Button Grid.Column="2" IsDefault="True" Content="ОТПРАВИТЬ" HorizontalAlignment="Right" Command="{Binding SendCommand}"/>
             </Grid>
         </Grid>
     </Grid>
