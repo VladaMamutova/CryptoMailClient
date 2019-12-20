@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
+﻿using System.IO;
 
 namespace CryptoMailClient.Models
 {
@@ -54,7 +51,8 @@ namespace CryptoMailClient.Models
             string userFile = GetUserInfoFile(login);
 
 
-            if (ComputeHash(password) == User.GetPasswordHashFromFile(userFile))
+            if (Cryptography.ComputeHash(password) ==
+                User.GetPasswordHashFromFile(userFile))
             {
                 CurrentUser = User.FromBytes(File.ReadAllBytes(userFile));
                 return true;
@@ -70,7 +68,7 @@ namespace CryptoMailClient.Models
                 return false;
             }
 
-            User user = new User(login, ComputeHash(password));
+            User user = new User(login, Cryptography.ComputeHash(password));
             Directory.CreateDirectory(GetUserDirectory(login));
 
             //todo: encrypt info
@@ -85,17 +83,6 @@ namespace CryptoMailClient.Models
             //todo: encrypt info
             File.WriteAllBytes(GetUserInfoFile(CurrentUser.Login),
                 CurrentUser.GetBytes());
-        }
-
-        private static string ComputeHash(string data)
-        {
-            byte[] hash;
-            using (MD5 md5 = MD5.Create())
-            {
-                hash = md5.ComputeHash(Encoding.Unicode.GetBytes(data));
-            }
-
-            return BitConverter.ToString(hash);
         }
     }
 }
