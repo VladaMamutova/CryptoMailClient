@@ -92,6 +92,7 @@
     <Compile Include="ViewModels\FolderItem.cs" />
     <Compile Include="ViewModels\MessageItem.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\WriteEmailWindowViewModel.cs" />
     <Compile Include="Views\ProgressDialog.xaml.cs">
       <DependentUpon>ProgressDialog.xaml</DependentUpon>
     </Compile>

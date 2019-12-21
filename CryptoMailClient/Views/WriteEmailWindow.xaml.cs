@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using CryptoMailClient.ViewModels;
 
 namespace CryptoMailClient.Views
 {
@@ -22,6 +12,16 @@ namespace CryptoMailClient.Views
         public WriteEmailWindow()
         {
             InitializeComponent();
+
+            var viewModel = new WriteEmailWindowViewModel();
+            viewModel.MessageBoxDisplayRequested += (s, o) =>
+            {
+                MessageBox.Show(o.MessageBoxText, o.Caption);
+            };
+            viewModel.CloseRequested += Close;
+
+            DataContext = viewModel;
+
         }
 
         private void Window_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

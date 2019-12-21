@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CryptoMailClient.Utilities;
 using CryptoMailClient.ViewModels;
 using MailKit;
 using MailKit.Net.Imap;
+using MailKit.Net.Smtp;
 using MimeKit;
 
 namespace CryptoMailClient.Models
@@ -120,6 +122,11 @@ namespace CryptoMailClient.Models
 
         public static void LoadMessages()
         {
+            if (UserManager.CurrentUser?.CurrentEmailAccount == null)
+            {
+                return;
+            }
+
             CurrentMessages.Clear();
 
             string folderPath =
@@ -271,6 +278,61 @@ namespace CryptoMailClient.Models
                 Directory.Delete(folder, true);
             }
         }
+
+        public static async Task SendMessage(string address, string subject, string htmlContent, string[] attachments)
+        {
+            if (UserManager.CurrentUser?.CurrentEmailAccount == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                throw new Exception(
+                    "Введите адрес получателя.");
+            }
+
+            var regex = new Regex(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+            if (!regex.IsMatch(address))
+            {
+                throw new Exception(
+                    "Неверный адрес почтовыго ящика получателя.");
+            }
+
+            MimeMessage message = new MimeMessage();
+            message.From.Add(new MailboxAddress("",
+                UserManager.CurrentUser.CurrentEmailAccount.Address));
+            message.Subject = subject ?? "";
+            message.To.Add(new MailboxAddress(address));
+
+
+            var bodyBuilder = new BodyBuilder
+            {
+                HtmlBody = "<!doctype html>" +
+                           "<head><meta charset = \"utf-8\"></head>" +
+                           "<body>" + htmlContent + "</body>" +
+                           "</html>"
+            };
+
+            foreach (var attachment in attachments)
+            {
+                bodyBuilder.Attachments.Add(attachment);
+            }
+
+            message.Body = bodyBuilder.ToMessageBody();
+
+            SmtpClient smtp = await UserManager.CurrentUser.CurrentEmailAccount
+                .GetSmtpClient();
+            smtp.Send(message);
+            smtp.Disconnect(true);
+
+            if (!await CheckImapConnection()) return;
+
+            //todo:sync this folder only
+            var sentFolder = _imapClient.GetFolder(SpecialFolder.Sent);
+            sentFolder.Append(message, MessageFlags.Seen, message.Date);
+        }
+
 
         public static bool OpenFolder(string name)
         {

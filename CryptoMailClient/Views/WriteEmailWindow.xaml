@@ -9,16 +9,11 @@
         FontFamily="Segoe UI"
         FontSize="16"
         Foreground="{StaticResource PrimaryHueLightForegroundBrush}"
-        Height="550" Width="800"
+        Height="550" Width="700"
         WindowStartupLocation="CenterScreen"
         BorderThickness="1" BorderBrush="{StaticResource PrimaryHueDarkBrush}"
         WindowStyle="None"
         ResizeMode="NoResize">
-    <Window.Resources>
-        <Style TargetType="htmlEditor:HtmlEditor">
-            <Setter Property="TextBox.AcceptsReturn" Value="True"/>
-        </Style>
-    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -34,10 +29,10 @@
                     <ColumnDefinition Width="15"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Row="0" FontSize="18" Text="Новое сообщение" FontWeight="Medium" TextWrapping="Wrap"></TextBlock>
+                <TextBlock Grid.Row="0" FontSize="18" Text="{Binding Title}" FontWeight="Medium" TextWrapping="Wrap"></TextBlock>
                 <Button Grid.Column="2" Width="24" Height="24" Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top"
                         Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                        Background="{x:Null}" BorderBrush="{x:Null}" Click="Close_OnClick">
+                        Background="{x:Null}" BorderBrush="{x:Null}" Command="{Binding CloseCommand}">
                     <materialDesign:PackIcon Width="24" Height="24" Kind="Close" 
                                              Foreground="{StaticResource PrimaryHueLightBrush}"/>
                 </Button>
@@ -50,16 +45,15 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="10"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" Text="Кому" VerticalAlignment="Center" Foreground="{StaticResource MaterialDesignBodyLight}"></TextBlock>
-            <TextBox Grid.Row="0" Text="{Binding EmailAddress}" Padding="22 0 0 0"/>
+            <TextBox Grid.Row="0" Text="{Binding Address, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Padding="22 0 0 0"/>
             <TextBlock Grid.Row="2" Text="Тема" VerticalAlignment="Center" Foreground="{StaticResource MaterialDesignBodyLight}"></TextBlock>
-            <TextBox Grid.Row="2" Text="{Binding Subject}" Padding="22 0 0 0"/>
-            <StackPanel Grid.Row="4" Orientation="Horizontal">
+            <TextBox Grid.Row="2" Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Padding="22 0 0 0"/>
+            <!--<StackPanel Grid.Row="4" Orientation="Horizontal">
                 <ListBox Margin="0 0 10 0" SelectionMode="Extended"
                          Style="{StaticResource MaterialDesignToolToggleFlatListBox}">
                     <ListBoxItem>
@@ -89,16 +83,17 @@
                             Kind="FormatAlignJustify" />
                     </ListBoxItem>
                 </ListBox>
-            </StackPanel>
-            <htmlEditor:HtmlEditor Grid.Row="6" x:Name="Editor"/>
-            <Grid Grid.Row="8" Visibility="{Binding IsNewEmailAccount, Converter={StaticResource BooleanToVisibilityConverter}}">
+            </StackPanel>-->
+
+            <htmlEditor:HtmlEditor Grid.Row="5" x:Name="HtmlEditor" BindingContent="{Binding Body, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+            <Grid Grid.Row="7">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition></ColumnDefinition>
                     <ColumnDefinition Width="10"></ColumnDefinition>
                     <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Button Grid.Column="0" Content="СОХРАНИТЬ ЧЕРНОВИК" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left"/>
-                <Button Grid.Column="2" IsDefault="True" Content="ОТПРАВИТЬ" HorizontalAlignment="Right" Command="{Binding SendCommand}"/>
+                <Button Grid.Column="2" Content="ОТПРАВИТЬ" HorizontalAlignment="Right" Command="{Binding SendCommand}"/>
             </Grid>
         </Grid>
     </Grid>

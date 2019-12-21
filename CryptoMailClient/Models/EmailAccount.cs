@@ -181,6 +181,36 @@ namespace CryptoMailClient.Models
             }
         }
 
+        public async Task<SmtpClient> GetSmtpClient()
+        {
+            try
+            {
+                SmtpClient client = new SmtpClient();
+                await client.ConnectAsync(Smtp.Server, Smtp.Port, Smtp.UseSsl);
+                await client.AuthenticateAsync(Address, _password);
+                return client;
+            }
+            catch (SocketException ex)
+            {
+                string message =
+                    "Соединение с почтовым сервером не установлено. ";
+                if (ex.ErrorCode == 11001)
+                {
+                    message += "Проверьте подключение к интернету.";
+                }
+                else
+                {
+                    message += ex.Message;
+                }
+
+                throw new Exception(message);
+            }
+            catch
+            {
+                throw new Exception("Логин или пароль неверны.");
+            }
+        }
+
         public byte[] GetBytes()
         {
             MemoryStream stream = new MemoryStream();

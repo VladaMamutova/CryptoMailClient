@@ -249,7 +249,10 @@ namespace CryptoMailClient.ViewModels
 
         private void WriteEmail(object o)
         {
-            OnShowDialogRequested(null);
+            if (UserManager.CurrentUser?.CurrentEmailAccount != null)
+            {
+                OnShowDialogRequested(null);
+            }
         }
 
         private async Task SynchronizeMailbox()
