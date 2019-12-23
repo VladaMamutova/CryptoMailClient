@@ -7,7 +7,17 @@ namespace CryptoMailClient.Models
 {
     static class Cryptography
     {
-        public static byte[] EncryptAES(byte[] data, string rsaPublicKey)
+        public static Encoding Encoding = Encoding.Unicode;
+
+        #region Encryption/Decryption
+
+        public static string EncryptData(in string data, string publicKey)
+        {
+            var bytes = EncryptAES(Encoding.GetBytes(data), publicKey);
+            return Convert.ToBase64String(bytes);
+        }
+
+        public static byte[] EncryptAES(in byte[] bytes, string rsaPublicKey)
         {
             AesManaged aes = new AesManaged
             {
@@ -45,7 +55,7 @@ namespace CryptoMailClient.Models
                 int blockSize = aes.BlockSize / 8;
                 byte[] block = new byte[blockSize];
 
-                using (MemoryStream inStream = new MemoryStream(data))
+                using (MemoryStream inStream = new MemoryStream(bytes))
                 {
                     int count;
                     do
@@ -65,7 +75,14 @@ namespace CryptoMailClient.Models
             return outStream.ToArray();
         }
 
-        public static byte[] DecryptAES(byte[] bytes, string rsaPrivateKey)
+
+        public static string DecryptData(in string data, string privateKey)
+        {
+            var bytes = DecryptAES(Encoding.GetBytes(data), privateKey);
+            return Convert.ToBase64String(bytes);
+        }
+
+        public static byte[] DecryptAES(in byte[] bytes, string rsaPrivateKey)
         {
             AesManaged aes = new AesManaged
             {
@@ -136,25 +153,68 @@ namespace CryptoMailClient.Models
             return outStream.ToArray();
         }
 
-        public static byte[] EncryptRSA(byte[] data, string rsaPublicKey)
+        public static byte[] EncryptRSA(in byte[] data, string rsaPublicKey)
         {
             var rsa = new RSACryptoServiceProvider();
             rsa.FromXmlString(rsaPublicKey);
             return rsa.Encrypt(data, false);
         }
 
-        public static byte[] DecryptRSA(byte[] data, string rsaPrivateKey)
+        public static byte[] DecryptRSA(in byte[] data, string rsaPrivateKey)
         {
             var rsa = new RSACryptoServiceProvider();
             rsa.FromXmlString(rsaPrivateKey);
             return rsa.Decrypt(data, false);
         }
 
-        public static string ComputeHash(string data)
+        #endregion
+
+
+        #region Signature
+
+        public static string SignData(in string data, string rsaPrivateKey)
         {
-            var md5 = new MD5CryptoServiceProvider();
-            var hash = md5.ComputeHash(Encoding.Unicode.GetBytes(data));
+            var signature = SignRSA(Encoding.GetBytes(data), rsaPrivateKey);
+            return Convert.ToBase64String(signature);
+        }
+
+        public static byte[] SignRSA(in byte[] bytes, string rsaPrivateKey)
+        {
+            var rsa = new RSACryptoServiceProvider();
+            rsa.FromXmlString(rsaPrivateKey);
+            return rsa.SignData(bytes, HashAlgorithmName.MD5);
+        }
+
+        public static bool VerifyData(in string data, string rsaPublicKey, string signature)
+        {
+            return VerifyRSA(Encoding.GetBytes(data), rsaPublicKey,
+                Convert.FromBase64String(signature));
+        }
+
+        public static bool VerifyRSA(in byte[] bytes, string rsaPublicKey, byte[] signature)
+        {
+            var rsa = new RSACryptoServiceProvider();
+            rsa.FromXmlString(rsaPublicKey);
+            return rsa.VerifyData(bytes, HashAlgorithmName.MD5, signature);
+        }
+
+        #endregion
+
+
+        #region Hashing
+
+        public static string ComputeHash(in string data)
+        {
+            var hash = ComputeMD5Hash(Encoding.GetBytes(data));
             return BitConverter.ToString(hash);
         }
+
+        public static byte[] ComputeMD5Hash(in byte[] bytes)
+        {
+            var md5 = new MD5CryptoServiceProvider();
+            return md5.ComputeHash(bytes);
+        }
+
+        #endregion
     }
 }
