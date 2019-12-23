@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CryptoMailClient.Models;
@@ -57,6 +56,42 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
+        private bool _encryptionChecked;
+
+        public bool EncryptionChecked
+        {
+            get => _encryptionChecked;
+            set
+            {
+                _encryptionChecked = value;
+                OnPropertyChanged(nameof(EncryptionChecked));
+                OnPropertyChanged(nameof(EncryptionToolTip));
+            }
+        }
+
+        public string EncryptionToolTip =>
+            _encryptionChecked ?
+                "Письмо будет зашифровано":
+                "Защитить электронное письмо с помощью шифрования";
+
+        private bool _signatureChecked;
+
+        public bool SignatureChecked
+        {
+            get => _signatureChecked;
+            set
+            {
+                _signatureChecked = value;
+                OnPropertyChanged(nameof(SignatureChecked));
+                OnPropertyChanged(nameof(SignatureToolTip));
+            }
+        }
+
+        public string SignatureToolTip =>
+            _signatureChecked ?
+                "Письмо будет подписано" :
+                "Подтвердить авторство электронного письма с помощью электронно-цифровой подписи";
+
         public RelayCommand SendCommand { get; }
         public RelayCommand CloseCommand { get; }
 
@@ -75,7 +110,9 @@ namespace CryptoMailClient.ViewModels
         {
             try
             {
-                await Mailbox.SendMessage(Address, Subject, Body, Attachments.ToArray());
+                await Mailbox.SendMessage(Address, Subject, Body,
+                    Attachments.ToArray(), _encryptionChecked,
+                    _signatureChecked);
                 OnMessageBoxDisplayRequest(Title, "Письмо отправлено.");
                 OnCloseRequested();
             }

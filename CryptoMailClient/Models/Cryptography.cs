@@ -180,9 +180,15 @@ namespace CryptoMailClient.Models
 
         public static byte[] SignRSA(in byte[] bytes, string rsaPrivateKey)
         {
-            var rsa = new RSACryptoServiceProvider();
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
             rsa.FromXmlString(rsaPrivateKey);
-            return rsa.SignData(bytes, HashAlgorithmName.MD5);
+
+            RSAParameters rsaParams = rsa.ExportParameters(true);
+            RSACng rsaAlgorithm = new RSACng();
+            rsaAlgorithm.ImportParameters(rsaParams);
+
+            return rsaAlgorithm.SignData(bytes, HashAlgorithmName.MD5,
+                RSASignaturePadding.Pss);
         }
 
         public static bool VerifyData(in string data, string rsaPublicKey, string signature)
@@ -193,9 +199,15 @@ namespace CryptoMailClient.Models
 
         public static bool VerifyRSA(in byte[] bytes, string rsaPublicKey, byte[] signature)
         {
-            var rsa = new RSACryptoServiceProvider();
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
             rsa.FromXmlString(rsaPublicKey);
-            return rsa.VerifyData(bytes, HashAlgorithmName.MD5, signature);
+
+            RSAParameters rsaParams = rsa.ExportParameters(false);
+            RSACng rsaAlgorithm = new RSACng();
+            rsaAlgorithm.ImportParameters(rsaParams);
+
+            return rsa.VerifyData(bytes, signature, HashAlgorithmName.MD5,
+                RSASignaturePadding.Pss);
         }
 
         #endregion

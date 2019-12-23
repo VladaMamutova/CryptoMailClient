@@ -6,6 +6,7 @@ namespace CryptoMailClient.Models
     {
         private const string USERS_DIRECTORY = "Users";
         private const string USER_INFO_FILE = "user.inf";
+        private const string PUBLIC_KEYS_DIRECTORY = "public";
 
         public static User CurrentUser { get; private set; }
 
@@ -17,6 +18,11 @@ namespace CryptoMailClient.Models
         private static string GetUserInfoFile(string login)
         {
             return Path.Combine(USERS_DIRECTORY, login, USER_INFO_FILE);
+        }
+
+        private static string GetEmailAddressKeyFile(string address)
+        {
+            return Path.Combine(PUBLIC_KEYS_DIRECTORY, address + ".key");
         }
 
         public static string GetCurrentUserEmailFolder()
@@ -83,6 +89,25 @@ namespace CryptoMailClient.Models
             //todo: encrypt info
             File.WriteAllBytes(GetUserInfoFile(CurrentUser.Login),
                 CurrentUser.GetBytes());
+        }
+
+        public static bool TryFindEmailAddressPublicKey(string address, out string publicKey)
+        {
+            publicKey = null;
+            if (!Directory.Exists(PUBLIC_KEYS_DIRECTORY))
+            {
+                Directory.CreateDirectory(PUBLIC_KEYS_DIRECTORY);
+                return false;
+            }
+
+            string keyFile = GetEmailAddressKeyFile(address);
+            if (File.Exists(keyFile))
+            {
+                publicKey = File.ReadAllText(keyFile);
+                return true;
+            }
+            
+            return false;
         }
     }
 }

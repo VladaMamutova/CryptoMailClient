@@ -53,47 +53,39 @@
             <TextBox Grid.Row="0" Text="{Binding Address, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Padding="22 0 0 0"/>
             <TextBlock Grid.Row="2" Text="Тема" VerticalAlignment="Center" Foreground="{StaticResource MaterialDesignBodyLight}"></TextBlock>
             <TextBox Grid.Row="2" Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Padding="22 0 0 0"/>
-            <!--<StackPanel Grid.Row="4" Orientation="Horizontal">
-                <ListBox Margin="0 0 10 0" SelectionMode="Extended"
-                         Style="{StaticResource MaterialDesignToolToggleFlatListBox}">
-                    <ListBoxItem>
-                        <materialDesign:PackIcon Kind="FormatBold" />
-                    </ListBoxItem>
-                    <ListBoxItem>
-                        <materialDesign:PackIcon Kind="FormatItalic" />
-                    </ListBoxItem>
-                    <ListBoxItem>
-                        <materialDesign:PackIcon Kind="FormatUnderline" />
-                    </ListBoxItem>
-                </ListBox>
-                <ListBox Style="{StaticResource MaterialDesignToolToggleFlatListBox}" SelectedIndex="0">
-                    <ListBoxItem>
-                        <materialDesign:PackIcon Kind="FormatAlignLeft" />
-                    </ListBoxItem>
-                    <ListBoxItem>
-                        <materialDesign:PackIcon
-                            Kind="FormatAlignCenter" />
-                    </ListBoxItem>
-                    <ListBoxItem>
-                        <materialDesign:PackIcon
-                            Kind="FormatAlignRight" />
-                    </ListBoxItem>
-                    <ListBoxItem>
-                        <materialDesign:PackIcon
-                            Kind="FormatAlignJustify" />
-                    </ListBoxItem>
-                </ListBox>
-            </StackPanel>-->
-
             <htmlEditor:HtmlEditor Grid.Row="5" x:Name="HtmlEditor" BindingContent="{Binding Body, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
             <Grid Grid.Row="7">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="10"></ColumnDefinition>
                     <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Button Grid.Column="0" Content="СОХРАНИТЬ ЧЕРНОВИК" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left"/>
-                <Button Grid.Column="2" Content="ОТПРАВИТЬ" HorizontalAlignment="Right" Command="{Binding SendCommand}"/>
+                <StackPanel Grid.Column="2" HorizontalAlignment="Right" Orientation="Horizontal">
+                    <ToggleButton Margin="0 0 10 0" Background="{StaticResource AttentionToActionBrush}"
+                                  Style="{StaticResource MaterialDesignActionToggleButton}"
+                                  ToolTip="{Binding EncryptionToolTip}"
+                                  IsChecked="{Binding EncryptionChecked}">
+                        <ToggleButton.Content>
+                            <materialDesign:PackIcon Kind="SecurityOff" />
+                        </ToggleButton.Content>
+                        <materialDesign:ToggleButtonAssist.OnContent>
+                            <materialDesign:PackIcon Kind="SecurityLock" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                        </materialDesign:ToggleButtonAssist.OnContent>
+                    </ToggleButton>
+                    <ToggleButton Margin="0 0 30 0" Background="{StaticResource AttentionToActionBrush}"
+                        Style="{StaticResource MaterialDesignActionToggleButton}"
+                        ToolTip="{Binding SignatureToolTip}"
+                        IsChecked="{Binding SignatureChecked}">
+                        <ToggleButton.Content>
+                            <materialDesign:PackIcon Kind="AlertDecagram" />
+                        </ToggleButton.Content>
+                        <materialDesign:ToggleButtonAssist.OnContent>
+                            <materialDesign:PackIcon Kind="CheckDecagram" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                        </materialDesign:ToggleButtonAssist.OnContent>
+                    </ToggleButton>
+                    <Button Content="ОТПРАВИТЬ" HorizontalAlignment="Right" Command="{Binding SendCommand}"/>
+                </StackPanel>
             </Grid>
         </Grid>
     </Grid>

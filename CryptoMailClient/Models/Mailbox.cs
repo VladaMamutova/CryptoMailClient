@@ -279,7 +279,9 @@ namespace CryptoMailClient.Models
             }
         }
 
-        public static async Task SendMessage(string address, string subject, string htmlContent, string[] attachments)
+        public static async Task SendMessage(string address, string subject,
+            string htmlContent, string[] attachments = null, 
+            bool needToEncrypt = false, bool neewToSign = false)
         {
             if (UserManager.CurrentUser?.CurrentEmailAccount == null)
             {
@@ -288,8 +290,7 @@ namespace CryptoMailClient.Models
 
             if (string.IsNullOrWhiteSpace(address))
             {
-                throw new Exception(
-                    "Введите адрес получателя.");
+                throw new Exception("Введите адрес получателя.");
             }
 
             var regex = new Regex(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
@@ -299,12 +300,22 @@ namespace CryptoMailClient.Models
                     "Неверный адрес почтовыго ящика получателя.");
             }
 
+
+            // логическое И (&) - чтобы обязательно был инициализирован publicKey
+            if (needToEncrypt &
+                !UserManager.TryFindEmailAddressPublicKey(address, out string publicKey))
+            {
+                throw new Exception("Публичный ключ пользователя с почтовым " +
+                                    $"адресом {address} не найден.\n" +
+                                    "Получите ключ от пользователя и поместите файл " +
+                                    $"с ключом \"{address}.key\" в папку \"public\".");
+            }
+
             MimeMessage message = new MimeMessage();
             message.From.Add(new MailboxAddress("",
                 UserManager.CurrentUser.CurrentEmailAccount.Address));
             message.Subject = subject ?? "";
             message.To.Add(new MailboxAddress(address));
-
 
             var bodyBuilder = new BodyBuilder
             {
@@ -314,9 +325,29 @@ namespace CryptoMailClient.Models
                            "</html>"
             };
 
-            foreach (var attachment in attachments)
+            if (needToEncrypt)
             {
-                bodyBuilder.Attachments.Add(attachment);
+                // Добавляем собственный заголовок типа содержимого
+                // с указанием того, что письмо зашифровано.
+                message.Headers.Add("X-Encrypted", bool.TrueString);
+                bodyBuilder.HtmlBody = Cryptography.EncryptData(bodyBuilder.HtmlBody, publicKey);
+            }
+
+            if (neewToSign)
+            {
+                message.Headers.Add("X-Signed", bool.TrueString);
+                string privateKey = UserManager.CurrentUser.CurrentEmailAccount
+                    .RsaPrivateKey;
+                string signature = Cryptography.SignData(bodyBuilder.HtmlBody, privateKey);
+                message.Headers.Add("X-Signature", signature);
+            }
+
+            if (attachments != null)
+            {
+                foreach (var attachment in attachments)
+                {
+                    bodyBuilder.Attachments.Add(attachment);
+                }
             }
 
             message.Body = bodyBuilder.ToMessageBody();
