@@ -146,7 +146,7 @@ namespace CryptoMailClient.ViewModels
                         OnPropertyChanged(nameof(HasEmailAccounts));
 
                         UpdateFolders();
-                        SelectFolder(SelectedFolder?.Name);
+                        SelectFolder(SelectedFolder?.FullName);
                     }
                 }
             }
@@ -166,7 +166,7 @@ namespace CryptoMailClient.ViewModels
 
                     await Mailbox.ResetImapConnection();
                     UpdateFolders();
-                    SelectFolder(SelectedFolder?.Name);
+                    SelectFolder(SelectedFolder?.FullName);
 
                     OnPropertyChanged(nameof(MessageRangeText));
                 }
@@ -181,21 +181,13 @@ namespace CryptoMailClient.ViewModels
         {
             try
             {
-                if (o is string folderName)
+                if (o is string folderFullName)
                 {
-                    string engFolderName = null;
-                    if (folderName.ToLower() == "входящие")
-                        engFolderName = "inbox";
-                    if (folderName.ToLower() == "социальные сети")
-                        engFolderName = "social";
-                    if (folderName.ToLower() == "рассылки")
-                        engFolderName = "newsletters";
-
-                    if (Mailbox.OpenFolder(engFolderName ?? folderName))
+                    if (Mailbox.OpenFolder(folderFullName))
                     {
                         LoadMessages();
                         SelectedFolder = Folders.First(f =>
-                            f.Name == folderName);
+                            f.FullName == folderFullName);
                         OnPropertyChanged(nameof(SelectedFolder));
                     }
                 }
@@ -211,7 +203,7 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
-        private void ReadEmail(object o)
+        private async void ReadEmail(object o)
         {
             if (o == null || !(o is MessageItem item)) return;
 
@@ -228,7 +220,8 @@ namespace CryptoMailClient.ViewModels
                         {
                             verificationResult = Cryptography.VerifyData(
                                 htmlBody.TrimEnd('\n', '\r'), publicKey,
-                                item.Message.Headers[Cryptography.HEADER_SIGNATURE])
+                                item.Message.Headers[
+                                    Cryptography.HEADER_SIGNATURE])
                                 ? CryptographicResult.Success
                                 : CryptographicResult.Error;
                         }
@@ -246,7 +239,8 @@ namespace CryptoMailClient.ViewModels
 
                 CryptographicResult decryptionResult =
                     CryptographicResult.None;
-                if (item.Message.Headers.Contains(Cryptography.HEADER_ENCRYPTED))
+                if (item.Message.Headers.Contains(Cryptography.HEADER_ENCRYPTED)
+                )
                 {
                     try
                     {
@@ -290,6 +284,25 @@ namespace CryptoMailClient.ViewModels
             item.HtmlBody = htmlBody;
 
             OnShowDialogRequested(item);
+
+            if (!item.Seen)
+            {
+                try
+                {
+                    Messages.ToList().Find(m => m.FullName == item.FullName)
+                        .Seen = true;
+                    OnPropertyChanged(nameof(Messages));
+
+                    await Mailbox.SetMessageSeen(item.FullName,
+                        SelectedFolder.FullName);
+                }
+                catch (Exception ex)
+                {
+                    OnMessageBoxDisplayRequest(Title,
+                        "Не удалось синхронизировать письмо с сервером. " +
+                        ex.Message);
+                }
+            }
         }
 
         private void WriteEmail(object o)
@@ -308,7 +321,7 @@ namespace CryptoMailClient.ViewModels
             {
                 await Mailbox.Synchronize();
                 UpdateFolders();
-                SelectFolder(SelectedFolder?.Name);
+                SelectFolder(SelectedFolder?.DisplayName);
                 DialogHost.CloseDialogCommand.Execute(null, null);
                 // Явно закрываем диалог, так как предыдущая
                 // команда иногда может не выполняться.
@@ -317,7 +330,7 @@ namespace CryptoMailClient.ViewModels
             catch (Exception e)
             {
                 UpdateFolders();
-                SelectFolder(SelectedFolder?.Name);
+                SelectFolder(SelectedFolder?.DisplayName);
                 DialogHost.CloseDialogCommand.Execute(null, null);
                 // Явно закрываем диалог, так как предыдущая
                 // команда иногда может не выполняться.
@@ -340,28 +353,31 @@ namespace CryptoMailClient.ViewModels
                     for (var i = 0; i < Mailbox.Folders.Count; i++)
                     {
                         var folder = Mailbox.Folders[i];
-                        if (folder.Name.ToLower() == "отправленные")
+                        if (folder.DisplayName.ToLower() == "отправленные")
                         {
                             sentIndex = i;
                         }
 
-                        if (folder.Name.ToLower() == "inbox")
+                        if (folder.DisplayName.ToLower() == "inbox")
                         {
-                            folders.Add(
-                                new FolderItem("Входящие", folder.Count));
+                            folders.Add(new FolderItem(folder.FullName,
+                                "Входящие", folder.Count));
                             inboxIndex = i;
                         }
                         else
                         {
-                            string ruFolderName = null;
-                            if (folder.Name.ToLower() == "social")
-                                ruFolderName = "Социальные сети";
-                            if (folder.Name.ToLower() == "newsletters")
-                                ruFolderName = "Рассылки";
+                            string displayName = folder.DisplayName;
+                            if (displayName.ToLower() == "social")
+                            {
+                                displayName = "Социальные сети";
+                            }
+                            else if (displayName.ToLower() == "newsletters")
+                            {
+                                displayName = "Рассылки";
+                            }
 
-                            folders.Add(new FolderItem(
-                                ruFolderName ?? folder.Name,
-                                folder.Count));
+                            folders.Add(new FolderItem(folder.FullName,
+                                displayName, folder.Count));
                         }
                     }
 
@@ -409,7 +425,8 @@ namespace CryptoMailClient.ViewModels
                     var messages = new ObservableCollection<MessageItem>();
                     foreach (var message in Mailbox.CurrentMessages)
                     {
-                        messages.Add(new MessageItem(message.Key, message.Value));
+                        messages.Add(
+                            new MessageItem(message.Key, message.Value));
                     }
 
                     Messages = messages;

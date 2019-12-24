@@ -11,6 +11,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Pink.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <utilities:CryptographicResultToForegroundConverter x:Key="CryptographicResultToForegroundConverter" />
+            <utilities:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

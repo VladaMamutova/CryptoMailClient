@@ -131,7 +131,7 @@ namespace CryptoMailClient.Models
 
             string folderPath =
                 Path.Combine(UserManager.GetCurrentUserEmailFolder(),
-                    CurrentFolder.RelativePath);
+                    CurrentFolder.FullName);
             List<string> messagesFiles =
                 Directory.GetFiles(folderPath, "*.msg").ToList();
             messagesFiles.Sort(new NaturalStringComparer());
@@ -365,15 +365,53 @@ namespace CryptoMailClient.Models
             sentFolder.Append(message, MessageFlags.Seen, message.Date);
         }
 
+        public static async Task SetMessageSeen(string messageRelativePath, string folderRelativePath)
+        {
+            if (UserManager.CurrentUser?.CurrentEmailAccount == null) return;
+            
+            if (await CheckImapConnection())
+            {
+                // Из полного имени получаем идентификатор письма.
+                string name = Path.GetFileName(messageRelativePath) ?? string.Empty;
+                uint uid = uint.Parse(name.Substring(0,
+                    name.IndexOf(' ')));
+                UniqueId uniqueId = new UniqueId(uid);
+             
+                // Получаем и открываем папку, в которой находится необходимое письмо.
+                var serverFolder = await _imapClient.GetFolderAsync(
+                    folderRelativePath.Replace('\\', '/'));
+                await serverFolder.OpenAsync(FolderAccess.ReadWrite);
 
-        public static bool OpenFolder(string name)
+                // Устаналиваем флаг просмотра сообщения и
+                // получаем обновлённый список флагов данного сообщения.
+                await serverFolder.AddFlagsAsync(uniqueId, MessageFlags.Seen, true);
+                var serverLetter = serverFolder.Fetch(
+                    new List<UniqueId> {uniqueId},
+                    MessageSummaryItems.UniqueId | MessageSummaryItems.Flags);
+
+                await serverFolder.CloseAsync();
+              
+                var messageFlags = serverLetter[0]?.Flags;
+                if (messageFlags != null)
+                {
+                    // Изменяем имя файла письма.
+                    string newMessagePath = Path.Combine(
+                        UserManager.GetCurrentUserEmailFolder(),
+                        folderRelativePath,
+                        uid + " (" + messageFlags + ")" + ".msg");
+                    File.Move(messageRelativePath, newMessagePath);
+                }
+            }
+        }
+
+        public static bool OpenFolder(string relativePath)
         {
             try
             {
-                if (CurrentFolder?.Name == name) return false;
+                if (CurrentFolder?.FullName == relativePath) return false;
 
-                CurrentFolder = Folders.First(f => string.Equals(f.Name, name,
-                    StringComparison.CurrentCultureIgnoreCase));
+                CurrentFolder = Folders.First(f => string.Equals(f.FullName,
+                    relativePath, StringComparison.CurrentCultureIgnoreCase));
                 FirstMessage = 1;
                 return true;
             }

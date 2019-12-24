@@ -131,9 +131,9 @@
                                     </Grid.ColumnDefinitions>
                                     <Grid.InputBindings>
                                         <MouseBinding Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}},
-                                  Path=DataContext.SelectFolderCommand}" CommandParameter="{Binding Name}" MouseAction="LeftClick"/>
+                                  Path=DataContext.SelectFolderCommand}" CommandParameter="{Binding FullName}" MouseAction="LeftClick"/>
                                     </Grid.InputBindings>
-                                    <TextBlock Grid.Column="0" Padding="14 6 0 6" Text="{Binding Name}"></TextBlock>
+                                    <TextBlock Grid.Column="0" Padding="14 6 0 6" Text="{Binding DisplayName}"></TextBlock>
                                     <TextBlock Grid.Column="1" Padding="0 6 14 6" Text="{Binding Count}"></TextBlock>
                                 </Grid>
                             </DataTemplate>
@@ -189,8 +189,8 @@
                                             Style="{StaticResource MaterialDesignActionLightToggleButton}"
                                             Content="{Binding CodeFrom}" />
                                         <StackPanel Margin="8 0 0 0" Grid.Column="1">
-                                            <TextBlock FontWeight="Medium" Text="{Binding NameFrom}" />
-                                            <TextBlock Text="{Binding Subject}" />
+                                            <TextBlock Text="{Binding NameFrom}" FontWeight="{Binding Seen, Converter={StaticResource BoolToFontWeightConverter}}"/>
+                                            <TextBlock Text="{Binding Subject}" FontWeight="{Binding Seen, Converter={StaticResource BoolToFontWeightConverter}}"/>
                                         </StackPanel>
                                         <TextBlock Grid.Column="2" Text="{Binding DateText}" />
                                     </Grid>

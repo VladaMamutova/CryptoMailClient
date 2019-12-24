@@ -1,27 +1,30 @@
-﻿namespace CryptoMailClient.ViewModels
+﻿using System.IO;
+
+namespace CryptoMailClient.ViewModels
 {
     public class FolderItem
     {
-        public string RelativePath { get; set; }
-        public string Name { get; set; }
+        public string FullName { get; }
+        public string DisplayName { get; }
         public int Count { get; set; }
 
-        public FolderItem(string path, string name, int count)
+        public FolderItem(string fullName, string displayName, int count)
         {
-            RelativePath = path;
-            Name = name;
+            FullName = fullName;
+            DisplayName = displayName;
             Count = count;
         }
 
-        public FolderItem(string name, int count)
+        public FolderItem(string path, int count)
         {
-            Name = name;
+            FullName = path;
+            DisplayName = Path.GetDirectoryName(path);
             Count = count;
         }
 
         public override string ToString()
         {
-            return Name;
+            return DisplayName;
         }
     }
 }

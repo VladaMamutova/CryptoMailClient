@@ -256,13 +256,13 @@ namespace CryptoMailClient.Models.Online
             }
         }
 
-        public static bool OpenFolder(string name)
+        public static bool OpenFolder(string relativePath)
         {
             try
             {
-                if (CurrentFolder?.Name == name) return false;
+                if (CurrentFolder?.FullName == relativePath) return false;
 
-                CurrentFolder = Folders.First(f => string.Equals(f.Name, name,
+                CurrentFolder = Folders.First(f => string.Equals(f.FullName, relativePath,
                     StringComparison.CurrentCultureIgnoreCase));
                 FirstMessage = 1;
                 return true;

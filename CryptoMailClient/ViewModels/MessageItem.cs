@@ -39,6 +39,7 @@ namespace CryptoMailClient.ViewModels
         }
 
         public MimeMessage Message { get; }
+        public string FullName { get; }
 
         // Эти поля отображаются как в списке писем,
         // так и в окне просмотра конкретного письма.
@@ -114,7 +115,8 @@ namespace CryptoMailClient.ViewModels
         public MessageItem(string fileName, MimeMessage message)
         {
             Message = message;
-            Seen = (fileName ?? "").Contains("Seen");
+            FullName = fileName ?? "";
+            Seen = FullName.Contains("Seen");
             DecryptionResult = CryptographicResult.None;
             VerificationResult = CryptographicResult.None;
 

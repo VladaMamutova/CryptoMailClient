@@ -46,7 +46,7 @@ namespace CryptoMailClient.Views
             DataContext = viewModel;
 
             viewModel.UpdateFolders();
-            viewModel.SelectFolder(viewModel.SelectedFolder?.Name);
+            viewModel.SelectFolder(viewModel.SelectedFolder?.FullName);
         }
 
         private void Window_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
