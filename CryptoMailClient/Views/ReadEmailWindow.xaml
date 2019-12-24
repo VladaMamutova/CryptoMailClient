@@ -30,12 +30,21 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" FontSize="18" Text="{Binding Subject}" FontWeight="Medium" TextWrapping="Wrap"></TextBlock>
-                <Button Grid.Column="2" Width="24" Height="24" Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top"
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Width="24" Height="24"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                            Background="{x:Null}" BorderBrush="{x:Null}" 
+                            Foreground="{StaticResource PrimaryHueLightBrush}"
+                            ToolTip="Развернуть" Click="ButtonExpand_OnClick">
+                        <materialDesign:PackIcon Kind="ArrowExpand" Width="23" Height="23"/>
+                    </Button>
+                    <Button Margin="8 0 0 0" Width="24" Height="24" Cursor="Hand" ToolTip="Закрыть" HorizontalAlignment="Right" VerticalAlignment="Top"
                     Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
                     Background="{x:Null}" BorderBrush="{x:Null}" Click="Close_OnClick">
-                    <materialDesign:PackIcon Width="24" Height="24" Kind="Close" 
+                        <materialDesign:PackIcon Width="24" Height="24" Kind="Close" 
                                          Foreground="{StaticResource PrimaryHueLightBrush}"/>
-                </Button>
+                    </Button>
+                </StackPanel>
             </Grid>
         </materialDesign:ColorZone>
         <Grid Grid.Row="1" Margin="15">

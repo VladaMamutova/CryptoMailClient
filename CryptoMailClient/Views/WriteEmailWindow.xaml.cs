@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using CryptoMailClient.ViewModels;
 
@@ -29,9 +30,18 @@ namespace CryptoMailClient.Views
             DragMove();
         }
 
-        private void Close_OnClick(object sender, RoutedEventArgs e)
+        private void ButtonExpand_OnClick(object sender, RoutedEventArgs e)
         {
-            DialogResult = true;
+            if (WindowState == WindowState.Maximized)
+            {
+                WindowState = WindowState.Normal;
+                ((Button)sender).ToolTip = "Развернуть";
+            }
+            else
+            {
+                WindowState = WindowState.Maximized;
+                ((Button)sender).ToolTip = "Свернуть";
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using CryptoMailClient.ViewModels;
 
 namespace CryptoMailClient.Views
@@ -28,6 +29,20 @@ namespace CryptoMailClient.Views
             if(DataContext is MessageItem message)
             {
                 WebBrowser.NavigateToString(message.HtmlBody);
+            }
+        }
+
+        private void ButtonExpand_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (WindowState == WindowState.Maximized)
+            {
+                WindowState = WindowState.Normal;
+                ((Button)sender).ToolTip = "Развернуть";
+            }
+            else
+            {
+                WindowState = WindowState.Maximized;
+                ((Button)sender).ToolTip = "Свернуть";
             }
         }
     }

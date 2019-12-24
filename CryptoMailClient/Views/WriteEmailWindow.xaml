@@ -22,7 +22,7 @@
         <materialDesign:ColorZone Padding="15"
                                   materialDesign:ShadowAssist.ShadowDepth="Depth2"
                                   Mode="PrimaryMid" DockPanel.Dock="Top"
-                                  MouseLeftButtonDown="Window_OnMouseLeftButtonDown">   
+                                  MouseLeftButtonDown="Window_OnMouseLeftButtonDown">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -30,12 +30,21 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" FontSize="18" Text="{Binding Title}" FontWeight="Medium" TextWrapping="Wrap"></TextBlock>
-                <Button Grid.Column="2" Width="24" Height="24" Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top"
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Width="24" Height="24"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                            Background="{x:Null}" BorderBrush="{x:Null}" 
+                            Foreground="{StaticResource PrimaryHueLightBrush}"
+                            ToolTip="Развернуть" Click="ButtonExpand_OnClick">
+                        <materialDesign:PackIcon Kind="ArrowExpand" Width="23" Height="23"/>
+                    </Button>
+                    <Button Margin="10 0 0 0" ToolTip="Закрыть" Width="24" Height="24" Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top"
                         Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
                         Background="{x:Null}" BorderBrush="{x:Null}" Command="{Binding CloseCommand}">
-                    <materialDesign:PackIcon Width="24" Height="24" Kind="Close" 
+                        <materialDesign:PackIcon Width="24" Height="24" Kind="Close" 
                                              Foreground="{StaticResource PrimaryHueLightBrush}"/>
-                </Button>
+                    </Button>
+                </StackPanel>
             </Grid>
         </materialDesign:ColorZone>
         <Grid Grid.Row="1" Margin="15">
@@ -54,39 +63,32 @@
             <TextBlock Grid.Row="2" Text="Тема" VerticalAlignment="Center" Foreground="{StaticResource MaterialDesignBodyLight}"></TextBlock>
             <TextBox Grid.Row="2" Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Padding="22 0 0 0"/>
             <htmlEditor:HtmlEditor Grid.Row="5" x:Name="HtmlEditor" BindingContent="{Binding Body, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-            <Grid Grid.Row="7">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    <ColumnDefinition Width="10"></ColumnDefinition>
-                    <ColumnDefinition></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Content="СОХРАНИТЬ ЧЕРНОВИК" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left"/>
-                <StackPanel Grid.Column="2" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <ToggleButton Margin="0 0 10 0" Background="{StaticResource AttentionToActionBrush}"
+
+            <StackPanel Grid.Row="7" HorizontalAlignment="Right" Orientation="Horizontal">
+                <ToggleButton Margin="0 0 10 0" Background="{StaticResource AttentionToActionBrush}"
                                   Style="{StaticResource MaterialDesignActionToggleButton}"
                                   ToolTip="{Binding EncryptionToolTip}"
                                   IsChecked="{Binding EncryptionChecked}">
-                        <ToggleButton.Content>
-                            <materialDesign:PackIcon Kind="SecurityOff" />
-                        </ToggleButton.Content>
-                        <materialDesign:ToggleButtonAssist.OnContent>
-                            <materialDesign:PackIcon Kind="SecurityLock" Foreground="{StaticResource PrimaryHueMidBrush}"/>
-                        </materialDesign:ToggleButtonAssist.OnContent>
-                    </ToggleButton>
-                    <ToggleButton Margin="0 0 30 0" Background="{StaticResource AttentionToActionBrush}"
+                    <ToggleButton.Content>
+                        <materialDesign:PackIcon Kind="SecurityOff" />
+                    </ToggleButton.Content>
+                    <materialDesign:ToggleButtonAssist.OnContent>
+                        <materialDesign:PackIcon Kind="SecurityLock" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                    </materialDesign:ToggleButtonAssist.OnContent>
+                </ToggleButton>
+                <ToggleButton Margin="0 0 30 0" Background="{StaticResource AttentionToActionBrush}"
                         Style="{StaticResource MaterialDesignActionToggleButton}"
                         ToolTip="{Binding SignatureToolTip}"
                         IsChecked="{Binding SignatureChecked}">
-                        <ToggleButton.Content>
-                            <materialDesign:PackIcon Kind="AlertDecagram" />
-                        </ToggleButton.Content>
-                        <materialDesign:ToggleButtonAssist.OnContent>
-                            <materialDesign:PackIcon Kind="CheckDecagram" Foreground="{StaticResource PrimaryHueMidBrush}"/>
-                        </materialDesign:ToggleButtonAssist.OnContent>
-                    </ToggleButton>
-                    <Button Content="ОТПРАВИТЬ" HorizontalAlignment="Right" Command="{Binding SendCommand}"/>
-                </StackPanel>
-            </Grid>
+                    <ToggleButton.Content>
+                        <materialDesign:PackIcon Kind="AlertDecagram" />
+                    </ToggleButton.Content>
+                    <materialDesign:ToggleButtonAssist.OnContent>
+                        <materialDesign:PackIcon Kind="CheckDecagram" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                    </materialDesign:ToggleButtonAssist.OnContent>
+                </ToggleButton>
+                <Button Content="ОТПРАВИТЬ" HorizontalAlignment="Right" Command="{Binding SendCommand}"/>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

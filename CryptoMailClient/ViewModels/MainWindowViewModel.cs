@@ -306,18 +306,29 @@ namespace CryptoMailClient.ViewModels
 
             if (!item.Seen)
             {
+                DialogHost.OpenDialogCommand.Execute(new ProgressDialog(),
+                    null);
                 try
                 {
+                    await Mailbox.MarkLetters(true,
+                        new List<string> {item.FullName},
+                        SelectedFolder.FullName);
+
                     Messages.ToList().Find(m => m.FullName == item.FullName)
                         .Seen = true;
                     OnPropertyChanged(nameof(Messages));
 
-                    await Mailbox.MarkLetters(true,
-                        new List<string> {item.FullName},
-                        SelectedFolder.FullName);
+                    DialogHost.CloseDialogCommand.Execute(null, null);
+                    // Явно закрываем диалог, так как предыдущая
+                    // команда иногда может не выполняться.
+                    IsDialogOpen = false;
                 }
                 catch (Exception ex)
                 {
+                    DialogHost.CloseDialogCommand.Execute(null, null);
+                    // Явно закрываем диалог, так как предыдущая
+                    // команда иногда может не выполняться.
+                    IsDialogOpen = false;
                     OnMessageBoxDisplayRequest(Title,
                         "Не удалось синхронизировать письмо с сервером. " +
                         ex.Message);
@@ -330,6 +341,7 @@ namespace CryptoMailClient.ViewModels
             if (UserManager.CurrentUser?.CurrentEmailAccount != null)
             {
                 OnShowDialogRequested(null);
+                UpdateFolders();
             }
         }
 

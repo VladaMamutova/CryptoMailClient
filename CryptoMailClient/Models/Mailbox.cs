@@ -364,9 +364,16 @@ namespace CryptoMailClient.Models
 
             if (!await CheckImapConnection()) return;
 
-            //todo:sync this folder only
             var sentFolder = _imapClient.GetFolder(SpecialFolder.Sent);
-            sentFolder.Append(message, MessageFlags.Seen, message.Date);
+            UniqueId? uid =
+                sentFolder.Append(message, MessageFlags.Seen, message.Date);
+            if (uid != null)
+            {
+                await message.WriteToAsync(Path.Combine(
+                    UserManager.GetCurrentUserEmailFolder(),
+                    sentFolder.FullName,
+                    uid + " (" + MessageFlags.Seen + ").msg"));
+            }
         }
 
         public static async Task MarkLetters(bool setSeenFlag,
