@@ -84,7 +84,6 @@
     </Compile>
     <Compile Include="Models\Cryptography.cs" />
     <Compile Include="Models\Online\Mailbox.cs" />
-    <Compile Include="Models\MailProtocols.cs" />
     <Compile Include="Models\Mailbox.cs" />
     <Compile Include="Models\UserManager.cs" />
     <Compile Include="Models\User.cs" />
@@ -143,6 +142,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -84,10 +84,10 @@ namespace CryptoMailClient.Models
             _password = password ??
                         throw new ArgumentNullException(nameof(password));
 
-            Smtp = new MailProtocol(MailProtocols.SMTP, mailAddress.Host,
+            Smtp = new MailProtocol(MailProtocol.MailProtocols.SMTP, mailAddress.Host,
                 smtpPort);
 
-            Imap = new MailProtocol(MailProtocols.IMAP, mailAddress.Host,
+            Imap = new MailProtocol(MailProtocol.MailProtocols.IMAP, mailAddress.Host,
                 imapPort);
 
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();

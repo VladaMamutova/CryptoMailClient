@@ -6,6 +6,18 @@ namespace CryptoMailClient.Models
 {
     public class MailProtocol
     {
+        public enum MailProtocols
+        {
+            /// <summary>
+            /// Simple Mail Transfer Protocol.
+            /// </summary>
+            SMTP,
+            /// <summary>
+            /// Internet Message Access Protocol.
+            /// </summary>
+            IMAP
+        }
+
         public const int DEFAULT_SMTP_PORT = 465;
         public const int DEFAULT_IMAP_PORT = 993;
 

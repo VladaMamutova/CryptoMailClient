@@ -2,7 +2,7 @@
 
 namespace CryptoMailClient.Models
 {
-    public class UserManager
+    public static class UserManager
     {
         private const string USERS_DIRECTORY = "Users";
         private const string USER_INFO_FILE = "user.inf";

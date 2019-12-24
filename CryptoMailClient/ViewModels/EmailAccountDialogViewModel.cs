@@ -26,7 +26,7 @@ namespace CryptoMailClient.ViewModels
         public SecureString SecurePassword { private get; set; }
 
         public string SmtpServer => MailProtocol.GetServerFromMailAddress(
-            MailProtocols.SMTP,
+            MailProtocol.MailProtocols.SMTP,
             Address);
 
         private int _smtpPort;
@@ -52,7 +52,7 @@ namespace CryptoMailClient.ViewModels
         }
 
         public string ImapServer => MailProtocol.GetServerFromMailAddress(
-            MailProtocols.IMAP,
+            MailProtocol.MailProtocols.IMAP,
             Address);
 
         private int _imapPort;
@@ -86,10 +86,10 @@ namespace CryptoMailClient.ViewModels
         public bool IsReadOnly => !IsNewEmailAccount;
 
         public string SmtpPortHelpMessage =>
-            MailProtocol.GetMessageAboutValidPorts(MailProtocols.SMTP);
+            MailProtocol.GetMessageAboutValidPorts(MailProtocol.MailProtocols.SMTP);
 
         public string ImapPortHelpMessage =>
-            MailProtocol.GetMessageAboutValidPorts(MailProtocols.IMAP);
+            MailProtocol.GetMessageAboutValidPorts(MailProtocol.MailProtocols.IMAP);
 
         public RelayCommand AddCommand { get; }
         public RelayCommand UpdateCommand { get; }
