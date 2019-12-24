@@ -365,21 +365,21 @@ namespace CryptoMailClient.Models
             sentFolder.Append(message, MessageFlags.Seen, message.Date);
         }
 
-        public static async Task SetMessageSeen(string messageRelativePath, string folderRelativePath)
+        public static async Task SetMessageSeen(string messageFullName, string folderFullMame)
         {
             if (UserManager.CurrentUser?.CurrentEmailAccount == null) return;
             
             if (await CheckImapConnection())
             {
                 // Из полного имени получаем идентификатор письма.
-                string name = Path.GetFileName(messageRelativePath) ?? string.Empty;
+                string name = Path.GetFileName(messageFullName) ?? string.Empty;
                 uint uid = uint.Parse(name.Substring(0,
                     name.IndexOf(' ')));
                 UniqueId uniqueId = new UniqueId(uid);
              
                 // Получаем и открываем папку, в которой находится необходимое письмо.
                 var serverFolder = await _imapClient.GetFolderAsync(
-                    folderRelativePath.Replace('\\', '/'));
+                    folderFullMame.Replace('\\', '/'));
                 await serverFolder.OpenAsync(FolderAccess.ReadWrite);
 
                 // Устаналиваем флаг просмотра сообщения и
@@ -397,9 +397,56 @@ namespace CryptoMailClient.Models
                     // Изменяем имя файла письма.
                     string newMessagePath = Path.Combine(
                         UserManager.GetCurrentUserEmailFolder(),
-                        folderRelativePath,
+                        folderFullMame,
                         uid + " (" + messageFlags + ")" + ".msg");
-                    File.Move(messageRelativePath, newMessagePath);
+                    File.Move(messageFullName, newMessagePath);
+                }
+            }
+        }
+
+        public static async Task DeleteMessages(List<string> messageFullNames,
+            string folderFullName)
+        {
+            if (UserManager.CurrentUser?.CurrentEmailAccount == null) return;
+
+            if (await CheckImapConnection())
+            {
+                // Из полного имени получаем идентификатор письма.
+                List<string> names = messageFullNames.Select(Path.GetFileName)
+                    .Select(m => m.Substring(0, Math.Max(m.IndexOf(' '), 0)))
+                    .ToList();
+                names.RemoveAll(string.IsNullOrEmpty);
+                List<uint> uidList = names.Select(uint.Parse).ToList();
+                List<UniqueId> uniqueIdList =
+                    uidList.Select(i => new UniqueId(i)).ToList();
+
+                // Получаем и открываем папку, в которой находится необходимое письмо.
+                var serverFolder = await _imapClient.GetFolderAsync(
+                    folderFullName.Replace('\\', '/'));
+                await serverFolder.OpenAsync(FolderAccess.ReadWrite);
+
+                // Устаналиваем флаг удаления сообщения.
+                await serverFolder.AddFlagsAsync(uniqueIdList,
+                    MessageFlags.Deleted, true);
+
+                // Окончательно удаляем все сообщения, помеченные на удаление.
+                await serverFolder.ExpungeAsync();
+                await serverFolder.CloseAsync();
+
+                foreach (var messageFullName in messageFullNames)
+                {
+                    File.Delete(messageFullName);
+                }
+
+                int messageCount = Directory
+                    .GetFiles(Path.Combine(
+                        UserManager.GetCurrentUserEmailFolder(),
+                        folderFullName)).Length;
+                Folders.Find(f => f.FullName.Equals(folderFullName)).Count =
+                    messageCount;
+                if (CurrentFolder.FullName == folderFullName)
+                {
+                    CurrentFolder.Count = messageCount;
                 }
             }
         }

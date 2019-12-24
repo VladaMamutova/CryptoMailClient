@@ -116,7 +116,6 @@
     <Compile Include="ViewModels\EmailAccountDialogViewModel.cs" />
     <Compile Include="ViewModels\LoginWindowViewModel.cs" />
     <Compile Include="Utilities\ViewModelBase.cs" />
-    <Compile Include="ViewModels\Online\MainWindowViewModel.cs" />
     <Compile Include="Views\EmailAccountDialog.xaml.cs">
       <DependentUpon>EmailAccountDialog.xaml</DependentUpon>
     </Compile>

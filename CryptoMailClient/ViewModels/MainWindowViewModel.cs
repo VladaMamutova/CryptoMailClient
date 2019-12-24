@@ -82,6 +82,7 @@ namespace CryptoMailClient.ViewModels
         public RelayCommand SelectFolderCommand { get; }
         public RelayCommand ReadEmailCommand { get; }
         public RelayCommand WriteEmailCommand { get; }
+        public RelayCommand DeleteEmailCommand { get; }
         public RelayCommand SynchronizeCommand { get; }
         public RelayCommand GetNextMessagesCommand { get; }
         public RelayCommand GetPreviousMessagesCommand { get; }
@@ -98,6 +99,8 @@ namespace CryptoMailClient.ViewModels
             SelectFolderCommand = new RelayCommand(SelectFolder);
             ReadEmailCommand = new RelayCommand(ReadEmail);
             WriteEmailCommand = new RelayCommand(WriteEmail);
+            DeleteEmailCommand = new RelayCommand(DeleteEmails,
+                o => Messages?.Count(m => m.IsSelected) > 0);
 
             SynchronizeCommand = new RelayCommand(async o =>
             {
@@ -310,6 +313,42 @@ namespace CryptoMailClient.ViewModels
             if (UserManager.CurrentUser?.CurrentEmailAccount != null)
             {
                 OnShowDialogRequested(null);
+            }
+        }
+
+        private async void DeleteEmails(object obj)
+        {
+            if (UserManager.CurrentUser?.CurrentEmailAccount != null)
+            {
+                DialogHost.OpenDialogCommand.Execute(new ProgressDialog(),
+                    null);
+
+                try
+                {
+                    List<string> messagesToDelete = Messages.ToList()
+                        .FindAll(m => m.IsSelected).Select(m => m.FullName)
+                        .ToList();
+                    await Mailbox.DeleteMessages(messagesToDelete,
+                        SelectedFolder.FullName);
+                    UpdateFolders();
+                    LoadMessages();
+                    DialogHost.CloseDialogCommand.Execute(null, null);
+                    // Явно закрываем диалог, так как предыдущая
+                    // команда иногда может не выполняться.
+                    IsDialogOpen = false;
+                }
+                catch (Exception ex)
+                {
+                    UpdateFolders();
+                    LoadMessages();
+                    DialogHost.CloseDialogCommand.Execute(null, null);
+                    // Явно закрываем диалог, так как предыдущая
+                    // команда иногда может не выполняться.
+                    IsDialogOpen = false;
+                    OnMessageBoxDisplayRequest(Title,
+                        "Не удалось синхронизировать письма с сервером. " +
+                        ex.Message);
+                }
             }
         }
 
