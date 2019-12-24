@@ -213,38 +213,83 @@ namespace CryptoMailClient.ViewModels
 
         private void ReadEmail(object o)
         {
-            if (o != null && o is MessageItem item)
+            if (o == null || !(o is MessageItem item)) return;
+
+            string htmlBody = item.Message.HtmlBody;
+            if (!string.IsNullOrEmpty(htmlBody))
             {
-                string content;
-                if (!string.IsNullOrEmpty(item.Message.HtmlBody))
+                var verificationResult = CryptographicResult.None;
+                if (item.Message.Headers.Contains(Cryptography.HEADER_SIGNED))
                 {
-                    int index = item.Message.HtmlBody.IndexOf("html>",
-                        StringComparison.OrdinalIgnoreCase);
-                    if (index < 0)
+                    if (UserManager.TryFindEmailAddressPublicKey(
+                        item.AddressFrom, out string publicKey))
                     {
-                        content = "<!doctype html>" +
-                                  "<head><meta charset = \"utf-8\"></head>" +
-                                  "<body>" + item.Message.HtmlBody + "</body>" +
-                                  "</html>";
+                        try
+                        {
+                            verificationResult = Cryptography.VerifyData(
+                                htmlBody.TrimEnd('\n', '\r'), publicKey,
+                                item.Message.Headers[Cryptography.HEADER_SIGNATURE])
+                                ? CryptographicResult.Success
+                                : CryptographicResult.Error;
+                        }
+                        catch
+                        {
+                            verificationResult = CryptographicResult.Error;
+                        }
                     }
                     else
                     {
-                        content = item.Message.HtmlBody.Insert(
-                            index + "html>".Length,
-                            "<head><meta charset=\"utf-8\"></head>");
+                        verificationResult = CryptographicResult.KeyNotFound;
                     }
+
+                }
+
+                CryptographicResult decryptionResult =
+                    CryptographicResult.None;
+                if (item.Message.Headers.Contains(Cryptography.HEADER_ENCRYPTED))
+                {
+                    try
+                    {
+                        htmlBody = Cryptography.DecryptData(htmlBody,
+                            UserManager.CurrentUser.CurrentEmailAccount
+                                .RsaPrivateKey);
+                        decryptionResult = CryptographicResult.Success;
+                    }
+                    catch
+                    {
+                        decryptionResult = CryptographicResult.Error;
+                    }
+                }
+
+                item.SetCryptographicResults(decryptionResult,
+                    verificationResult);
+
+                int index = htmlBody.IndexOf("html>",
+                    StringComparison.OrdinalIgnoreCase);
+                if (index < 0)
+                {
+                    htmlBody = "<!doctype html>" +
+                               "<head><meta charset = \"utf-8\"></head>" +
+                               "<body>" + htmlBody + "</body>" +
+                               "</html>";
                 }
                 else
                 {
-                    content =
-                        "<!doctype html><head><meta charset = \"utf-8\"></head>" +
-                        "<body>" + item.Message.TextBody + "</body></html>";
+                    htmlBody = htmlBody.Insert(
+                        index + "html>".Length,
+                        "<head><meta charset=\"utf-8\"></head>");
                 }
-
-                item.HtmlBody = content;
-
-                OnShowDialogRequested(item);
             }
+            else
+            {
+                htmlBody =
+                    "<!doctype html><head><meta charset = \"utf-8\"></head>" +
+                    "<body>" + item.Message.TextBody + "</body></html>";
+            }
+
+            item.HtmlBody = htmlBody;
+
+            OnShowDialogRequested(item);
         }
 
         private void WriteEmail(object o)
@@ -364,7 +409,7 @@ namespace CryptoMailClient.ViewModels
                     var messages = new ObservableCollection<MessageItem>();
                     foreach (var message in Mailbox.CurrentMessages)
                     {
-                        messages.Add(new MessageItem(message));
+                        messages.Add(new MessageItem(message.Key, message.Value));
                     }
 
                     Messages = messages;

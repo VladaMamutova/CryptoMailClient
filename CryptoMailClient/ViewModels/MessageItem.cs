@@ -54,6 +54,48 @@ namespace CryptoMailClient.ViewModels
         public string HtmlBody { get; set; }
         public string DateTimeText { get; }
 
+        private CryptographicResult _decryptionResult;
+
+        public CryptographicResult DecryptionResult
+        {
+            get => _decryptionResult;
+            private set
+            {
+                _decryptionResult = value;
+                OnPropertyChanged(nameof(DecryptionResult));
+                OnPropertyChanged(nameof(DecryptionToolTip));
+            }
+        }
+
+        public string DecryptionToolTip => DecryptionResult == CryptographicResult.None
+            ? "Письмо не зашифровано"
+            : DecryptionResult == CryptographicResult.Success
+                ? "Письмо зашифровано, содержимое успешно расшифровано"
+                : "Письмо зашифровано, но содержимое не может быть расшифровано вашим ключом";
+
+        private CryptographicResult _verificationResult;
+
+        public CryptographicResult VerificationResult
+        {
+            get => _verificationResult;
+            private set
+            {
+                _verificationResult = value;
+                OnPropertyChanged(nameof(VerificationResult));
+                OnPropertyChanged(nameof(VerificationToolTip));
+            }
+        }
+
+        public string VerificationToolTip =>
+            VerificationResult == CryptographicResult.None
+                ? "Письмо не подписано"
+                : VerificationResult == CryptographicResult.Success
+                    ? "Письмо подписано, отправитель проверен и подтверждён"
+                    : VerificationResult == CryptographicResult.KeyNotFound
+                        ? "Письмо подписано, но отправитель не может быть " +
+                          "проверен, ключи не найдены"
+                        : "Письмо подписано, но подпись не соответствует отправителю, ключи неверны";
+
         public bool HasAttachments => Attachments.Count != 0;
 
         public ObservableCollection<AttachmentItem> Attachments { get; }
@@ -69,9 +111,13 @@ namespace CryptoMailClient.ViewModels
                 new PropertyChangedEventArgs(propertyName));
         }
 
-        public MessageItem(MimeMessage message)
+        public MessageItem(string fileName, MimeMessage message)
         {
             Message = message;
+            Seen = (fileName ?? "").Contains("Seen");
+            DecryptionResult = CryptographicResult.None;
+            VerificationResult = CryptographicResult.None;
+
             Attachments = new ObservableCollection<AttachmentItem>();
             foreach (var attachment in Message.Attachments)
             {
@@ -102,32 +148,39 @@ namespace CryptoMailClient.ViewModels
             DownloadAttachmentCommand = new RelayCommand(DownloadAttachment);
         }
 
+        public void SetCryptographicResults(
+            CryptographicResult decryptionResult,
+            CryptographicResult verificationResult)
+        {
+            DecryptionResult = decryptionResult;
+            VerificationResult = verificationResult;
+        }
+
         private void DownloadAttachment(object o)
         {
-            if (o is AttachmentItem attachment)
-            {
-                SaveFileDialog saveFileDialog =
-                    new SaveFileDialog
-                    {
-                        FileName = attachment.FileName,
-                        Filter = !string.IsNullOrEmpty(attachment.Extension)
-                            ? $"*{attachment.Extension}|*{attachment.Extension}"
-                            : "All files (*.*)|*.*"
-                    };
+            if (!(o is AttachmentItem attachment)) return;
 
-                if (saveFileDialog.ShowDialog() == true)
+            SaveFileDialog saveFileDialog =
+                new SaveFileDialog
                 {
-                    using (var stream = File.Create(saveFileDialog.FileName))
+                    FileName = attachment.FileName,
+                    Filter = !string.IsNullOrEmpty(attachment.Extension)
+                        ? $"*{attachment.Extension}|*{attachment.Extension}"
+                        : "All files (*.*)|*.*"
+                };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                using (var stream = File.Create(saveFileDialog.FileName))
+                {
+                    if (attachment.Content is MessagePart messagePart)
                     {
-                        if (attachment.Content is MessagePart messagePart)
-                        {
-                            messagePart.Message.WriteTo(stream);
-                        }
-                        else
-                        {
-                            ((MimePart) attachment.Content).Content.DecodeTo(
-                                stream);
-                        }
+                        messagePart.Message.WriteTo(stream);
+                    }
+                    else
+                    {
+                        ((MimePart) attachment.Content).Content.DecodeTo(
+                            stream);
                     }
                 }
             }

@@ -335,7 +335,7 @@ namespace CryptoMailClient.ViewModels.Online
                     var messages = new ObservableCollection<MessageItem>();
                     foreach (var message in Mailbox.CurrentMessages)
                     {
-                        messages.Add(new MessageItem(message));
+                        messages.Add(new MessageItem("", message));
                     }
 
                     Messages = messages;
@@ -349,24 +349,6 @@ namespace CryptoMailClient.ViewModels.Online
             {
                 OnMessageBoxDisplayRequest(Title, ex.Message);
             }
-        }
-
-        private void ClosingEventHandler(object sender,
-            DialogClosingEventArgs eventArgs)
-        {
-            //if ((bool)eventArgs.Parameter == false) return;
-
-            ////OK, lets cancel the close...
-            //eventArgs.Cancel();
-
-            ////...now, lets update the "session" with some new content!
-            //eventArgs.Session.UpdateContent(new ProgressDialog());
-            ////note, you can also grab the session when the dialog opens via the DialogOpenedEventHandler
-
-            ////lets run a fake operation for 3 seconds then close this baby.
-            //Task.Delay(TimeSpan.FromSeconds(3))
-            //    .ContinueWith((t, _) => eventArgs.Session.Close(false), null,
-            //        TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         public MainWindowViewModel()

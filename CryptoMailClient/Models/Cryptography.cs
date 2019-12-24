@@ -8,6 +8,9 @@ namespace CryptoMailClient.Models
     static class Cryptography
     {
         public static Encoding Encoding = Encoding.Unicode;
+        public const string HEADER_ENCRYPTED = "X-Encrypted";
+        public const string HEADER_SIGNED = "X-Signed";
+        public const string HEADER_SIGNATURE = "X-Signature";
 
         #region Encryption/Decryption
 
@@ -65,8 +68,8 @@ namespace CryptoMailClient.Models
                     } while (count > 0);
                 }
 
-                // Обновляем исходный поток данных и очищаем буфер,
-                // то есть в этом методе вызывается и Close().
+                // Обновляем исходный поток данных и очищаем буфер
+                // (в методе FlushFinalBlock() также вызывается и Close()).
                 outStreamEncrypted.FlushFinalBlock();
             }
 
@@ -74,12 +77,11 @@ namespace CryptoMailClient.Models
 
             return outStream.ToArray();
         }
-
-
+        
         public static string DecryptData(in string data, string privateKey)
         {
-            var bytes = DecryptAES(Encoding.GetBytes(data), privateKey);
-            return Convert.ToBase64String(bytes);
+            var bytes = DecryptAES(Convert.FromBase64String(data), privateKey);
+            return Encoding.GetString(bytes);
         }
 
         public static byte[] DecryptAES(in byte[] bytes, string rsaPrivateKey)
@@ -134,8 +136,8 @@ namespace CryptoMailClient.Models
                         outStreamDecrypted.Write(block, 0, count);
                     } while (count > 0);
 
-                    // Обновляем исходный поток данных и очищаем буфер,
-                    // то есть в этом методе вызывается и Close().
+                    // Обновляем исходный поток данных и очищаем буфер
+                    // (в методе FlushFinalBlock() также вызывается и Close()).
                     outStreamDecrypted.FlushFinalBlock();
                 }
             }
@@ -169,7 +171,6 @@ namespace CryptoMailClient.Models
 
         #endregion
 
-
         #region Signature
 
         public static string SignData(in string data, string rsaPrivateKey)
@@ -197,7 +198,8 @@ namespace CryptoMailClient.Models
                 Convert.FromBase64String(signature));
         }
 
-        public static bool VerifyRSA(in byte[] bytes, string rsaPublicKey, byte[] signature)
+        public static bool VerifyRSA(in byte[] bytes, string rsaPublicKey,
+            byte[] signature)
         {
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
             rsa.FromXmlString(rsaPublicKey);
@@ -206,13 +208,13 @@ namespace CryptoMailClient.Models
             RSACng rsaAlgorithm = new RSACng();
             rsaAlgorithm.ImportParameters(rsaParams);
 
-            return rsa.VerifyData(bytes, signature, HashAlgorithmName.MD5,
+            return rsaAlgorithm.VerifyData(bytes, signature,
+                HashAlgorithmName.MD5,
                 RSASignaturePadding.Pss);
         }
 
         #endregion
-
-
+        
         #region Hashing
 
         public static string ComputeHash(in string data)

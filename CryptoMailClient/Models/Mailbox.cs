@@ -21,7 +21,7 @@ namespace CryptoMailClient.Models
 
         public static List<FolderItem> Folders { get; }
         public static FolderItem CurrentFolder { get; private set; }
-        public static List<MimeMessage> CurrentMessages { get; }
+        public static Dictionary<string, MimeMessage> CurrentMessages { get; }
 
         private static int _firstMessage;
 
@@ -41,7 +41,7 @@ namespace CryptoMailClient.Models
         static Mailbox()
         {
             Folders = new List<FolderItem>();
-            CurrentMessages = new List<MimeMessage>();
+            CurrentMessages = new Dictionary<string, MimeMessage>();
             _firstMessage = 0;
             CurrentCount = 0;
         }
@@ -143,7 +143,7 @@ namespace CryptoMailClient.Models
                 i > -1;
                 i--)
             {
-                CurrentMessages.Add(MimeMessage.Load(messagesFiles[i]));
+                CurrentMessages.Add(messagesFiles[i], MimeMessage.Load(messagesFiles[i]));
             }
         }
 
@@ -281,7 +281,7 @@ namespace CryptoMailClient.Models
 
         public static async Task SendMessage(string address, string subject,
             string htmlContent, string[] attachments = null, 
-            bool needToEncrypt = false, bool neewToSign = false)
+            bool needToEncrypt = false, bool needToSign = false)
         {
             if (UserManager.CurrentUser?.CurrentEmailAccount == null)
             {
@@ -329,17 +329,18 @@ namespace CryptoMailClient.Models
             {
                 // Добавляем собственный заголовок типа содержимого
                 // с указанием того, что письмо зашифровано.
-                message.Headers.Add("X-Encrypted", bool.TrueString);
+                message.Headers.Add(Cryptography.HEADER_ENCRYPTED,
+                    bool.TrueString);
                 bodyBuilder.HtmlBody = Cryptography.EncryptData(bodyBuilder.HtmlBody, publicKey);
             }
 
-            if (neewToSign)
+            if (needToSign)
             {
-                message.Headers.Add("X-Signed", bool.TrueString);
+                message.Headers.Add(Cryptography.HEADER_SIGNED, bool.TrueString);
                 string privateKey = UserManager.CurrentUser.CurrentEmailAccount
                     .RsaPrivateKey;
                 string signature = Cryptography.SignData(bodyBuilder.HtmlBody, privateKey);
-                message.Headers.Add("X-Signature", signature);
+                message.Headers.Add(Cryptography.HEADER_SIGNATURE, signature);
             }
 
             if (attachments != null)

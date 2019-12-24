@@ -63,12 +63,18 @@
                 <WrapPanel Grid.Row="0" Grid.Column="1" Margin="0 0 0 2">
                     <TextBlock Text="{Binding NameFrom}" FontWeight="Medium" Margin="0 0 10 0"/>
                     <TextBlock Text="{Binding AddressFrom}"/>
-                    <materialDesign:PackIcon Margin="10 0 0 0" Kind="CheckDecagram" Foreground="#FF5ADC78" Background="Transparent" ToolTip="Письмо подписано, отправитель подтверждён и проверен" VerticalAlignment="Center" Cursor="Hand"/>
+                    <materialDesign:PackIcon Margin="10 0 0 0" Kind="CheckDecagram"
+                                             Foreground="{Binding VerificationResult, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CryptographicResultToForegroundConverter}}"
+                                             Background="Transparent" ToolTip="{Binding VerificationToolTip}" 
+                                             VerticalAlignment="Center" Cursor="Hand"/>
                 </WrapPanel>
                 <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
                     <TextBlock Text="кому:" FontSize="14" Margin="0 0 10 0" Foreground="{StaticResource MaterialDesignBodyLight}"/>
                     <TextBlock Text="{Binding AddressTo}" FontSize="14" Foreground="{StaticResource MaterialDesignBodyLight}"/>
-                    <materialDesign:PackIcon Margin="10 0 0 0" Kind="SecurityLock" Foreground="#FF5ADC78" Background="Transparent" ToolTip="Письмо зашифровано, содержимое успешно расшифровано" VerticalAlignment="Center" Cursor="Hand"/>
+                    <materialDesign:PackIcon Margin="10 0 0 0" Kind="SecurityLock" 
+                                             Foreground="{Binding DecryptionResult, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CryptographicResultToForegroundConverter}}"
+                                             Background="Transparent" ToolTip="{Binding DecryptionToolTip}"
+                                             VerticalAlignment="Center" Cursor="Hand"/>
                 </StackPanel>
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding DateTimeText}" VerticalAlignment="Top" FontSize="14" Foreground="{StaticResource MaterialDesignBodyLight}"></TextBlock>
             </Grid>

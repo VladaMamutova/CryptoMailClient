@@ -88,9 +88,11 @@
     <Compile Include="Models\Mailbox.cs" />
     <Compile Include="Models\UserManager.cs" />
     <Compile Include="Models\User.cs" />
+    <Compile Include="Utilities\CryptographicResultToForegroundConverter.cs" />
     <Compile Include="Utilities\RelayAsyncCommand.cs" />
     <Compile Include="Utilities\SafeNativeMethods.cs" />
     <Compile Include="ViewModels\AttachmentItem.cs" />
+    <Compile Include="ViewModels\CryptographicResult.cs" />
     <Compile Include="ViewModels\FolderItem.cs" />
     <Compile Include="ViewModels\MessageItem.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
