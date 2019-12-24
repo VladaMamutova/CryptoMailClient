@@ -32,6 +32,15 @@ namespace CryptoMailClient.ViewModels
 
         public string MessageRangeText => Mailbox.GetMessageRange();
 
+        private bool OpenEmail => Messages == null ||
+                                  Messages.ToList().Exists(m =>
+                                      m.IsSelected && !m.Seen);
+
+        public PackIconKind MarkEmailIcon =>
+            OpenEmail ? PackIconKind.EmailOpen : PackIconKind.Email;
+
+        public string MarkEmailText => OpenEmail ? "Прочитано" : "Не прочитано";
+
         private bool _isDialogOpen;
 
         public bool IsDialogOpen
@@ -83,6 +92,8 @@ namespace CryptoMailClient.ViewModels
         public RelayCommand ReadEmailCommand { get; }
         public RelayCommand WriteEmailCommand { get; }
         public RelayCommand DeleteEmailCommand { get; }
+        public RelayCommand MarkEmailCommand { get; }
+        public RelayCommand SelectEmailCommand { get; }
         public RelayCommand SynchronizeCommand { get; }
         public RelayCommand GetNextMessagesCommand { get; }
         public RelayCommand GetPreviousMessagesCommand { get; }
@@ -101,6 +112,13 @@ namespace CryptoMailClient.ViewModels
             WriteEmailCommand = new RelayCommand(WriteEmail);
             DeleteEmailCommand = new RelayCommand(DeleteEmails,
                 o => Messages?.Count(m => m.IsSelected) > 0);
+            MarkEmailCommand = new RelayCommand(MarkEmails,
+                o => Messages?.Count(m => m.IsSelected) > 0);
+            SelectEmailCommand = new RelayCommand(o =>
+            {
+                OnPropertyChanged(nameof(MarkEmailIcon));
+                OnPropertyChanged(nameof(MarkEmailText));
+            });
 
             SynchronizeCommand = new RelayCommand(async o =>
             {
@@ -186,13 +204,11 @@ namespace CryptoMailClient.ViewModels
             {
                 if (o is string folderFullName)
                 {
-                    if (Mailbox.OpenFolder(folderFullName))
-                    {
-                        LoadMessages();
-                        SelectedFolder = Folders.First(f =>
-                            f.FullName == folderFullName);
-                        OnPropertyChanged(nameof(SelectedFolder));
-                    }
+                    Mailbox.OpenFolder(folderFullName);
+                    LoadMessages();
+                    SelectedFolder = Folders.First(f =>
+                        f.FullName == folderFullName);
+                    OnPropertyChanged(nameof(SelectedFolder));
                 }
                 else
                 {
@@ -296,7 +312,8 @@ namespace CryptoMailClient.ViewModels
                         .Seen = true;
                     OnPropertyChanged(nameof(Messages));
 
-                    await Mailbox.SetMessageSeen(item.FullName,
+                    await Mailbox.MarkLetters(true,
+                        new List<string> {item.FullName},
                         SelectedFolder.FullName);
                 }
                 catch (Exception ex)
@@ -318,37 +335,74 @@ namespace CryptoMailClient.ViewModels
 
         private async void DeleteEmails(object obj)
         {
-            if (UserManager.CurrentUser?.CurrentEmailAccount != null)
-            {
-                DialogHost.OpenDialogCommand.Execute(new ProgressDialog(),
-                    null);
+            DialogHost.OpenDialogCommand.Execute(new ProgressDialog(), null);
 
-                try
+            try
+            {
+                List<string> messagesToDelete = Messages.ToList()
+                    .FindAll(m => m.IsSelected).Select(m => m.FullName)
+                    .ToList();
+                await Mailbox.DeleteMessages(messagesToDelete,
+                    SelectedFolder.FullName);
+                UpdateFolders();
+                LoadMessages();
+                DialogHost.CloseDialogCommand.Execute(null, null);
+                // Явно закрываем диалог, так как предыдущая
+                // команда иногда может не выполняться.
+                IsDialogOpen = false;
+            }
+            catch (Exception ex)
+            {
+                UpdateFolders();
+                LoadMessages();
+                DialogHost.CloseDialogCommand.Execute(null, null);
+                // Явно закрываем диалог, так как предыдущая
+                // команда иногда может не выполняться.
+                IsDialogOpen = false;
+                OnMessageBoxDisplayRequest(Title,
+                    "Не удалось синхронизировать письма с сервером. " +
+                    ex.Message);
+            }
+        }
+
+        private async void MarkEmails(object obj)
+        {
+            DialogHost.OpenDialogCommand.Execute(new ProgressDialog(), null);
+
+            try
+            {
+                List<string> messagesToMark;
+                if (OpenEmail)
                 {
-                    List<string> messagesToDelete = Messages.ToList()
-                        .FindAll(m => m.IsSelected).Select(m => m.FullName)
-                        .ToList();
-                    await Mailbox.DeleteMessages(messagesToDelete,
-                        SelectedFolder.FullName);
-                    UpdateFolders();
-                    LoadMessages();
-                    DialogHost.CloseDialogCommand.Execute(null, null);
-                    // Явно закрываем диалог, так как предыдущая
-                    // команда иногда может не выполняться.
-                    IsDialogOpen = false;
+                    messagesToMark = Messages.ToList()
+                        .FindAll(m => m.IsSelected && !m.Seen)
+                        .Select(m => m.FullName).ToList();
                 }
-                catch (Exception ex)
+                else
                 {
-                    UpdateFolders();
-                    LoadMessages();
-                    DialogHost.CloseDialogCommand.Execute(null, null);
-                    // Явно закрываем диалог, так как предыдущая
-                    // команда иногда может не выполняться.
-                    IsDialogOpen = false;
-                    OnMessageBoxDisplayRequest(Title,
-                        "Не удалось синхронизировать письма с сервером. " +
-                        ex.Message);
+                    messagesToMark = Messages.ToList()
+                        .FindAll(m => m.IsSelected && m.Seen)
+                        .Select(m => m.FullName).ToList();
                 }
+
+                await Mailbox.MarkLetters(OpenEmail, messagesToMark,
+                    SelectedFolder.FullName);
+                LoadMessages();
+                DialogHost.CloseDialogCommand.Execute(null, null);
+                // Явно закрываем диалог, так как предыдущая
+                // команда иногда может не выполняться.
+                IsDialogOpen = false;
+            }
+            catch (Exception ex)
+            {
+                LoadMessages();
+                DialogHost.CloseDialogCommand.Execute(null, null);
+                // Явно закрываем диалог, так как предыдущая
+                // команда иногда может не выполняться.
+                IsDialogOpen = false;
+                OnMessageBoxDisplayRequest(Title,
+                    "Не удалось синхронизировать письма с сервером. " +
+                    ex.Message);
             }
         }
 
@@ -441,7 +495,16 @@ namespace CryptoMailClient.ViewModels
 
                     Folders = folders;
 
-                    SelectedFolder = Folders.Count > 0 ? Folders[0] : null;
+                    if (SelectedFolder != null && Folders.ToList().Exists(f =>
+                            f.FullName == SelectedFolder.FullName))
+                    {
+                        SelectedFolder = Folders.First(f =>
+                            f.FullName == SelectedFolder.FullName);
+                    }
+                    else
+                    {
+                        SelectedFolder = Folders.First();
+                    }
                 }
                 else
                 {

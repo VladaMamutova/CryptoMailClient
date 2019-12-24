@@ -96,7 +96,7 @@ namespace CryptoMailClient.Models
             Folders.Clear();
 
             string emailFolder = UserManager.GetCurrentUserEmailFolder();
-            if(emailFolder == null) return;
+            if (emailFolder == null) return;
 
             DirectoryInfo emailFolderInfo = new DirectoryInfo(emailFolder);
             if (!emailFolderInfo.Exists)
@@ -143,7 +143,8 @@ namespace CryptoMailClient.Models
                 i > -1;
                 i--)
             {
-                CurrentMessages.Add(messagesFiles[i], MimeMessage.Load(messagesFiles[i]));
+                CurrentMessages.Add(messagesFiles[i],
+                    MimeMessage.Load(messagesFiles[i]));
             }
         }
 
@@ -209,9 +210,8 @@ namespace CryptoMailClient.Models
                 List<string> localLetters =
                     Directory.GetFiles(folderPath, "*.msg").ToList();
                 List<uint> localUids = new List<uint>(localLetters
-                    .Select(l => l.Substring(l.LastIndexOf('\\') + 1,
-                        l.LastIndexOf('(') - l.LastIndexOf('\\') - 2))
-                    // -1 на пробел перед "("
+                    .Select(Path.GetFileName)
+                    .Select(m => m.Substring(0, m.IndexOf(' ')))
                     .ToList().Select(uint.Parse).ToList());
 
                 foreach (var serverLetter in serverLetters)
@@ -220,12 +220,12 @@ namespace CryptoMailClient.Models
                     if (serverLetter.Flags != null)
                     {
                         // Получаем ожидаемое имя файла письма.
-                        var letterName = uid + " (" + serverLetter.Flags.Value + ")";
+                        var letterName =
+                            uid + " (" + serverLetter.Flags.Value + ")";
 
                         // Проверяем, есть ли письмо на клиенте
                         // с данным идентификатором.
-                        int index =
-                            localUids.FindIndex(x => x == uid.Id);
+                        int index = localUids.FindIndex(x => x == uid.Id);
                         if (index != -1)
                         {
                             // Если письмо на клиенте существует,
@@ -280,7 +280,7 @@ namespace CryptoMailClient.Models
         }
 
         public static async Task SendMessage(string address, string subject,
-            string htmlContent, string[] attachments = null, 
+            string htmlContent, string[] attachments = null,
             bool needToEncrypt = false, bool needToSign = false)
         {
             if (UserManager.CurrentUser?.CurrentEmailAccount == null)
@@ -303,7 +303,8 @@ namespace CryptoMailClient.Models
 
             // логическое И (&) - чтобы обязательно был инициализирован publicKey
             if (needToEncrypt &
-                !UserManager.TryFindEmailAddressPublicKey(address, out string publicKey))
+                !UserManager.TryFindEmailAddressPublicKey(address,
+                    out string publicKey))
             {
                 throw new Exception("Публичный ключ пользователя с почтовым " +
                                     $"адресом {address} не найден.\n" +
@@ -331,15 +332,18 @@ namespace CryptoMailClient.Models
                 // с указанием того, что письмо зашифровано.
                 message.Headers.Add(Cryptography.HEADER_ENCRYPTED,
                     bool.TrueString);
-                bodyBuilder.HtmlBody = Cryptography.EncryptData(bodyBuilder.HtmlBody, publicKey);
+                bodyBuilder.HtmlBody =
+                    Cryptography.EncryptData(bodyBuilder.HtmlBody, publicKey);
             }
 
             if (needToSign)
             {
-                message.Headers.Add(Cryptography.HEADER_SIGNED, bool.TrueString);
+                message.Headers.Add(Cryptography.HEADER_SIGNED,
+                    bool.TrueString);
                 string privateKey = UserManager.CurrentUser.CurrentEmailAccount
                     .RsaPrivateKey;
-                string signature = Cryptography.SignData(bodyBuilder.HtmlBody, privateKey);
+                string signature =
+                    Cryptography.SignData(bodyBuilder.HtmlBody, privateKey);
                 message.Headers.Add(Cryptography.HEADER_SIGNATURE, signature);
             }
 
@@ -365,62 +369,82 @@ namespace CryptoMailClient.Models
             sentFolder.Append(message, MessageFlags.Seen, message.Date);
         }
 
-        public static async Task SetMessageSeen(string messageFullName, string folderFullMame)
+        public static async Task MarkLetters(bool setSeenFlag,
+            List<string> messageFullNameList, string folderFullName)
         {
             if (UserManager.CurrentUser?.CurrentEmailAccount == null) return;
-            
+
             if (await CheckImapConnection())
             {
-                // Из полного имени получаем идентификатор письма.
-                string name = Path.GetFileName(messageFullName) ?? string.Empty;
-                uint uid = uint.Parse(name.Substring(0,
-                    name.IndexOf(' ')));
-                UniqueId uniqueId = new UniqueId(uid);
-             
-                // Получаем и открываем папку, в которой находится необходимое письмо.
+                // Из полного имени файлов писем получаем идентификаторы.
+                List<string> names = messageFullNameList
+                    .Select(Path.GetFileName)
+                    .Select(m => m.Substring(0, m.IndexOf(' ')))
+                    .ToList();
+                List<UniqueId> uniqueIdList =
+                    names.Select(uint.Parse).ToList()
+                        .Select(i => new UniqueId(i)).ToList();
+
+                // Получаем и открываем папку, в которой находятся необходимые письма.
                 var serverFolder = await _imapClient.GetFolderAsync(
-                    folderFullMame.Replace('\\', '/'));
+                    folderFullName.Replace('\\', '/'));
                 await serverFolder.OpenAsync(FolderAccess.ReadWrite);
 
-                // Устаналиваем флаг просмотра сообщения и
-                // получаем обновлённый список флагов данного сообщения.
-                await serverFolder.AddFlagsAsync(uniqueId, MessageFlags.Seen, true);
-                var serverLetter = serverFolder.Fetch(
-                    new List<UniqueId> {uniqueId},
+                // Устаналиваем флаги.
+                if (setSeenFlag)
+                {
+                    await serverFolder.AddFlagsAsync(uniqueIdList,
+                        MessageFlags.Seen, true);
+                }
+                else
+                {
+                    await serverFolder.RemoveFlagsAsync(uniqueIdList,
+                        MessageFlags.Seen, true);
+                }
+
+                // Получаем обновлённый список флагов сообщений.
+                var serverLetters = serverFolder.Fetch(uniqueIdList,
                     MessageSummaryItems.UniqueId | MessageSummaryItems.Flags);
 
                 await serverFolder.CloseAsync();
-              
-                var messageFlags = serverLetter[0]?.Flags;
-                if (messageFlags != null)
+
+                // Изменяем имена файлов писем (с обновлёнными флагами).
+                string folderPath = Path.Combine(
+                    UserManager.GetCurrentUserEmailFolder(), folderFullName);
+                foreach (var serverLetter in serverLetters)
                 {
-                    // Изменяем имя файла письма.
-                    string newMessagePath = Path.Combine(
-                        UserManager.GetCurrentUserEmailFolder(),
-                        folderFullMame,
-                        uid + " (" + messageFlags + ")" + ".msg");
-                    File.Move(messageFullName, newMessagePath);
+                    int index = uniqueIdList.FindIndex(x =>
+                        x.Id == serverLetter.UniqueId.Id);
+                    string letterName = Path.Combine(folderPath,
+                        serverLetter.UniqueId + " (" + serverLetter.Flags +
+                        ")" + ".msg");
+                    if (serverLetter.Flags != null)
+                    {
+                        File.Move(messageFullNameList[index], letterName);
+                    }
                 }
             }
         }
 
-        public static async Task DeleteMessages(List<string> messageFullNames,
+        public static async Task DeleteMessages(
+            List<string> messageFullNameList,
             string folderFullName)
         {
             if (UserManager.CurrentUser?.CurrentEmailAccount == null) return;
 
             if (await CheckImapConnection())
             {
-                // Из полного имени получаем идентификатор письма.
-                List<string> names = messageFullNames.Select(Path.GetFileName)
+                // Из полного имени файлов писем получаем идентификаторы.
+                List<string> names = messageFullNameList
+                    .Select(Path.GetFileName)
                     .Select(m => m.Substring(0, Math.Max(m.IndexOf(' '), 0)))
                     .ToList();
                 names.RemoveAll(string.IsNullOrEmpty);
-                List<uint> uidList = names.Select(uint.Parse).ToList();
                 List<UniqueId> uniqueIdList =
-                    uidList.Select(i => new UniqueId(i)).ToList();
+                    names.Select(uint.Parse).ToList()
+                        .Select(i => new UniqueId(i)).ToList();
 
-                // Получаем и открываем папку, в которой находится необходимое письмо.
+                // Получаем и открываем папку, в которой находятся необходимые письма.
                 var serverFolder = await _imapClient.GetFolderAsync(
                     folderFullName.Replace('\\', '/'));
                 await serverFolder.OpenAsync(FolderAccess.ReadWrite);
@@ -433,11 +457,13 @@ namespace CryptoMailClient.Models
                 await serverFolder.ExpungeAsync();
                 await serverFolder.CloseAsync();
 
-                foreach (var messageFullName in messageFullNames)
+                // Удаляем сообщения с клиента.
+                foreach (var messageFullName in messageFullNameList)
                 {
                     File.Delete(messageFullName);
                 }
 
+                // ОБновляем количество сообщений в папке.
                 int messageCount = Directory
                     .GetFiles(Path.Combine(
                         UserManager.GetCurrentUserEmailFolder(),
@@ -451,21 +477,12 @@ namespace CryptoMailClient.Models
             }
         }
 
-        public static bool OpenFolder(string relativePath)
+        public static void OpenFolder(string fullName)
         {
-            try
-            {
-                if (CurrentFolder?.FullName == relativePath) return false;
-
-                CurrentFolder = Folders.First(f => string.Equals(f.FullName,
-                    relativePath, StringComparison.CurrentCultureIgnoreCase));
-                FirstMessage = 1;
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            CurrentFolder = Folders.FirstOrDefault(f =>
+                string.Equals(f.FullName,
+                    fullName, StringComparison.CurrentCultureIgnoreCase));
+            FirstMessage = 1;
         }
 
         public static bool SetNextMessageRange()
