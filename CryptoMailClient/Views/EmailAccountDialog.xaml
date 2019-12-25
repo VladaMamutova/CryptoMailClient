@@ -75,6 +75,15 @@
                     <materialDesign:PackIcon Grid.Column="6" Kind="InfoCircleOutline" Background="Transparent" Cursor="Hand" Width="20" Height="20" VerticalAlignment="Center"
                                              ToolTip="{Binding ImapPortHelpMessage}"/>
                 </Grid>
+                <Grid Margin="0 20 0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="10"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Button Content="Импорт ключей" Grid.Column="0" ToolTip="Импорт пары ключей: приватный + публичный" Command="{Binding ImportKeysCommand}" Style="{StaticResource MaterialDesignFlatButton}"/>
+                    <Button Content="Экспорт ключей..." Grid.Column="2" ToolTip="Экспорт только публичного ключа или пары ключей: публичный + приватный" Command="{Binding ExportKeysCommand}" Style="{StaticResource MaterialDesignFlatButton}"/>
+                </Grid>
             </StackPanel>
         </Expander>
         <Grid Grid.Row="7" Visibility="{Binding IsNewEmailAccount, Converter={StaticResource BooleanToVisibilityConverter}}">

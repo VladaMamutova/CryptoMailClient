@@ -1,9 +1,16 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Security;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using CryptoMailClient.Models;
 using CryptoMailClient.Utilities;
+using CryptoMailClient.Views;
+using Ionic.Zip;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Win32;
 
 namespace CryptoMailClient.ViewModels
 {
@@ -86,15 +93,18 @@ namespace CryptoMailClient.ViewModels
         public bool IsReadOnly => !IsNewEmailAccount;
 
         public string SmtpPortHelpMessage =>
-            MailProtocol.GetMessageAboutValidPorts(MailProtocol.MailProtocols.SMTP);
+            MailProtocol.GetMessageAboutValidPorts(MailProtocol.MailProtocols
+                .SMTP);
 
         public string ImapPortHelpMessage =>
-            MailProtocol.GetMessageAboutValidPorts(MailProtocol.MailProtocols.IMAP);
+            MailProtocol.GetMessageAboutValidPorts(MailProtocol.MailProtocols
+                .IMAP);
 
         public RelayCommand AddCommand { get; }
         public RelayCommand UpdateCommand { get; }
-
         public RelayCommand DeleteCommand { get; }
+        public RelayCommand ImportKeysCommand { get; }
+        public RelayCommand ExportKeysCommand { get; }
 
         public EmailAccountDialogViewModel(bool isNewEmailAccount)
         {
@@ -119,6 +129,9 @@ namespace CryptoMailClient.ViewModels
             AddCommand = new RelayCommand(Add);
             UpdateCommand = new RelayCommand(Update);
             DeleteCommand = new RelayCommand(Delete);
+            ImportKeysCommand = new RelayCommand(ImportKeys);
+            ExportKeysCommand =
+                new RelayCommand(ExportKeys, o => !isNewEmailAccount);
         }
 
         private async void Add(object o)
@@ -178,6 +191,163 @@ namespace CryptoMailClient.ViewModels
             UserManager.CurrentUser.RemoveEmailAccount(Address);
             UserManager.SaveCurrectUserInfo();
             DialogHost.CloseDialogCommand.Execute(true, null);
+        }
+
+        private void ImportKeys(object obj)
+        {
+            var view = new ImportExportKeysDialog(true);
+            if (view.ShowDialog() != true) return;
+
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                InitialDirectory = Environment.CurrentDirectory,
+                Filter = "*.zip|*.zip"
+            };
+
+            if (openFileDialog.ShowDialog() != true) return;
+
+            string zipFileName = openFileDialog.FileName;
+            string keyFileName =
+                Path.GetFileNameWithoutExtension(zipFileName) + ".key";
+
+            string content;
+            try
+            {
+                using (ZipFile zip = new ZipFile(zipFileName, Encoding.UTF8))
+                {
+                    if (zip.EntryFileNames.Contains(keyFileName))
+                    {
+                        ZipEntry entry = zip.Entries.ToList()
+                            .Find(e => e.FileName == keyFileName);
+                        using (var sr = new StreamReader(
+                            entry.OpenReader(view.Password.Password),
+                            Encoding.UTF8))
+                        {
+                            content = sr.ReadToEnd();
+                        }
+                    }
+                    else
+                    {
+                        OnMessageBoxDisplayRequest(Title,
+                            "Ключи не были импортированы в ваш аккаунт.\n" +
+                            "Файл архива не содержит " +
+                            $"файл с ключами: \"{keyFileName}\".");
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                OnMessageBoxDisplayRequest(Title,
+                    "Ключи не были импортированы в ваш аккаунт.\n" +
+                    "Невозможно прочитать данные из файла. " +
+                    ex.Message);
+                return;
+            }
+
+            try
+            {
+                var rsa = new RSACryptoServiceProvider();
+                rsa.FromXmlString(content);
+                if (rsa.PublicOnly)
+                {
+                    OnMessageBoxDisplayRequest(Title,
+                        "Ключи не были импортированы в ваш аккаунт.\n" +
+                        "Файл содержит только публичный ключ.");
+                }
+                else
+                {
+                    UserManager.CurrentUser.CurrentEmailAccount
+                        .SetRsaFullKeyPair(rsa.ToXmlString(true));
+                    UserManager.SaveCurrectUserInfo();
+                    OnMessageBoxDisplayRequest(Title,
+                        "Публичный и приватный ключи были " +
+                        "успешно импортированы в ваш аккаунт.");
+                }
+            }
+            catch
+            {
+                OnMessageBoxDisplayRequest(Title,
+                    "Ключи не были импортированы в ваш аккаунт.\n" +
+                    "Файл содержит не содержит приватный и публичный ключ.");
+            }
+        }
+
+        private void ExportKeys(object obj)
+        {
+            var view = new ImportExportKeysDialog(false);
+            if (view.ShowDialog() != true) return;
+
+            bool exportPrivateKey =
+                view.PrivateKeyRadioButton.IsChecked.HasValue &&
+                view.PrivateKeyRadioButton.IsChecked.Value;
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                InitialDirectory = Environment.CurrentDirectory,
+                FileName = UserManager.CurrentUser.CurrentEmailAccount.Address,
+                Filter = exportPrivateKey ? "*.zip|*.zip" : "*.key|*.key"
+            };
+
+            if (saveFileDialog.ShowDialog() != true) return;
+
+            string fileName = saveFileDialog.FileName;
+
+            if (exportPrivateKey)
+            {
+                ExportPrivateKey(fileName, view.Password.Password);
+            }
+            else
+            {
+                ExportPublicKey(fileName);
+            }
+        }
+
+        private void ExportPublicKey(string keyFileName)
+        {
+            try
+            {
+                using (StreamWriter writer =
+                    new StreamWriter(keyFileName, false))
+                {
+                    writer.Write(UserManager.CurrentUser.CurrentEmailAccount
+                        .RsaPublicKey);
+                }
+                OnMessageBoxDisplayRequest(Title,
+                    "Публичный ключ был успешно экспортирован.");
+            }
+            catch(Exception ex)
+            {
+                OnMessageBoxDisplayRequest(Title,
+                    "Ключ не был экспортирован. " + ex.Message);
+            }
+        }
+
+        private void ExportPrivateKey(string zipFileName, string password)
+        {
+            string keyFileName =
+                Path.GetFileNameWithoutExtension(zipFileName) + ".key";
+
+            try
+            {
+                using (ZipFile zip = new ZipFile(zipFileName, Encoding.UTF8))
+                {
+                    zip.CompressionLevel = Ionic.Zlib.CompressionLevel.Default;
+                    zip.TempFileFolder = Path.GetTempPath();
+                    zip.Password = password;
+                    zip.AddEntry(keyFileName,
+                        Encoding.UTF8.GetBytes(UserManager.CurrentUser
+                            .CurrentEmailAccount.RsaPrivateKey));
+                    zip.Save();
+                }
+                OnMessageBoxDisplayRequest(Title,
+                    "Публичный и приватный ключи были успешно экспортированы.");
+            }
+            catch (Exception ex)
+            {
+                OnMessageBoxDisplayRequest(Title,
+                    "Ключи не были экспортированы. " + ex.Message);
+            }
         }
     }
 }

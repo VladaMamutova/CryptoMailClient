@@ -1,0 +1,53 @@
+﻿<Window x:Class="CryptoMailClient.Views.ImportExportKeysDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        FontFamily="Segoe UI"
+        FontSize="16"
+        Foreground="{StaticResource PrimaryHueLightForegroundBrush}"
+        Title="Экспорт"
+        AllowsTransparency="True"
+        WindowStyle="None"
+        BorderThickness="1" BorderBrush="{StaticResource PrimaryHueDarkBrush}"
+        SizeToContent="Height" Width="300" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Name="Caption"
+                   Padding="10" Background="{StaticResource PrimaryHueMidBrush}" 
+                   FontWeight="Medium" Foreground="{StaticResource MaterialDesignDarkForeground}" 
+                   MouseLeftButtonDown="Title_OnMouseLeftButtonDown"/>
+        <StackPanel Grid.Row="1" Margin="10">
+            <StackPanel Name="KeyTypesRadioButtons">
+                <RadioButton Name="PublicKeyRadioButton" Content="Публичный ключ" VerticalContentAlignment="Center" IsChecked="True"/>
+                <RadioButton Name="PrivateKeyRadioButton" Content="Приватный + публичный ключи" VerticalContentAlignment="Center"/>
+            </StackPanel>
+            <Grid Margin="0 10 0 0"
+                  Visibility="{Binding ElementName=PrivateKeyRadioButton, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="5"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <materialDesign:PackIcon Grid.Column="0" Kind="Key" VerticalAlignment="Center" Height="20" Width="20"
+                                         Foreground="{Binding ElementName=Password, Path=BorderBrush}"/>
+                <PasswordBox Grid.Column="2" x:Name="Password" materialDesign:HintAssist.Hint="Пароль на файл с ключами"/>
+            </Grid>
+            <Grid Margin="0 20 0 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition Width="10"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" IsCancel="True" Content="ОТМЕНА" Style="{StaticResource MaterialDesignFlatButton}"/>
+                <Button Grid.Column="2" IsDefault="True" Name="CommandButton" Content="ЭКСПОРТИРОВАТЬ" Click="ButtonBase_OnClick"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Window>
