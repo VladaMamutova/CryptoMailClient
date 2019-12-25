@@ -39,7 +39,7 @@ namespace CryptoMailClient.Views
                 PrivateKeyRadioButton.IsChecked.Value
                 && Password.Password.Length < 4)
             {
-                MessageBox.Show("Пароль должен содержать минимум 4 символа.",
+                CustomMessageBox.Show("Пароль должен содержать минимум 4 символа.",
                     Title);
             }
             else

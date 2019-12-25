@@ -20,7 +20,7 @@ namespace CryptoMailClient.Views
             var viewModel = new EmailAccountDialogViewModel(isNewEmailAccount);
             viewModel.MessageBoxDisplayRequested += (s, o) =>
             {
-                MessageBox.Show(o.MessageBoxText, o.Caption);
+                CustomMessageBox.Show(o.MessageBoxText, o.Caption);
             };
             DataContext = viewModel;
         }

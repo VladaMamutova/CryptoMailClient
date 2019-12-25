@@ -16,7 +16,7 @@ namespace CryptoMailClient.Views
             LoginWindowViewModel loginViewModel = new LoginWindowViewModel();
             loginViewModel.MessageBoxDisplayRequested += (sender, e) =>
             {
-                MessageBox.Show(e.MessageBoxText, e.Caption);
+                CustomMessageBox.Show(e.MessageBoxText, e.Caption);
             };
             loginViewModel.CloseDialogRequested += result => DialogResult = result;
             loginViewModel.ClearPasswordFieldsRequested += () =>

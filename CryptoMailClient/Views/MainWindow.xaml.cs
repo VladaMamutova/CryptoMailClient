@@ -24,7 +24,7 @@ namespace CryptoMailClient.Views
             var viewModel = new MainWindowViewModel();
             viewModel.MessageBoxDisplayRequested += (s, o) =>
             {
-                MessageBox.Show(o.MessageBoxText, o.Caption);
+                CustomMessageBox.Show(o.MessageBoxText, o.Caption);
             };
             viewModel.CloseRequested += Close;
             viewModel.ShowDialogRequested += dialogViewModel =>

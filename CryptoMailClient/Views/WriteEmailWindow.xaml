@@ -11,7 +11,7 @@
         Foreground="{StaticResource PrimaryHueLightForegroundBrush}"
         Height="550" Width="700"
         WindowStartupLocation="CenterScreen"
-        BorderThickness="1" BorderBrush="{StaticResource PrimaryHueDarkBrush}"
+        BorderThickness="1" BorderBrush="{StaticResource PrimaryHueMidBrush}"
         WindowStyle="None"
         ResizeMode="NoResize">
     <!--Если использовать AllowsTransparency="True", то HtmlEditor 

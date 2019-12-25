@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using CryptoMailClient.Models;
 using CryptoMailClient.Utilities;
+using CryptoMailClient.Views;
 using Microsoft.Win32;
 using MimeKit;
 
@@ -200,7 +201,7 @@ namespace CryptoMailClient.ViewModels
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show("Не удалось скачать вложение. " + ex.Message,
+                            CustomMessageBox.Show("Не удалось скачать вложение. " + ex.Message,
                                 "Загрузка вложений");
                         }
                     }
