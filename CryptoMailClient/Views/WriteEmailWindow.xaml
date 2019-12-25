@@ -14,6 +14,9 @@
         BorderThickness="1" BorderBrush="{StaticResource PrimaryHueDarkBrush}"
         WindowStyle="None"
         ResizeMode="NoResize">
+    <!--Если использовать AllowsTransparency="True", то HtmlEditor 
+    не будет отображаться. Поэтому, чтобы избавиться от рамки окна, 
+    вместо свойства прозрачности используем ResizeMode="NoResize".-->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -53,8 +56,8 @@
                 <RowDefinition Height="10"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="20"/>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
@@ -62,33 +65,76 @@
             <TextBox Grid.Row="0" Text="{Binding Address, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Padding="22 0 0 0"/>
             <TextBlock Grid.Row="2" Text="Тема" VerticalAlignment="Center" Foreground="{StaticResource MaterialDesignBodyLight}"></TextBlock>
             <TextBox Grid.Row="2" Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Padding="22 0 0 0"/>
-            <htmlEditor:HtmlEditor Grid.Row="5" x:Name="HtmlEditor" BindingContent="{Binding Body, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-
-            <StackPanel Grid.Row="7" HorizontalAlignment="Right" Orientation="Horizontal">
-                <ToggleButton Margin="0 0 10 0" Background="{StaticResource AttentionToActionBrush}"
+            <htmlEditor:HtmlEditor Grid.Row="4" x:Name="HtmlEditor" BindingContent="{Binding Body, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+            <ItemsControl Grid.Row="5" ItemsSource="{Binding Attachments}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <materialDesign:Chip ToolTip="{Binding FullName}" Margin="0 10 10 0"
+                                                 Command="{Binding Path=DataContext.RemoveAttachmentCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}">
+                                <materialDesign:Chip.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding FileName}" VerticalAlignment="Center"/>
+                                        <materialDesign:PackIcon Kind="Delete" Margin="5 0 0 0" 
+                                                                 Foreground="{StaticResource PrimaryHueLightForegroundBrush}" 
+                                                                 VerticalAlignment="Center"
+                                                                 ToolTip="Нажмите для удаления"/>
+                                    </StackPanel>
+                                </materialDesign:Chip.Content>
+                            </materialDesign:Chip>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Grid Grid.Row="7">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        HorizontalAlignment="Left"
+                        Command="{Binding AttachFileCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="AttachFile" Width="20" Margin="0 0 8 0" Height="20" HorizontalAlignment="Center"/>
+                        <TextBlock Text="ПРИКРЕПИТЬ"></TextBlock>
+                    </StackPanel>
+                </Button>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
+                    <ToggleButton Margin="0 0 10 0" Background="{StaticResource AttentionToActionBrush}"
                                   Style="{StaticResource MaterialDesignActionToggleButton}"
                                   ToolTip="{Binding EncryptionToolTip}"
                                   IsChecked="{Binding EncryptionChecked}">
-                    <ToggleButton.Content>
-                        <materialDesign:PackIcon Kind="SecurityOff" />
-                    </ToggleButton.Content>
-                    <materialDesign:ToggleButtonAssist.OnContent>
-                        <materialDesign:PackIcon Kind="SecurityLock" Foreground="{StaticResource PrimaryHueMidBrush}"/>
-                    </materialDesign:ToggleButtonAssist.OnContent>
-                </ToggleButton>
-                <ToggleButton Margin="0 0 30 0" Background="{StaticResource AttentionToActionBrush}"
+                        <ToggleButton.Content>
+                            <materialDesign:PackIcon Kind="SecurityOff" />
+                        </ToggleButton.Content>
+                        <materialDesign:ToggleButtonAssist.OnContent>
+                            <materialDesign:PackIcon Kind="SecurityLock" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                        </materialDesign:ToggleButtonAssist.OnContent>
+                    </ToggleButton>
+                    <ToggleButton Margin="0 0 30 0" Background="{StaticResource AttentionToActionBrush}"
                         Style="{StaticResource MaterialDesignActionToggleButton}"
                         ToolTip="{Binding SignatureToolTip}"
                         IsChecked="{Binding SignatureChecked}">
-                    <ToggleButton.Content>
-                        <materialDesign:PackIcon Kind="AlertDecagram" />
-                    </ToggleButton.Content>
-                    <materialDesign:ToggleButtonAssist.OnContent>
-                        <materialDesign:PackIcon Kind="CheckDecagram" Foreground="{StaticResource PrimaryHueMidBrush}"/>
-                    </materialDesign:ToggleButtonAssist.OnContent>
-                </ToggleButton>
-                <Button Content="ОТПРАВИТЬ" HorizontalAlignment="Right" Command="{Binding SendCommand}"/>
-            </StackPanel>
+                        <ToggleButton.Content>
+                            <materialDesign:PackIcon Kind="AlertDecagram" />
+                        </ToggleButton.Content>
+                        <materialDesign:ToggleButtonAssist.OnContent>
+                            <materialDesign:PackIcon Kind="CheckDecagram" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                        </materialDesign:ToggleButtonAssist.OnContent>
+                    </ToggleButton>
+                    <Button Content="ОТПРАВИТЬ" HorizontalAlignment="Right" Command="{Binding SendCommand}"/>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

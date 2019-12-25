@@ -33,7 +33,7 @@
                 <TextBlock Grid.Column="0" Text="{Binding Title}" FontWeight="Medium" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="22"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Cursor="Hand" Background="Transparent" Visibility="{Binding CurrentUserLogin, Converter={StaticResource NullableToVisibilityConverter}}">
                     <materialDesign:PackIcon Kind="User" Foreground="{StaticResource MaterialDesignDarkForeground}" Width="20" Height="20"/>
-                    <TextBlock Text="{Binding CurrentUserLogin}" VerticalAlignment="Center" Padding="10 0 0 0" FontSize="14" Foreground="{StaticResource MaterialDesignDarkForeground}"></TextBlock>
+                    <TextBlock Text="{Binding CurrentUserLogin}" VerticalAlignment="Center" Padding="8 0 0 0" FontSize="14" Foreground="{StaticResource MaterialDesignDarkForeground}"></TextBlock>
                 </StackPanel>
                 <Button IsEnabled="{Binding IsDialogClose}" Content="Добавить почтовый ящик" Grid.Column="3"
                         Visibility="{Binding HasCurrentEmailAccount, Converter={StaticResource InverseBoolToVisConverter}}"
@@ -47,7 +47,7 @@
                     <materialDesign:PopupBox.ToggleContent>
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="MailOutline" Foreground="{StaticResource MaterialDesignDarkForeground}" Width="20" Height="20" Cursor="Hand"/>
-                            <TextBlock Text="{Binding CurrentEmailAddress}" VerticalAlignment="Center" Padding="10 0 0 0" FontSize="14" Foreground="{StaticResource MaterialDesignDarkForeground}" Cursor="Hand"></TextBlock>
+                            <TextBlock Text="{Binding CurrentEmailAddress}" VerticalAlignment="Center" Padding="8 0 0 0" FontSize="14" Foreground="{StaticResource MaterialDesignDarkForeground}" Cursor="Hand"></TextBlock>
                         </StackPanel>
                     </materialDesign:PopupBox.ToggleContent>
                     <StackPanel>
@@ -108,7 +108,7 @@
                         </Grid.ColumnDefinitions>
                         <Button Grid.Column="0" Command="{Binding WriteEmailCommand}">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Edit" Width="20" Margin="0 0 10 0" Height="20" HorizontalAlignment="Center"/>
+                                <materialDesign:PackIcon Kind="Edit" Width="20" Margin="0 0 8 0" Height="20" HorizontalAlignment="Center"/>
                                 <TextBlock Text="Написать"></TextBlock>
                             </StackPanel>
                         </Button>
@@ -161,7 +161,7 @@
                                     Command="{Binding MarkEmailCommand}" Margin="0 0 10 0"
                                     ToolTip="Для смены статуса писем необходимо сначала выбрать их путём нажатия на иконку письма" ToolTipService.ShowOnDisabled="True">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="{Binding MarkEmailIcon}" Width="20" Margin="0 0 10 0" Height="20" HorizontalAlignment="Center"/>
+                                    <materialDesign:PackIcon Kind="{Binding MarkEmailIcon}" Width="20" Margin="0 0 8 0" Height="20" HorizontalAlignment="Center"/>
                                     <TextBlock Text="{Binding MarkEmailText}"></TextBlock>
                                 </StackPanel>
                             </Button>
@@ -169,7 +169,7 @@
                                     Command="{Binding DeleteEmailCommand}" 
                                     ToolTip="Для удаления писем необходимо сначала выбрать их путём нажатия на иконку письма" ToolTipService.ShowOnDisabled="True">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Delete" Width="20" Margin="0 0 10 0" Height="20" HorizontalAlignment="Center"/>
+                                    <materialDesign:PackIcon Kind="Delete" Width="20" Margin="0 0 8 0" Height="20" HorizontalAlignment="Center"/>
                                     <TextBlock Text="Удалить"></TextBlock>
                                 </StackPanel>
                             </Button>

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CryptoMailClient.Models;
 using CryptoMailClient.Utilities;
+using Microsoft.Win32;
 
 namespace CryptoMailClient.ViewModels
 {
@@ -44,9 +45,9 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
-        private ObservableCollection<string> _attachments;
+        private ObservableCollection<AttachmentItem> _attachments;
 
-        public ObservableCollection<string> Attachments
+        public ObservableCollection<AttachmentItem> Attachments
         {
             get => _attachments;
             set
@@ -92,6 +93,8 @@ namespace CryptoMailClient.ViewModels
                 "Письмо будет подписано" :
                 "Подтвердить авторство электронного письма с помощью электронно-цифровой подписи";
 
+        public RelayCommand AttachFileCommand { get; }
+        public RelayCommand RemoveAttachmentCommand { get; }
         public RelayCommand SendCommand { get; }
         public RelayCommand CloseCommand { get; }
 
@@ -100,10 +103,32 @@ namespace CryptoMailClient.ViewModels
             _address = string.Empty;
             _subject = string.Empty;
             _body = string.Empty;
-            _attachments = new ObservableCollection<string>();
+            _attachments = new ObservableCollection<AttachmentItem>();
 
+            AttachFileCommand = new RelayCommand(AttachFile);
+            RemoveAttachmentCommand = new RelayCommand(o =>
+            {
+                if (o is AttachmentItem attachment && Attachments.Contains(attachment))
+                {
+                    Attachments.Remove(attachment);
+                }
+            });
             SendCommand = new RelayCommand(Send);
             CloseCommand = new RelayCommand(o => { OnCloseRequested(); });
+        }
+
+        private void AttachFile(object obj)
+        {
+            OpenFileDialog openFileDialog =
+                new OpenFileDialog
+                {
+                    Filter = "All files (*.*)|*.*"
+                };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                Attachments.Add(new AttachmentItem(openFileDialog.FileName));
+            }
         }
 
         private async void Send(object o)
@@ -111,7 +136,7 @@ namespace CryptoMailClient.ViewModels
             try
             {
                 await Mailbox.SendMessage(Address, Subject, Body,
-                    Attachments.ToArray(), _encryptionChecked,
+                    Attachments.Select(a=>a.FullName).ToArray(), _encryptionChecked,
                     _signatureChecked);
                 OnMessageBoxDisplayRequest(Title, "Письмо отправлено.");
                 OnCloseRequested();

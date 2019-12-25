@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows;
+using CryptoMailClient.Models;
 using CryptoMailClient.Utilities;
 using Microsoft.Win32;
 using MimeKit;
@@ -97,8 +99,6 @@ namespace CryptoMailClient.ViewModels
                           "проверен, ключи не найдены"
                         : "Письмо подписано, но подпись не соответствует отправителю, ключи неверны";
 
-        public bool HasAttachments => Attachments.Count != 0;
-
         public ObservableCollection<AttachmentItem> Attachments { get; }
 
         public RelayCommand DownloadAttachmentCommand { get; }
@@ -175,14 +175,39 @@ namespace CryptoMailClient.ViewModels
             {
                 using (var stream = File.Create(saveFileDialog.FileName))
                 {
+                    MemoryStream contentStream = new MemoryStream();
                     if (attachment.Content is MessagePart messagePart)
                     {
-                        messagePart.Message.WriteTo(stream);
+                        messagePart.Message.WriteTo(contentStream);
                     }
                     else
                     {
                         ((MimePart) attachment.Content).Content.DecodeTo(
-                            stream);
+                            contentStream);
+                    }
+
+                    if (DecryptionResult == CryptographicResult.Success)
+                    {
+                        try
+                        {
+                            byte[] encryptedAttachment =
+                                Cryptography.DecryptAES(
+                                    contentStream.ToArray(),
+                                    UserManager.CurrentUser.CurrentEmailAccount
+                                        .RsaPrivateKey);
+                            stream.Write(encryptedAttachment, 0,
+                                encryptedAttachment.Length);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Не удалось скачать вложение. " + ex.Message,
+                                "Загрузка вложений");
+                        }
+                    }
+                    else
+                    {
+                        stream.Write(contentStream.ToArray(), 0,
+                            contentStream.ToArray().Length);
                     }
                 }
             }

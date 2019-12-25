@@ -53,7 +53,6 @@
                 <RowDefinition Height="10"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0" Background="Transparent">
                 <Grid.RowDefinitions>
@@ -70,7 +69,7 @@
                     <TextBlock Text="{Binding CodeFrom}" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
                 </Grid>
                 <WrapPanel Grid.Row="0" Grid.Column="1" Margin="0 0 0 2">
-                    <TextBlock Text="{Binding NameFrom}" FontWeight="Medium" Margin="0 0 10 0"/>
+                    <TextBlock Text="{Binding NameFrom}" FontWeight="Medium" Margin="0 10 10 0"/>
                     <TextBlock Text="{Binding AddressFrom}"/>
                     <materialDesign:PackIcon Margin="10 0 0 0" Kind="CheckDecagram"
                                              Foreground="{Binding VerificationResult, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CryptographicResultToForegroundConverter}}"
@@ -88,8 +87,7 @@
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding DateTimeText}" VerticalAlignment="Top" FontSize="14" Foreground="{StaticResource MaterialDesignBodyLight}"></TextBlock>
             </Grid>
             <WebBrowser Grid.Row="2" x:Name="WebBrowser"></WebBrowser>
-            <TextBlock Grid.Row="3" Height="10" Visibility="{Binding HasAttachments, Converter={StaticResource BooleanToVisibilityConverter}}"></TextBlock>
-            <ItemsControl Grid.Row="4" ItemsSource="{Binding Attachments}">
+            <ItemsControl Grid.Row="3" ItemsSource="{Binding Attachments}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel />
@@ -102,7 +100,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <materialDesign:Chip ToolTip="Нажмите для скачивания" Margin="0 0 10 0"
+                            <materialDesign:Chip ToolTip="Нажмите для скачивания" Margin="0 10 10 0"
                                                  Command="{Binding Path=DataContext.DownloadAttachmentCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}">
                                 <materialDesign:Chip.Content>
                                     <StackPanel Orientation="Horizontal">

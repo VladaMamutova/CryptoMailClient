@@ -349,9 +349,29 @@ namespace CryptoMailClient.Models
 
             if (attachments != null)
             {
-                foreach (var attachment in attachments)
+                if (needToEncrypt)
                 {
-                    bodyBuilder.Attachments.Add(attachment);
+                    foreach (var attachment in attachments)
+                    {
+                        byte[] data = File.ReadAllBytes(attachment);
+                        data = Cryptography.EncryptAES(data, publicKey);
+                        MemoryStream stream = new MemoryStream(data);
+                        var mimePart = new MimePart
+                        {
+                            Content = new MimeContent(stream),
+                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                            ContentTransferEncoding = ContentEncoding.Base64,
+                            FileName = Path.GetFileName(attachment)
+                        };
+                        bodyBuilder.Attachments.Add(mimePart);
+                    }
+                }
+                else
+                {
+                    foreach (var attachment in attachments)
+                    {
+                        bodyBuilder.Attachments.Add(attachment);
+                    }
                 }
             }
 
@@ -486,10 +506,13 @@ namespace CryptoMailClient.Models
 
         public static void OpenFolder(string fullName)
         {
-            CurrentFolder = Folders.FirstOrDefault(f =>
-                string.Equals(f.FullName,
-                    fullName, StringComparison.CurrentCultureIgnoreCase));
-            FirstMessage = 1;
+            int index = Folders.FindIndex(f => f.FullName.Equals(fullName,
+                StringComparison.CurrentCultureIgnoreCase));
+            if (index != -1)
+            {
+                CurrentFolder = Folders[index];
+                FirstMessage = 1;
+            }
         }
 
         public static bool SetNextMessageRange()

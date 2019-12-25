@@ -426,7 +426,7 @@ namespace CryptoMailClient.ViewModels
             {
                 await Mailbox.Synchronize();
                 UpdateFolders();
-                SelectFolder(SelectedFolder?.DisplayName);
+                SelectFolder(SelectedFolder?.FullName);
                 DialogHost.CloseDialogCommand.Execute(null, null);
                 // Явно закрываем диалог, так как предыдущая
                 // команда иногда может не выполняться.
@@ -435,7 +435,7 @@ namespace CryptoMailClient.ViewModels
             catch (Exception e)
             {
                 UpdateFolders();
-                SelectFolder(SelectedFolder?.DisplayName);
+                SelectFolder(SelectedFolder?.FullName);
                 DialogHost.CloseDialogCommand.Execute(null, null);
                 // Явно закрываем диалог, так как предыдущая
                 // команда иногда может не выполняться.
@@ -515,7 +515,7 @@ namespace CryptoMailClient.ViewModels
                     }
                     else
                     {
-                        SelectedFolder = Folders.First();
+                        SelectedFolder = Folders.FirstOrDefault();
                     }
                 }
                 else
