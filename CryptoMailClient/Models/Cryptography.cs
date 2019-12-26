@@ -77,7 +77,7 @@ namespace CryptoMailClient.Models
 
             return outStream.ToArray();
         }
-        
+
         public static string DecryptData(in string data, string privateKey)
         {
             var bytes = DecryptAES(Convert.FromBase64String(data), privateKey);
@@ -169,6 +169,20 @@ namespace CryptoMailClient.Models
             return rsa.Decrypt(data, false);
         }
 
+        public static byte[] EncryptDPAPI(byte[] data, byte[] entropyBytes)
+        {
+            byte[] entropy = ComputeMD5Hash(entropyBytes);
+            return ProtectedData.Protect(data,
+                entropy, DataProtectionScope.CurrentUser);
+        }
+
+        public static byte[] DecryptDPAPI(byte[] data, byte[] entropyBytes)
+        {
+            byte[] entropy = ComputeMD5Hash(entropyBytes);
+            return ProtectedData.Unprotect(data, entropy,
+                DataProtectionScope.CurrentUser);
+        }
+
         #endregion
 
         #region Signature
@@ -192,7 +206,8 @@ namespace CryptoMailClient.Models
                 RSASignaturePadding.Pss);
         }
 
-        public static bool VerifyData(in string data, string rsaPublicKey, string signature)
+        public static bool VerifyData(in string data, string rsaPublicKey,
+            string signature)
         {
             return VerifyRSA(Encoding.GetBytes(data), rsaPublicKey,
                 Convert.FromBase64String(signature));
@@ -214,7 +229,7 @@ namespace CryptoMailClient.Models
         }
 
         #endregion
-        
+
         #region Hashing
 
         public static string ComputeHash(in string data)

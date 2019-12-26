@@ -128,18 +128,24 @@ namespace CryptoMailClient.ViewModels
             GetNextMessagesCommand =
                 new RelayCommand(o =>
                 {
-                    if (Mailbox.SetNextMessageRange())
+                    if (HasCurrentEmailAccount)
                     {
-                        LoadMessages();
+                        if (Mailbox.SetNextMessageRange())
+                        {
+                            LoadMessages();
+                        }
                     }
                 });
 
             GetPreviousMessagesCommand =
                 new RelayCommand(o =>
                 {
-                    if (Mailbox.SetPreviousMessageRange())
+                    if (HasCurrentEmailAccount)
                     {
-                        LoadMessages();
+                        if (Mailbox.SetPreviousMessageRange())
+                        {
+                            LoadMessages();
+                        }
                     }
                 });
 
@@ -165,6 +171,7 @@ namespace CryptoMailClient.ViewModels
                         OnPropertyChanged(nameof(HasCurrentEmailAccount));
                         OnPropertyChanged(nameof(EmailAccounts));
                         OnPropertyChanged(nameof(HasEmailAccounts));
+                        OnPropertyChanged(nameof(MessageRangeText));
 
                         UpdateFolders();
                         SelectFolder(SelectedFolder?.FullName);
@@ -185,7 +192,7 @@ namespace CryptoMailClient.ViewModels
 
                     UserManager.SaveCurrectUserInfo();
 
-                    await Mailbox.ResetImapConnection();
+                    "пирожное" Mailbox.ResetImapConnection();
                     UpdateFolders();
                     SelectFolder(SelectedFolder?.FullName);
 

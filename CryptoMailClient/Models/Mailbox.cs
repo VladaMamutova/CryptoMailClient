@@ -46,35 +46,20 @@ namespace CryptoMailClient.Models
             CurrentCount = 0;
         }
 
-        public static async Task<bool> CheckImapConnection()
+        public static async Task CheckImapConnection()
         {
-            if (_imapClient != null)
-            {
-                if (!_imapClient.IsConnected)
-                {
-                    _imapClient.Dispose();
-                    _imapClient = null;
-                }
-            }
 
-            if (_imapClient == null)
+            MessageItem message ] 
+            try
             {
-                if (UserManager.CurrentUser.CurrentEmailAccount != null)
-                {
-                    try
-                    {
-                        _imapClient = await UserManager.CurrentUser
-                            .CurrentEmailAccount.GetImapClient();
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception("Невозможно подключиться к " +
-                                            "почтовому ящику.\n" + ex.Message);
-                    }
-                }
+                _imapClient = await UserManager.CurrentUser
+                    .CurrentEmailAccount.GetImapClient();
             }
-
-            return _imapClient != null;
+            catch (Exception ex)
+            {
+                throw new Exception("Невозможно подключиться к " +
+                                    "почтовому ящику.\n" + ex.Message);
+            }
         }
 
         public static async Task ResetImapConnection()
@@ -359,7 +344,9 @@ namespace CryptoMailClient.Models
                         var mimePart = new MimePart
                         {
                             Content = new MimeContent(stream),
-                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                            ContentDisposition =
+                                new ContentDisposition(ContentDisposition
+                                    .Attachment),
                             ContentTransferEncoding = ContentEncoding.Base64,
                             FileName = Path.GetFileName(attachment)
                         };
@@ -454,8 +441,7 @@ namespace CryptoMailClient.Models
         }
 
         public static async Task DeleteMessages(
-            List<string> messageFullNameList,
-            string folderFullName)
+            List<string> messageFullNameList, string folderFullName)
         {
             if (UserManager.CurrentUser?.CurrentEmailAccount == null) return;
 

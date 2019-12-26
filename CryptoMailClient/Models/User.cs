@@ -63,10 +63,10 @@ namespace CryptoMailClient.Models
             return user;
         }
 
-        public static string GetPasswordHashFromFile(string userFile)
+        public static string GetHashPasswordFromUserBytes(byte[] userBytes)
         {
             using (BinaryReader reader =
-                new BinaryReader(File.Open(userFile, FileMode.Open)))
+                new BinaryReader(new MemoryStream(userBytes)))
             {
                 int loginLength = reader.ReadInt32();
                 reader.BaseStream.Seek(4 + loginLength, SeekOrigin.Begin);
@@ -74,7 +74,6 @@ namespace CryptoMailClient.Models
                 int passwordHashLength = reader.ReadInt32();
                 return Encoding.Unicode.GetString(
                     reader.ReadBytes(passwordHashLength));
-
             }
         }
 
@@ -128,6 +127,11 @@ namespace CryptoMailClient.Models
         private bool ContainsEmailAddress(string address)
         {
             return EmailAccounts.Exists(e => e.Address == address);
+        }
+
+        public byte[] GetLoginBytes()
+        {
+            return Encoding.Unicode.GetBytes(Login);
         }
 
         public byte[] GetBytes()

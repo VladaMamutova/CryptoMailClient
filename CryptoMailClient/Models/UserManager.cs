@@ -55,12 +55,23 @@ namespace CryptoMailClient.Models
             }
 
             string userFile = GetUserInfoFile(login);
+            byte[] userBytes = File.ReadAllBytes(userFile);
 
+            byte[] decrypted;
+            try
+            {
+                decrypted = Cryptography.DecryptDPAPI(userBytes,
+                    Cryptography.Encoding.GetBytes(login));
+            }
+            catch
+            {
+                return false;
+            }
 
             if (Cryptography.ComputeHash(password) ==
-                User.GetPasswordHashFromFile(userFile))
+                User.GetHashPasswordFromUserBytes(decrypted))
             {
-                CurrentUser = User.FromBytes(File.ReadAllBytes(userFile));
+                CurrentUser = User.FromBytes(decrypted);
                 return true;
             }
 
@@ -77,21 +88,40 @@ namespace CryptoMailClient.Models
             User user = new User(login, Cryptography.ComputeHash(password));
             Directory.CreateDirectory(GetUserDirectory(login));
 
-            //todo: encrypt info
-            File.WriteAllBytes(GetUserInfoFile(user.Login),
-                user.GetBytes());
+            try
+            {
+                byte[] encrypted = Cryptography.EncryptDPAPI(user.GetBytes(),
+                    user.GetLoginBytes());
+                File.WriteAllBytes(GetUserInfoFile(CurrentUser.Login),
+                    encrypted);
+            }
+            catch
+            {
+                return false;
+            }
 
             return true;
         }
 
-        public static void SaveCurrectUserInfo()
+        public static void SaveCurrectUserInfo(string removedEmailAddress = null)
         {
-            //todo: encrypt info
-            File.WriteAllBytes(GetUserInfoFile(CurrentUser.Login),
-                CurrentUser.GetBytes());
-        }
+            byte[] encrypted = Cryptography.EncryptDPAPI(CurrentUser.GetBytes(),
+                CurrentUser.GetLoginBytes());
+            File.WriteAllBytes(GetUserInfoFile(CurrentUser.Login), encrypted);
 
-        public static bool TryFindEmailAddressPublicKey(string address, out string publicKey)
+            if (!string.IsNullOrWhiteSpace(removedEmailAddress))
+            {
+                string emailFolder = Path.Combine(
+                    GetUserDirectory(CurrentUser.Login), removedEmailAddress);
+                if (Directory.Exists(emailFolder))
+                {
+                    Directory.Delete(emailFolder, true);
+                }
+            }
+            }
+
+            public static bool TryFindEmailAddressPublicKey(string address,
+            out string publicKey)
         {
             publicKey = null;
             if (!Directory.Exists(PUBLIC_KEYS_DIRECTORY))
@@ -106,7 +136,7 @@ namespace CryptoMailClient.Models
                 publicKey = File.ReadAllText(keyFile);
                 return true;
             }
-            
+
             return false;
         }
     }

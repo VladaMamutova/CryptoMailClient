@@ -189,7 +189,7 @@ namespace CryptoMailClient.ViewModels
         private void Delete(object o)
         {
             UserManager.CurrentUser.RemoveEmailAccount(Address);
-            UserManager.SaveCurrectUserInfo();
+            UserManager.SaveCurrectUserInfo(Address);
             DialogHost.CloseDialogCommand.Execute(true, null);
         }
 
