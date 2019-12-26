@@ -1,23 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="CryptoMailClient.ViewModels.AttachmentItem">
-    <Position X="3" Y="14.5" Width="2" />
+    <Position X="3" Y="15.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAgAAAAAEAAAAAAAAAAAAAQAAAAAAAABAAAA=</HashCode>
+      <HashCode>AAAAAAAAAgAAAIAEAAAAAAAAAAAAAQAAAAAAAABAAAA=</HashCode>
       <FileName>ViewModels\AttachmentItem.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CryptoMailClient.ViewModels.EmailAccountDialogViewModel">
     <Position X="8" Y="5.25" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>kAYBAEAAAAAAQEESAAAAYAAAAAGAAAACAAAAAEAAAAg=</HashCode>
+      <HashCode>kAZRAEAAAIAAQkESAAAAYAAAAAGAAQACAAAAAEAAAAg=</HashCode>
       <FileName>ViewModels\EmailAccountDialogViewModel.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CryptoMailClient.ViewModels.FolderItem">
-    <Position X="5.5" Y="14.5" Width="2.25" />
+    <Position X="5.5" Y="15.75" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAEAAAAAAQAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAEAAAAAAAAIAEAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>ViewModels\FolderItem.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -32,29 +32,29 @@
   <Class Name="CryptoMailClient.ViewModels.MainWindowViewModel">
     <Position X="3" Y="5.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>wABAAAAYAMCAAEgEACIA4cACBQAFAABAkAAFCQAAAAE=</HashCode>
+      <HashCode>wIBAIgAYAMCABEgEACIA4dACFQQFAABAlAAFCQAAAAE=</HashCode>
       <FileName>ViewModels\MainWindowViewModel.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CryptoMailClient.ViewModels.MessageItem" BaseTypeListCollapsed="true">
-    <Position X="0.5" Y="11" Width="2" />
+    <Position X="0.5" Y="10.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>EAAQAAKAIAAAEAEEIIEAAACIsACAAAAAACIKYAAAEQA=</HashCode>
+      <HashCode>EAAQAAKAIAAAEIEEIIEAAACIsACAAAAAACICYAAAEQA=</HashCode>
       <FileName>ViewModels\MessageItem.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="CryptoMailClient.ViewModels.WriteEmailWindowViewModel">
-    <Position X="8" Y="11.5" Width="2.5" />
+    <Position X="8" Y="12.5" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAIAAEEAAMABAEAAACAACAACiAAIAEAwEAA=</HashCode>
+      <HashCode>AAAAAAAAAAIAAEEEAMEBAEAAACAACAACiAAIAEAwEAA=</HashCode>
       <FileName>ViewModels\WriteEmailWindowViewModel.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CryptoMailClient.Models.Cryptography">
     <Position X="14.75" Y="5.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>AIAAAAAAAIAAAAAAAAAQiAAAgmAAAAAAAhAACICACAA=</HashCode>
+      <HashCode>AIAAAAAAAIAAAAAAAAAQiAAAgmAAAAAIghAACICACAA=</HashCode>
       <FileName>Models\Cryptography.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -75,14 +75,14 @@
   <Class Name="CryptoMailClient.Models.User">
     <Position X="12.25" Y="0.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>gACAAAAAAAAgAAAUAAAAAEAAgAAAAEAEAAAQAAAAAII=</HashCode>
+      <HashCode>gACAAAAAAAAAAAAUAAAAAEAAwAAAAEAEAAASAAAAAII=</HashCode>
       <FileName>Models\User.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CryptoMailClient.Models.Mailbox">
     <Position X="17.5" Y="0.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>ABIAAAAACIAAIAAEADAAAEAAEAAABAAAJAAGCAAgAQA=</HashCode>
+      <HashCode>ABIAAAAACIAAIBQEADABAEAAEAAABAAAJAAGCAAgAQA=</HashCode>
       <FileName>Models\Mailbox.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -107,7 +107,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="CryptoMailClient.Utilities.CryptographicResultToForegroundConverter" BaseTypeListCollapsed="true">
-    <Position X="15.75" Y="17" Width="3.25" />
+    <Position X="12.25" Y="17" Width="3.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Utilities\CryptographicResultToForegroundConverter.cs</FileName>
@@ -115,7 +115,7 @@
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="CryptoMailClient.Utilities.RelayCommand">
-    <Position X="20.25" Y="12.25" Width="2.25" />
+    <Position X="16.75" Y="12.25" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAEACAAQAAECAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Utilities\RelayCommand.cs</FileName>
@@ -123,14 +123,14 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="CryptoMailClient.Utilities.SafeNativeMethods">
-    <Position X="15.75" Y="15.5" Width="2" />
+    <Position X="12.25" Y="15.5" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Utilities\SafeNativeMethods.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CryptoMailClient.Utilities.NaturalStringComparer" BaseTypeListCollapsed="true">
-    <Position X="18" Y="15.5" Width="2" />
+    <Position X="14.5" Y="15.5" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAA=</HashCode>
       <FileName>Utilities\SafeNativeMethods.cs</FileName>
@@ -138,7 +138,7 @@
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="CryptoMailClient.Utilities.NaturalFileInfoNameComparer" BaseTypeListCollapsed="true">
-    <Position X="20.25" Y="15.5" Width="2.5" />
+    <Position X="16.75" Y="15.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAA=</HashCode>
       <FileName>Utilities\SafeNativeMethods.cs</FileName>
@@ -146,7 +146,7 @@
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="CryptoMailClient.Utilities.SecureStringHelper">
-    <Position X="15.75" Y="12.25" Width="2" />
+    <Position X="12.25" Y="12.25" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAAAABAAAAAAAAAAAAA=</HashCode>
       <FileName>Utilities\SecureStringHelper.cs</FileName>
@@ -171,14 +171,14 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="CryptoMailClient.Utilities.RelayAsyncCommand">
-    <Position X="18" Y="12.25" Width="2" />
+    <Position X="14.5" Y="12.25" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAgAUAAQAAAAAAAAIAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Utilities\RelayAsyncCommand.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CryptoMailClient.Views.EmailSettingsDialog">
-    <Position X="4.5" Y="0.5" Width="1.75" />
+    <Position X="4.5" Y="0.5" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Views\EmailAccountDialog.xaml.cs</FileName>
@@ -188,7 +188,7 @@
   <Class Name="CryptoMailClient.Views.WriteEmailWindow" BaseTypeListCollapsed="true">
     <Position X="2.5" Y="2.5" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
       <FileName>Views\WriteEmailWindow.xaml.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
@@ -196,13 +196,13 @@
   <Class Name="CryptoMailClient.Views.ReadEmailWindow" BaseTypeListCollapsed="true">
     <Position X="0.5" Y="2.5" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAQAAAAAAAAAgAAAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAwAAAAAAAAAgAAAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
       <FileName>Views\ReadEmailWindow.xaml.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="CryptoMailClient.Views.ProgressDialog" BaseTypeListCollapsed="true">
-    <Position X="4.5" Y="2.5" Width="1.75" />
+    <Position X="6.75" Y="2.5" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Views\ProgressDialog.xaml.cs</FileName>
@@ -225,8 +225,32 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
+  <Class Name="CryptoMailClient.Views.ImportExportKeysDialog" BaseTypeListCollapsed="true">
+    <Position X="4.5" Y="2.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Views\ImportExportKeysDialog.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="CryptoMailClient.Views.CustomMessageBox" BaseTypeListCollapsed="true">
+    <Position X="6.75" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAABAAEAAAAAAAAAACAAAA=</HashCode>
+      <FileName>Views\CustomMessageBox.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="CryptoMailClient.Utilities.BoolToFontWeightConverter" BaseTypeListCollapsed="true">
+    <Position X="15.75" Y="17" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Utilities\BoolToFontWeightConverter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
   <Enum Name="CryptoMailClient.ViewModels.CryptographicResult">
-    <Position X="15.75" Y="13.75" Width="2" />
+    <Position X="12.25" Y="13.75" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAgAAAAAAAAAAABEAAAA=</HashCode>
       <FileName>ViewModels\CryptographicResult.cs</FileName>
