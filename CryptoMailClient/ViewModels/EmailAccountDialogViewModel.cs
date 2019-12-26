@@ -186,10 +186,11 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
-        private void Delete(object o)
+        private async void Delete(object o)
         {
             UserManager.CurrentUser.RemoveEmailAccount(Address);
             UserManager.SaveCurrectUserInfo(Address);
+            await Mailbox.ResetState();
             DialogHost.CloseDialogCommand.Execute(true, null);
         }
 

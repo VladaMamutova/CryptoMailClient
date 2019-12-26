@@ -140,12 +140,9 @@ namespace CryptoMailClient.ViewModels
             GetPreviousMessagesCommand =
                 new RelayCommand(o =>
                 {
-                    if (HasCurrentEmailAccount)
+                    if (Mailbox.SetPreviousMessageRange())
                     {
-                        if (Mailbox.SetPreviousMessageRange())
-                        {
-                            LoadMessages();
-                        }
+                        LoadMessages();
                     }
                 });
 
@@ -192,7 +189,7 @@ namespace CryptoMailClient.ViewModels
 
                     UserManager.SaveCurrectUserInfo();
 
-                    "пирожное" Mailbox.ResetImapConnection();
+                    await Mailbox.ResetImapConnection();
                     UpdateFolders();
                     SelectFolder(SelectedFolder?.FullName);
 

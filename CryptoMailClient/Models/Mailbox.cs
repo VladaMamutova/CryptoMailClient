@@ -19,9 +19,14 @@ namespace CryptoMailClient.Models
 
         private static ImapClient _imapClient;
 
-        public static List<FolderItem> Folders { get; }
+        public static List<FolderItem> Folders { get; private set; }
         public static FolderItem CurrentFolder { get; private set; }
-        public static Dictionary<string, MimeMessage> CurrentMessages { get; }
+
+        public static Dictionary<string, MimeMessage> CurrentMessages
+        {
+            get;
+            private set;
+        }
 
         private static int _firstMessage;
 
@@ -42,24 +47,40 @@ namespace CryptoMailClient.Models
         {
             Folders = new List<FolderItem>();
             CurrentMessages = new Dictionary<string, MimeMessage>();
+            CurrentFolder = null;
             _firstMessage = 0;
             CurrentCount = 0;
         }
 
-        public static async Task CheckImapConnection()
+        public static async Task<bool> CheckImapConnection()
         {
+            if (_imapClient != null)
+            {
+                if (!_imapClient.IsConnected)
+                {
+                    _imapClient.Dispose();
+                    _imapClient = null;
+                }
+            }
 
-            MessageItem message ] 
-            try
+            if (_imapClient == null)
             {
-                _imapClient = await UserManager.CurrentUser
-                    .CurrentEmailAccount.GetImapClient();
+                if (UserManager.CurrentUser.CurrentEmailAccount != null)
+                {
+                    try
+                    {
+                        _imapClient = await UserManager.CurrentUser
+                            .CurrentEmailAccount.GetImapClient();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Невозможно подключиться к " +
+                                            "почтовому ящику.\n" + ex.Message);
+                    }
+                }
             }
-            catch (Exception ex)
-            {
-                throw new Exception("Невозможно подключиться к " +
-                                    "почтовому ящику.\n" + ex.Message);
-            }
+
+            return _imapClient != null;
         }
 
         public static async Task ResetImapConnection()
@@ -74,6 +95,16 @@ namespace CryptoMailClient.Models
                 _imapClient.Dispose();
                 _imapClient = null;
             }
+        }
+
+        public static async Task ResetState()
+        {
+            await ResetImapConnection();
+            CurrentMessages = new Dictionary<string, MimeMessage>();
+            Folders = new List<FolderItem>();
+            CurrentFolder = null;
+            _firstMessage = 0;
+            CurrentCount = 0;
         }
 
         public static void LoadFolders()
