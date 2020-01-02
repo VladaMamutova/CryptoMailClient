@@ -11,7 +11,7 @@ namespace CryptoMailClient.Views
         private CustomMessageBox(string title, string message)
         {
             InitializeComponent();
-            Title.Text = title;
+            MessageTitle.Text = title;
             Message.Text = message;
         }
 

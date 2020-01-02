@@ -16,6 +16,21 @@ namespace CryptoMailClient.ViewModels
 {
     class EmailAccountDialogViewModel : ViewModelBase
     {
+        public bool IsNewEmailAccount { get; }
+
+        public string Title =>
+            IsNewEmailAccount ? "Добавление ящика" : "Управление аккаунтом";
+
+        public bool IsReadOnly => !IsNewEmailAccount;
+
+        public string SmtpPortHelpMessage =>
+            MailProtocol.GetMessageAboutValidPorts(MailProtocol.MailProtocols
+                .SMTP);
+
+        public string ImapPortHelpMessage =>
+            MailProtocol.GetMessageAboutValidPorts(MailProtocol.MailProtocols
+                .IMAP);
+
         private string _address;
 
         public string Address
@@ -85,20 +100,7 @@ namespace CryptoMailClient.ViewModels
             }
         }
 
-        public bool IsNewEmailAccount { get; }
-
-        public string Title =>
-            IsNewEmailAccount ? "Добавление ящика" : "Управление аккаунтом";
-
-        public bool IsReadOnly => !IsNewEmailAccount;
-
-        public string SmtpPortHelpMessage =>
-            MailProtocol.GetMessageAboutValidPorts(MailProtocol.MailProtocols
-                .SMTP);
-
-        public string ImapPortHelpMessage =>
-            MailProtocol.GetMessageAboutValidPorts(MailProtocol.MailProtocols
-                .IMAP);
+        private string _rsaPrivateKey;
 
         public RelayCommand AddCommand { get; }
         public RelayCommand UpdateCommand { get; }
@@ -110,6 +112,7 @@ namespace CryptoMailClient.ViewModels
         {
             IsNewEmailAccount = isNewEmailAccount;
             SecurePassword = new SecureString();
+            _rsaPrivateKey = string.Empty;
             if (IsNewEmailAccount ||
                 UserManager.CurrentUser.CurrentEmailAccount == null)
             {
@@ -141,6 +144,11 @@ namespace CryptoMailClient.ViewModels
                 EmailAccount emailAccount = new EmailAccount(Address,
                     SecureStringHelper.SecureStringToString(SecurePassword),
                     _smtpPort, _imapPort);
+
+                if (!string.IsNullOrEmpty(_rsaPrivateKey))
+                {
+                    emailAccount.SetRsaFullKeyPair(_rsaPrivateKey);
+                }
 
                 // Асинхронно вызываем метод подключения к почтовым серверам,
                 // чтобы не блокировать интерфейс.
@@ -211,9 +219,9 @@ namespace CryptoMailClient.ViewModels
             string keyFileName =
                 Path.GetFileNameWithoutExtension(zipFileName) + ".key";
 
-            string content;
             try
             {
+                string content;
                 using (ZipFile zip = new ZipFile(zipFileName, Encoding.UTF8))
                 {
                     if (zip.EntryFileNames.Contains(keyFileName))
@@ -229,32 +237,35 @@ namespace CryptoMailClient.ViewModels
                     }
                     else
                     {
-                        OnMessageBoxDisplayRequest(Title,
-                            "Ключи не были импортированы в ваш аккаунт.\n" +
-                            "Файл архива не содержит " +
-                            $"файл с ключами: \"{keyFileName}\".");
-                        return;
+                        throw new Exception("Файл архива не содержит " +
+                                            $"файл с ключами: \"{keyFileName}\".");
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                OnMessageBoxDisplayRequest(Title,
-                    "Ключи не были импортированы в ваш аккаунт.\n" +
-                    "Невозможно прочитать данные из файла. " +
-                    ex.Message);
-                return;
-            }
 
-            try
-            {
-                var rsa = new RSACryptoServiceProvider();
-                rsa.FromXmlString(content);
+                RSACryptoServiceProvider rsa;
+                try
+                {
+                    rsa = new RSACryptoServiceProvider();
+                    rsa.FromXmlString(content);
+                }
+                catch
+                {
+                    throw new Exception(
+                        "Файл не содержит пару ключей, или " +
+                        "ключи являются некорректными.");
+                }
+
                 if (rsa.PublicOnly)
                 {
+                    throw new Exception("Файл содержит только публичный ключ.");
+                }
+
+                if (IsNewEmailAccount)
+                {
+                    _rsaPrivateKey = rsa.ToXmlString(true);
                     OnMessageBoxDisplayRequest(Title,
-                        "Ключи не были импортированы в ваш аккаунт.\n" +
-                        "Файл содержит только публичный ключ.");
+                        "Пара ключей получена, она будет " +
+                        "добавлена в новый аккаунт.");
                 }
                 else
                 {
@@ -262,15 +273,16 @@ namespace CryptoMailClient.ViewModels
                         .SetRsaFullKeyPair(rsa.ToXmlString(true));
                     UserManager.SaveCurrectUserInfo();
                     OnMessageBoxDisplayRequest(Title,
-                        "Публичный и приватный ключи были " +
-                        "успешно импортированы в ваш аккаунт.");
+                        "Пара ключей была успешно " +
+                        "импортирована в ваш аккаунт.");
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                OnMessageBoxDisplayRequest(Title,
-                    "Ключи не были импортированы в ваш аккаунт.\n" +
-                    "Файл содержит не содержит приватный и публичный ключ.");
+                string message = IsNewEmailAccount
+                    ? "Ключи не будут импортированы в новый аккаунт.\n"
+                    : "Ключи не были импортированы в ваш аккаунт.\n";
+                OnMessageBoxDisplayRequest(Title, message + ex.Message);
             }
         }
 
@@ -320,7 +332,7 @@ namespace CryptoMailClient.ViewModels
             catch(Exception ex)
             {
                 OnMessageBoxDisplayRequest(Title,
-                    "Ключ не был экспортирован. " + ex.Message);
+                    "Публичный ключ не был экспортирован. " + ex.Message);
             }
         }
 

@@ -15,13 +15,6 @@ namespace CryptoMailClient.ViewModels
             Count = count;
         }
 
-        public FolderItem(string path, int count)
-        {
-            FullName = path;
-            DisplayName = Path.GetDirectoryName(path);
-            Count = count;
-        }
-
         public override string ToString()
         {
             return DisplayName;

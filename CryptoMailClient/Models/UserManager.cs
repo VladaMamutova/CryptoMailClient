@@ -92,7 +92,7 @@ namespace CryptoMailClient.Models
             {
                 byte[] encrypted = Cryptography.EncryptDPAPI(user.GetBytes(),
                     user.GetLoginBytes());
-                File.WriteAllBytes(GetUserInfoFile(CurrentUser.Login),
+                File.WriteAllBytes(GetUserInfoFile(user.Login),
                     encrypted);
             }
             catch

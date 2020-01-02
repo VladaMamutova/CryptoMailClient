@@ -16,7 +16,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" x:Name="Title" Padding="10" TextWrapping="Wrap" MinHeight="20" Foreground="{StaticResource MaterialDesignDarkForeground}" Background="{StaticResource PrimaryHueMidBrush}" MouseLeftButtonDown="Title_OnMouseLeftButtonDown"></TextBlock>
+        <TextBlock Grid.Row="0" x:Name="MessageTitle" Padding="10" TextWrapping="Wrap" MinHeight="20" Foreground="{StaticResource MaterialDesignDarkForeground}" Background="{StaticResource PrimaryHueMidBrush}" MouseLeftButtonDown="Title_OnMouseLeftButtonDown"></TextBlock>
         <TextBlock Grid.Row="1" x:Name="Message" Padding="15 10" TextWrapping="Wrap"></TextBlock>
         <Button Grid.Row="2" Content="OK" IsDefault="True" Width="100" Margin="10 5 10 15" Click="Ok_OnClick"></Button>
     </Grid>

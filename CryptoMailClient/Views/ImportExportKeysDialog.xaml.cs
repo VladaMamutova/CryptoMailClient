@@ -13,16 +13,14 @@ namespace CryptoMailClient.Views
             InitializeComponent();
             if (isImport)
             {
-                Title = "Импорт";
-                Caption.Text = "Введите пароль от файла с ключами:";
+                Caption.Text = "Импорт ключей:";
                 PrivateKeyRadioButton.IsChecked = true;
                 CommandButton.Content = "Импортировать".ToUpper();
                 KeyTypesRadioButtons.Visibility = Visibility.Collapsed;
             }
             else
             {
-                Title = "Экспорт";
-                Caption.Text = "Выберите ключ для экспорта:";
+                Caption.Text = "Экспорт ключей:";
                 PublicKeyRadioButton.IsChecked = true;
                 CommandButton.Content = "Экспортировать".ToUpper();
             }

@@ -52,7 +52,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="CryptoMailClient.Models.Cryptography">
-    <Position X="14.75" Y="5.75" Width="2" />
+    <Position X="17.5" Y="6.25" Width="2" />
     <TypeIdentifier>
       <HashCode>AIAAAAAAAIAAAAAAAAAQiAAAgmAAAAAIghAACICACAA=</HashCode>
       <FileName>Models\Cryptography.cs</FileName>
@@ -87,11 +87,8 @@
     </TypeIdentifier>
   </Class>
   <Class Name="CryptoMailClient.Models.MailProtocol">
-    <Position X="17.5" Y="6" Width="2" />
+    <Position X="14.75" Y="5.5" Width="2" />
     <Compartments>
-      <Compartment Name="Fields" Collapsed="true" />
-      <Compartment Name="Properties" Collapsed="true" />
-      <Compartment Name="Methods" Collapsed="true" />
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
     <NestedTypes>
